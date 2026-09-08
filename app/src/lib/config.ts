@@ -12,5 +12,8 @@ export const FUNCTIE_LABEL: Record<Functie, string> = {
   supporter: "Supporter",
 };
 
+/** Functies die meespelen (aanwezigheid, opstelling, statistieken); de database leidt hier `speelt` uit af. */
+export const SPEELT: Functie[] = ["speler", "spelercoach", "verantwoordelijke"];
+
 /** Functies die telefoon, geboortedatum en adres verplicht moeten invullen. */
 export const GEGEVENS_VERPLICHT: Functie[] = ["speler", "spelercoach", "coach", "verantwoordelijke"];

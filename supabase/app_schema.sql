@@ -9,6 +9,7 @@ create table if not exists members (
   naam           text not null,          -- afgeleid: voornaam + achternaam (trigger members_naam)
   voornaam       text,
   achternaam     text,
+  speelt         boolean not null default false,  -- afgeleid: telt mee als speler (speler, spelercoach, verantwoordelijke)
   functie        text not null default 'speler'
                  check (functie in ('speler', 'spelercoach', 'coach', 'verantwoordelijke', 'supporter')),
   email          text not null,
@@ -25,12 +26,14 @@ create table if not exists members (
 create unique index if not exists members_een_hoofdadmin on members (is_hoofdadmin) where is_hoofdadmin;
 alter table members add column if not exists voornaam text;
 alter table members add column if not exists achternaam text;
+alter table members add column if not exists speelt boolean not null default false;
 update members
    set voornaam = split_part(naam, ' ', 1),
        achternaam = nullif(trim(substr(naam, length(split_part(naam, ' ', 1)) + 1)), '')
  where voornaam is null;
 
--- Volledige naam altijd afleiden uit voornaam + achternaam.
+-- Afgeleide velden: volledige naam uit voornaam + achternaam, en 'speelt' uit de functie
+-- (speler, spelercoach en verantwoordelijke tellen mee als speler; coach en supporter niet).
 create or replace function members_naam() returns trigger
 language plpgsql as $$
 begin
@@ -38,6 +41,7 @@ begin
   if new.naam = '' then
     new.naam := split_part(new.email, '@', 1);
   end if;
+  new.speelt := new.functie in ('speler', 'spelercoach', 'verantwoordelijke');
   return new;
 end $$;
 drop trigger if exists members_naam on members;
@@ -148,7 +152,7 @@ create trigger members_guard before update on members
 
 -- Beperkte weergave voor supporters: alleen naam en functie.
 create or replace view members_basis as
-  select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam from members;
+  select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam, speelt from members;
 revoke all on members_basis from anon;
 grant select on members_basis to authenticated;
 
@@ -262,9 +266,8 @@ create trigger lineups_stamp before insert or update on lineups
 create or replace function lineup_players_check() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if not exists (select 1 from members where id = new.member_id and status = 'actief'
-                 and functie in ('speler', 'spelercoach')) then
-    raise exception 'alleen actieve spelers en spelercoaches kunnen opgesteld worden';
+  if not exists (select 1 from members where id = new.member_id and status = 'actief' and speelt) then
+    raise exception 'alleen actieve leden die meespelen kunnen opgesteld worden';
   end if;
   return new;
 end $$;

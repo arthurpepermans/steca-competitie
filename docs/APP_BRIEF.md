@@ -25,7 +25,8 @@ seizoen opgeslagen zodat volgende seizoenen erbij kunnen.
 ## 2. Functies en rechten
 
 Functies: speler, spelercoach, coach, verantwoordelijke, supporter. Spelercoach heeft de rechten
-van coach én telt mee als speler (aanwezigheid, opstelling, statistieken).
+van coach én telt mee als speler (aanwezigheid, opstelling, statistieken). Een verantwoordelijke
+telt ook altijd mee als speler; een coach en een supporter niet.
 
 | Wat | speler | spelercoach / coach / verantwoordelijke | admin | supporter |
 |---|---|---|---|---|

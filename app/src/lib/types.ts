@@ -71,6 +71,7 @@ export type Member = {
   naam: string; // voornaam + achternaam, afgeleid in de database
   voornaam: string | null;
   achternaam: string | null;
+  speelt: boolean; // afgeleid uit de functie: speler, spelercoach en verantwoordelijke tellen mee als speler
   functie: Functie;
   email: string;
   telefoon: string | null;
@@ -83,7 +84,7 @@ export type Member = {
 };
 
 /** Beperkte weergave (view members_basis) voor supporters. */
-export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
+export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "speelt" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
 
 export type AanwezigheidStatus = "aanwezig" | "afwezig" | "onzeker";
 

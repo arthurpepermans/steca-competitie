@@ -61,7 +61,7 @@ export type Rechten = {
   isHoofdadmin: boolean;
   /** coach, spelercoach, verantwoordelijke of admin */
   isStaf: boolean;
-  /** speler of spelercoach: telt mee voor aanwezigheid, opstelling en statistieken */
+  /** speler, spelercoach of verantwoordelijke: telt mee voor aanwezigheid, opstelling en statistieken */
   isSpeler: boolean;
   isSupporter: boolean;
   /** mag telefoon, adres, geboortedatum en e-mail van leden zien */
@@ -78,7 +78,7 @@ export function rechten(lid: Member | null): Rechten {
     isAdmin,
     isHoofdadmin: Boolean(actief && lid?.is_hoofdadmin),
     isStaf: isAdmin || Boolean(actief && (functie === "coach" || functie === "spelercoach" || functie === "verantwoordelijke")),
-    isSpeler: Boolean(actief && (functie === "speler" || functie === "spelercoach")),
+    isSpeler: Boolean(actief && lid?.speelt),
     isSupporter,
     zietGegevens: Boolean(actief && !isSupporter),
     gegevensVolledig: !lid || !GEGEVENS_VERPLICHT.includes(lid.functie) || Boolean(lid.telefoon && lid.geboortedatum && lid.adres),
@@ -86,6 +86,6 @@ export function rechten(lid: Member | null): Rechten {
 }
 
 /** Telt mee als speler in de app (aanwezigheid, opstelling, statistieken). */
-export function isSpelerLid(m: { functie: string; status: string }): boolean {
-  return m.status === "actief" && (m.functie === "speler" || m.functie === "spelercoach");
+export function isSpelerLid(m: { speelt: boolean; status: string }): boolean {
+  return m.status === "actief" && m.speelt;
 }
