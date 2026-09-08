@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "competition"
+version = "0.1.0"
+description = "Klassement, uitslagen en kalender van kavvv-vb-ov.be ophalen, klassement herberekenen en naar Supabase syncen"
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+    "requests>=2.31",
+    "truststore>=0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+sync-competition = "competition.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["competition*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

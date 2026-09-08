@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+
+  <title>KAVVV VB&amp;OV</title>
+
+  <link rel="icon" type="image/png" href="images/favicon/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="images/favicon/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="images/favicon/favicon-96x96.png" sizes="96x96">
+
+  <meta name="keywords" content="voetbal, vriendenclubs, Vlaams-Brabant, sport, soccer, club, vereniging,KAVVV - Koninklijke Algemene Vereniging van Vriendenclubs">
+  <meta name="description" content="KAVVV - Koninklijke Vereniging Van Vriendenclubs Vlaams-Brabant &amp; Oost-Vlaanderen">
+
+  <!-- Google Fonts: Optie B "Het Clubhuis" -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bestaande stijlen (Bootstrap + admin) -->
+  <link href="css/stylesFromLess.css?v=1786604579" rel="stylesheet">
+  <link href="css/font-awesome.min.css?v=1785324963" rel="stylesheet">
+  <link href="css/jquery-ui.css?v=1785324963" rel="stylesheet">
+  <link href="css/lightbox.css?v=1785324963" rel="stylesheet">
+  <link href="css/styles.css?v=1787300630" rel="stylesheet">
+  <link href="css/cms.css?v=1785324963" rel="stylesheet">
+  <link href="css/print.css" rel="stylesheet" media="print">
+  <!-- Material Icons (voor bestaande views) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Nieuw KAVVV-thema -->
+  <link href="css/kavvv-theme.css?v=1788189206" rel="stylesheet">
+
+  <!-- jQuery + jQuery UI -->
+  <script src="jscripts/jquery-3.1.0.min.js"></script>
+  <script src="jscripts/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+
+  <!-- jQuery UI datepicker — Nederlandse locale -->
+  <script>
+  $.datepicker.regional['nl'] = {
+    closeText: 'Sluiten', prevText: '←', nextText: '→',
+    currentText: 'Vandaag',
+    monthNames: ['januari','februari','maart','april','mei','juni',
+      'juli','augustus','september','oktober','november','december'],
+    monthNamesShort: ['jan','feb','mrt','apr','mei','jun',
+      'jul','aug','sep','okt','nov','dec'],
+    dayNames: ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'],
+    dayNamesShort: ['zon','maa','din','woe','don','vri','zat'],
+    dayNamesMin: ['zo','ma','di','wo','do','vr','za'],
+    weekHeader: 'Wk', dateFormat: 'dd-mm-yy',
+    firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix: ''
+  };
+  $.datepicker.setDefaults($.datepicker.regional['nl']);
+  </script>
+
+  <!-- Bootstrap JS + overige libs -->
+  <script src="jscripts/bootstrap_v3.3.7/bootstrap.min.js"></script>
+  <script src="jscripts/jquery.fileDownload/jquery.fileDownload.js"></script>
+  <script src="jscripts/moment.js"></script>
+
+  <!-- CKEditor 4 (bestaande views — backward compat) -->
+  <script src="jscripts/ckeditor_4.6.2_e7f931e7f11f/ckeditor/ckeditor.js"></script>
+  <!-- CKEditor 5 beschikbaar als window.CKEditor5 voor nieuwe views -->
+  <!-- <script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script> -->
+
+  <script>
+  $(document).ready(function () {
+    // Datepicker instanties
+    $(".datepicker").datepicker({
+      changeMonth: true, changeYear: true,
+      dateFormat: 'dd-mm-yy',
+      minDate: -60, maxDate: '+2Y',
+      numberOfMonths: [1,2]
+    });
+    $(".datepicker2").datepicker({
+      changeMonth: true, changeYear: true,
+      dateFormat: 'dd-mm-yy',
+      yearRange: '1900:2026',
+      numberOfMonths: [1,2]
+    });
+
+    // Scroll-effect op header
+    const header = document.querySelector('.kavvv-header');
+    if (header) {
+      window.addEventListener('scroll', function () {
+        header.classList.toggle('scrolled', window.scrollY > 8);
+      }, { passive: true });
+    }
+
+    // Drawer menu
+    const overlay = document.querySelector('.kavvv-drawer-overlay');
+    const hamburger = document.querySelector('.kavvv-hamburger');
+    const drawerClose = document.querySelector('.kavvv-drawer-close');
+    function openDrawer()  { document.body.classList.add('drawer-open'); }
+    function closeDrawer() { document.body.classList.remove('drawer-open'); }
+    if (hamburger) hamburger.addEventListener('click', openDrawer);
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    // Fade-in animatie via IntersectionObserver
+    if ('IntersectionObserver' in window) {
+      const fadeEls = document.querySelectorAll('.kavvv-fadein');
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      fadeEls.forEach(function(el) { observer.observe(el); });
+    } else {
+      document.querySelectorAll('.kavvv-fadein').forEach(function(el) {
+        el.classList.add('visible');
+      });
+    }
+
+    // Active menu-item markeren.
+    // Op view alleen matchen volstaat niet: alle CMS-pagina's delen view=page,
+    // waardoor elk pagina-item tegelijk actief leek. Daarom ook op id matchen
+    // zodra beide kanten een id hebben.
+    const urlParams  = new URLSearchParams(window.location.search);
+    const currentView = urlParams.get('view') || '';
+    const currentId   = urlParams.get('id');
+    document.querySelectorAll('.kavvv-nav-pill a, .kavvv-drawer-nav a').forEach(function(a) {
+      const q = new URLSearchParams((a.getAttribute('href') || '').split('?')[1] || '');
+      const view = q.get('view');
+      const id   = q.get('id');
+      if (!view || view !== currentView) return;
+      if (id && currentId && id !== currentId) return;
+      a.classList.add('active');
+    });
+
+    // Hoofditem met subpagina's markeren wanneer een kind actief is
+    document.querySelectorAll('.kavvv-nav-has-sub, .kavvv-drawer-has-sub').forEach(function(li) {
+      if (li.querySelector('a.active')) {
+        li.classList.add('has-active-child');
+        if (li.classList.contains('kavvv-drawer-has-sub')) openDrawerSub(li, true);
+      }
+    });
+
+    // Drawer: subpagina's in-/uitklappen (hoofditem is zelf geen link)
+    function openDrawerSub(li, open) {
+      li.classList.toggle('open', open);
+      const btn = li.querySelector('.kavvv-drawer-parent');
+      if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    document.querySelectorAll('.kavvv-drawer-parent').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const li = btn.closest('.kavvv-drawer-has-sub');
+        openDrawerSub(li, !li.classList.contains('open'));
+      });
+    });
+
+    // Pill-nav: dropdown opent op hover/focus (CSS), klik is er voor touch
+    function closeNavSubs(except) {
+      document.querySelectorAll('.kavvv-nav-has-sub.open').forEach(function(li) {
+        if (li === except) return;
+        li.classList.remove('open');
+        li.querySelector('.kavvv-nav-parent').setAttribute('aria-expanded', 'false');
+      });
+    }
+    document.querySelectorAll('.kavvv-nav-parent').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const li = btn.closest('.kavvv-nav-has-sub');
+        const open = !li.classList.contains('open');
+        closeNavSubs(li);
+        li.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+    document.addEventListener('click', function() { closeNavSubs(null); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeNavSubs(null);
+    });
+  });
+  </script>
+</head>
+<body>
+
+
+<!-- ===== DRAWER (mobiel) ===================================== -->
+<div class="kavvv-drawer-overlay" aria-hidden="true"></div>
+<aside class="kavvv-drawer" role="dialog" aria-label="Navigatiemenu">
+  <div class="kavvv-drawer-header">
+    <a href="index.php" class="kavvv-wordmark" style="gap:10px;">
+      <img src="assets/logo.svg" alt="KAVVV logo" style="height:38px;">
+    </a>
+    <button class="kavvv-drawer-close" aria-label="Sluit menu">✕</button>
+  </div>
+  <ul class="kavvv-drawer-nav">
+                  <li><a href="index.php?view=home&id=0">Home</a></li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Berichten<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=page&id=145">Woordje voorzitter</a></li>
+                          <li><a href="index.php?view=page&id=146">Officiële berichten</a></li>
+                          <li><a href="index.php?view=page&id=147">Activiteiten</a></li>
+                          <li><a href="index.php?view=page&id=171">Kampioenen 2026</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Seizoen 2026-2027<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=clubs_db&id=124">Clubs</a></li>
+                          <li><a href="index.php?view=kalender_db&id=5">Kalender</a></li>
+                          <li><a href="index.php?view=uitslagen_db&id=6">Uitslagen</a></li>
+                          <li><a href="index.php?view=klassement_db&id=7">Klassement</a></li>
+                          <li><a href="index.php?view=page&id=172">Fairplay</a></li>
+                          <li><a href="index.php?view=klassement_historie&id=181">Klassement historie</a></li>
+                          <li><a href="index.php?view=page&id=165">Reeksindeling 26-27</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Info<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=contact&id=20">Contact</a></li>
+                          <li><a href="index.php?view=page&id=148">Handleidingen</a></li>
+                          <li><a href="index.php?view=page&id=21">Nieuwe clubs</a></li>
+                          <li><a href="index.php?view=page&id=151">Bestuur</a></li>
+                          <li><a href="index.php?view=page&id=11">Reglementen</a></li>
+                          <li><a href="index.php?view=page&id=122">Verzekering</a></li>
+                          <li><a href="index.php?view=aanvraag_vriendenwedstrijd&id=16">Aanvraag vriendenmatch</a></li>
+                          <li><a href="index.php?view=page&id=155">Privacy</a></li>
+                          <li><a href="index.php?view=page&id=161">Advertentie scheidsrechte</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Schorsingen<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=page&id=8">Schorsingen</a></li>
+                          <li><a href="index.php?view=page&id=9">Onderzoekscomite</a></li>
+                          <li><a href="index.php?view=page&id=163">Beroepscomite</a></li>
+                      </ul>
+        </li>
+                        <li><a href="index.php?view=clubnieuws_publiek&id=180">Clubnieuws</a></li>
+            </ul>
+  <div class="kavvv-drawer-cta">
+    <a href="index.php?view=addsr">Word scheidsrechter</a>
+  </div>
+</aside>
+
+<!-- ===== HEADER ============================================= -->
+<header class="kavvv-header">
+  <div class="kavvv-header-inner">
+    <!-- Logo + wordmark -->
+    <a href="index.php" class="kavvv-wordmark">
+      <img src="assets/logo.svg" alt="KAVVV logo">
+      <div class="kavvv-wordmark-text">KAVVV<span>VB&amp;OV</span></div>
+    </a>
+
+    <!-- Pill-nav (desktop) -->
+    <nav aria-label="Hoofdnavigatie">
+      <ul class="kavvv-nav-pill">
+                    <li><a href="index.php?view=home&id=0">Home</a></li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Berichten <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=page&id=145">Woordje voorzitter</a></li>
+                                  <li><a href="index.php?view=page&id=146">Officiële berichten</a></li>
+                                  <li><a href="index.php?view=page&id=147">Activiteiten</a></li>
+                                  <li><a href="index.php?view=page&id=171">Kampioenen 2026</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Seizoen 2026-2027 <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=clubs_db&id=124">Clubs</a></li>
+                                  <li><a href="index.php?view=kalender_db&id=5">Kalender</a></li>
+                                  <li><a href="index.php?view=uitslagen_db&id=6">Uitslagen</a></li>
+                                  <li><a href="index.php?view=klassement_db&id=7">Klassement</a></li>
+                                  <li><a href="index.php?view=page&id=172">Fairplay</a></li>
+                                  <li><a href="index.php?view=klassement_historie&id=181">Klassement historie</a></li>
+                                  <li><a href="index.php?view=page&id=165">Reeksindeling 26-27</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Info <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=contact&id=20">Contact</a></li>
+                                  <li><a href="index.php?view=page&id=148">Handleidingen</a></li>
+                                  <li><a href="index.php?view=page&id=21">Nieuwe clubs</a></li>
+                                  <li><a href="index.php?view=page&id=151">Bestuur</a></li>
+                                  <li><a href="index.php?view=page&id=11">Reglementen</a></li>
+                                  <li><a href="index.php?view=page&id=122">Verzekering</a></li>
+                                  <li><a href="index.php?view=aanvraag_vriendenwedstrijd&id=16">Aanvraag vriendenmatch</a></li>
+                                  <li><a href="index.php?view=page&id=155">Privacy</a></li>
+                                  <li><a href="index.php?view=page&id=161">Advertentie scheidsrechte</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Schorsingen <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=page&id=8">Schorsingen</a></li>
+                                  <li><a href="index.php?view=page&id=9">Onderzoekscomite</a></li>
+                                  <li><a href="index.php?view=page&id=163">Beroepscomite</a></li>
+                              </ul>
+            </li>
+                      <li><a href="index.php?view=clubnieuws_publiek&id=180">Clubnieuws</a></li>
+                </ul>
+    </nav>
+
+    <!-- Rechts: scheidsrechter CTA + admin-slot + hamburger -->
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="index.php?view=addsr" class="kavvv-header-cta">Word scheidsrechter</a>
+              <a href="index.php?view=adminc" class="kavvv-admin-btn" title="Login">
+          <i class="fa fa-lock" aria-hidden="true"></i>
+        </a>
+            <button class="kavvv-hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== CONTENT ============================================ -->
+<main class="kavvv-content">
+  
+<!-- ===== HERO =============================================== -->
+<section class="kavvv-hero kavvv-fadein">
+  <div class="kavvv-hero-inner">
+    <!-- Vervang door echte foto: <img src="..." class="kavvv-hero-bg" alt=""> -->
+    <div class="kavvv-hero-content">
+      <div class="kavvv-hero-eyebrow">Vriendenvoetbal · VB &amp; OV</div>
+      <h1>Het verbond van de vriendenclubs</h1>
+      <p class="kavvv-hero-intro">
+        Voor elke club, elke speler en elke scheidsrechter.<br>
+        Eerlijk en sportief, week na week.
+      </p>
+      <div class="kavvv-hero-buttons">
+        <a href="index.php?view=uitslagen_db" class="kavvv-btn kavvv-btn-white">Bekijk uitslagen</a>
+        <a href="index.php?view=clubs_db"     class="kavvv-btn kavvv-btn-ghost">Vind een club</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS STRIP ======================================== -->
+<section class="kavvv-stats kavvv-fadein">
+  <div class="kavvv-card kavvv-stat-card">
+    <div class="kavvv-stat-number">73</div>
+    <div class="kavvv-stat-label">aangesloten clubs</div>
+  </div>
+  <div class="kavvv-card kavvv-stat-card">
+    <div class="kavvv-stat-number">3.607</div>
+    <div class="kavvv-stat-label">aangesloten spelers</div>
+  </div>
+  <div class="kavvv-card kavvv-stat-card">
+    <div class="kavvv-stat-number">75+</div>
+    <div class="kavvv-stat-label">jaar vriendenvoetbal</div>
+  </div>
+</section>
+
+<!-- ===== NIEUWS ============================================= -->
+<section class="kavvv-section kavvv-fadein">
+  <div class="kavvv-section-header">
+    <h2 class="kavvv-section-title">Nieuws &amp; mededelingen</h2>
+    <a href="index.php?view=nieuws" class="kavvv-section-link">Alle berichten →</a>
+  </div>
+  <div class="kavvv-news-grid">
+                  <article class="kavvv-card kavvv-news-card">
+                      <img src="uploads/clubnieuws/18/1788446348_img-20260829-wa0005.jpg"
+                 alt="Mosselfestijn -  zaterdag 03 oktober 2026 - Parochiezaal Beigem (Zevensterre)"
+                 class="kavvv-news-img">
+                    <div class="kavvv-news-body">
+            <span class="kavvv-tag">Duvelshoek SC</span>
+            <h3 class="kavvv-news-title">
+              <a href="index.php?view=clubnieuws_publiek"
+                 style="text-decoration:none;color:inherit;">
+                Mosselfestijn -  zaterdag 03 oktober 2026 - Parochiezaal Beigem (Zevensterre)              </a>
+            </h3>
+            <p class="kavvv-news-excerpt">
+              …
+            </p>
+            <div class="kavvv-news-date">3 Sep 2026 → 3 Oct 2026</div>
+          </div>
+        </article>
+              <article class="kavvv-card kavvv-news-card">
+                      <img src="files/FotosNieuws/groen.JPG"
+                 alt="OFFICIELE BERICHTEN"
+                 class="kavvv-news-img">
+                    <div class="kavvv-news-body">
+            <span class="kavvv-tag">Nieuws</span>
+            <h3 class="kavvv-news-title">
+              <a href="index.php?view=page&amp;id=146"
+                 style="text-decoration:none;color:inherit;">
+                OFFICIELE BERICHTEN              </a>
+            </h3>
+            <p class="kavvv-news-excerpt">
+              01/09/26
+
+Royal Radio TV Boys, afdeling 3D, speelt vanaf heden in het Sportcomplex van Evere, Avenue des Anciens Comba…
+            </p>
+            <div class="kavvv-news-date">2 Sep 2026</div>
+          </div>
+        </article>
+              <article class="kavvv-card kavvv-news-card">
+                      <div class="kavvv-news-img-placeholder"></div>
+                    <div class="kavvv-news-body">
+            <span class="kavvv-tag">Overijse ZSV</span>
+            <h3 class="kavvv-news-title">
+              <a href="index.php?view=clubnieuws_publiek"
+                 style="text-decoration:none;color:inherit;">
+                Werkzaamheden Hagaard site              </a>
+            </h3>
+            <p class="kavvv-news-excerpt">
+              Doorheen het seizoen 2026-2027 wordt het voetbalcomplex Hagaard herontwikkeld. Deze werkzaamheden zullen invloed hebben …
+            </p>
+            <div class="kavvv-news-date">1 Sep 2026 → 31 Mar 2027</div>
+          </div>
+        </article>
+            </div>
+</section>
+
+<!-- ===== KLASSEMENT + UITSLAGEN ============================= -->
+<section class="kavvv-section kavvv-fadein">
+  <div class="kavvv-results-grid">
+
+    <!-- Klassement -->
+    <div class="kavvv-card">
+      <div class="kavvv-table-header">
+        <h3 class="kavvv-table-title">Klassement</h3>
+                  <span class="kavvv-table-sub">
+            EERSTE AFDELING            · Speeldag 11          </span>
+              </div>
+              <table class="kavvv-standings">
+          <tbody>
+                          <tr>
+                <td class="pos">1</td>
+                <td class="club">KV SKO Vollezele</td>
+                <td class="games">1</td>
+                <td class="pts">3</td>
+              </tr>
+                          <tr>
+                <td class="pos">2</td>
+                <td class="club">Dynamo Wijndaal </td>
+                <td class="games">1</td>
+                <td class="pts">3</td>
+              </tr>
+                          <tr>
+                <td class="pos">3</td>
+                <td class="club">Simca Boys</td>
+                <td class="games">1</td>
+                <td class="pts">3</td>
+              </tr>
+                          <tr>
+                <td class="pos">4</td>
+                <td class="club">VK De Sjoeters A</td>
+                <td class="games">1</td>
+                <td class="pts">3</td>
+              </tr>
+                          <tr>
+                <td class="pos">5</td>
+                <td class="club">VK Bouwvrienden</td>
+                <td class="games">0</td>
+                <td class="pts">0</td>
+              </tr>
+                          <tr>
+                <td class="pos">6</td>
+                <td class="club">V.O.K. Jezus Eik A</td>
+                <td class="games">0</td>
+                <td class="pts">0</td>
+              </tr>
+                      </tbody>
+        </table>
+        <div style="padding:12px 24px;">
+          <a href="index.php?view=klassement_db" class="kavvv-section-link" style="font-size:13px;">
+            Volledig klassement →
+          </a>
+        </div>
+          </div>
+
+    <!-- Laatste uitslagen -->
+    <div class="kavvv-card">
+      <div class="kavvv-table-header">
+        <h3 class="kavvv-table-title">Laatste uitslagen</h3>
+                  <span class="kavvv-table-sub">05/09/2026</span>
+              </div>
+              <div class="kavvv-results-list">
+                      <div class="kavvv-result-row">
+              <span class="kavvv-result-home">Cristal Boys A</span>
+              <span class="kavvv-result-score">
+                1 – 2              </span>
+              <span>FC Flora 1</span>
+            </div>
+                      <div class="kavvv-result-row">
+              <span class="kavvv-result-home">FC Ons Huis</span>
+              <span class="kavvv-result-score">
+                5 – 2              </span>
+              <span>FC Caféboontjes A</span>
+            </div>
+                      <div class="kavvv-result-row">
+              <span class="kavvv-result-home">VC Bleuken Langevelde</span>
+              <span class="kavvv-result-score">
+                2 – 2              </span>
+              <span>VK Opel Boys</span>
+            </div>
+                      <div class="kavvv-result-row">
+              <span class="kavvv-result-home">Stinne Boys</span>
+              <span class="kavvv-result-score">
+                2 – 2              </span>
+              <span>VK De Sjoeters B</span>
+            </div>
+                      <div class="kavvv-result-row">
+              <span class="kavvv-result-home">Sesley Wonck</span>
+              <span class="kavvv-result-score">
+                1 – 2              </span>
+              <span>Los Palmos</span>
+            </div>
+                  </div>
+        <div style="padding:12px 24px;">
+          <a href="index.php?view=uitslagen_db" class="kavvv-section-link" style="font-size:13px;">
+            Alle uitslagen →
+          </a>
+        </div>
+          </div>
+
+  </div>
+</section>
+
+<!-- ===== CTA BAND =========================================== -->
+<section class="kavvv-cta-section kavvv-fadein">
+  <div class="kavvv-cta-band">
+    <div>
+      <h2 class="kavvv-cta-title">Word scheidsrechter bij KAVVV</h2>
+      <p class="kavvv-cta-text">
+        Geen verplichte cursussen, geen strenge controles — wel een eerlijke vergoeding
+        en wekelijks voetbal van dichtbij.
+      </p>
+    </div>
+    <a href="index.php?view=contact" class="kavvv-btn-cta">Neem contact op →</a>
+  </div>
+</section>
+</main>
+
+<!-- ===== FOOTER ============================================= -->
+<footer class="kavvv-footer">
+  <div class="kavvv-footer-grid">
+    <div class="kavvv-footer-logo">
+      <img src="assets/logo.svg" alt="KAVVV logo">
+      <p class="kavvv-footer-desc">Koninklijke Algemene Vereniging van Vriendenclubs — Voetbal Vlaams-Brabant &amp; Oost-Vlaanderen.</p>
+    </div>
+    <div>
+      <p class="kavvv-footer-heading">Snel naar</p>
+      <ul class="kavvv-footer-links">
+        <li><a href="index.php?view=nieuws">Nieuws</a></li>
+        <li><a href="index.php?view=uitslagen_db">Uitslagen &amp; Kalender</a></li>
+        <li><a href="index.php?view=clubs_db">Clubs</a></li>
+        <li><a href="index.php?view=listsr">Scheidsrechters</a></li>
+        <li><a href="index.php?view=klassement_db">Klassement</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="kavvv-footer-heading">Admin</p>
+      <ul class="kavvv-footer-links">
+        <li><a href="index.php?view=admin">Beheerpaneel</a></li>
+                  <li><a href="index.php?view=adminc">Aanmelden</a></li>
+                <li><a href="http://www.pc-partner.be" target="_blank" rel="noopener">PC Partner</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="kavvv-footer-bottom">
+    &copy; 2026 KAVVV VB&amp;OV — Alle rechten voorbehouden &nbsp;|&nbsp;
+    1 458 723 bezoekers
+  </div>
+</footer>
+
+</body>
+</html>

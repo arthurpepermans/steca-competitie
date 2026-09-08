@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+
+  <title>KAVVV VB&amp;OV</title>
+
+  <link rel="icon" type="image/png" href="images/favicon/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="images/favicon/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="images/favicon/favicon-96x96.png" sizes="96x96">
+
+  <meta name="keywords" content="voetbal, vriendenclubs, Vlaams-Brabant, sport, soccer, club, vereniging,KAVVV - Koninklijke Algemene Vereniging van Vriendenclubs">
+  <meta name="description" content="KAVVV - Koninklijke Vereniging Van Vriendenclubs Vlaams-Brabant &amp; Oost-Vlaanderen">
+
+  <!-- Google Fonts: Optie B "Het Clubhuis" -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bestaande stijlen (Bootstrap + admin) -->
+  <link href="css/stylesFromLess.css?v=1786604579" rel="stylesheet">
+  <link href="css/font-awesome.min.css?v=1785324963" rel="stylesheet">
+  <link href="css/jquery-ui.css?v=1785324963" rel="stylesheet">
+  <link href="css/lightbox.css?v=1785324963" rel="stylesheet">
+  <link href="css/styles.css?v=1787300630" rel="stylesheet">
+  <link href="css/cms.css?v=1785324963" rel="stylesheet">
+  <link href="css/print.css" rel="stylesheet" media="print">
+  <!-- Material Icons (voor bestaande views) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Nieuw KAVVV-thema -->
+  <link href="css/kavvv-theme.css?v=1788189206" rel="stylesheet">
+
+  <!-- jQuery + jQuery UI -->
+  <script src="jscripts/jquery-3.1.0.min.js"></script>
+  <script src="jscripts/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+
+  <!-- jQuery UI datepicker — Nederlandse locale -->
+  <script>
+  $.datepicker.regional['nl'] = {
+    closeText: 'Sluiten', prevText: '←', nextText: '→',
+    currentText: 'Vandaag',
+    monthNames: ['januari','februari','maart','april','mei','juni',
+      'juli','augustus','september','oktober','november','december'],
+    monthNamesShort: ['jan','feb','mrt','apr','mei','jun',
+      'jul','aug','sep','okt','nov','dec'],
+    dayNames: ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'],
+    dayNamesShort: ['zon','maa','din','woe','don','vri','zat'],
+    dayNamesMin: ['zo','ma','di','wo','do','vr','za'],
+    weekHeader: 'Wk', dateFormat: 'dd-mm-yy',
+    firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix: ''
+  };
+  $.datepicker.setDefaults($.datepicker.regional['nl']);
+  </script>
+
+  <!-- Bootstrap JS + overige libs -->
+  <script src="jscripts/bootstrap_v3.3.7/bootstrap.min.js"></script>
+  <script src="jscripts/jquery.fileDownload/jquery.fileDownload.js"></script>
+  <script src="jscripts/moment.js"></script>
+
+  <!-- CKEditor 4 (bestaande views — backward compat) -->
+  <script src="jscripts/ckeditor_4.6.2_e7f931e7f11f/ckeditor/ckeditor.js"></script>
+  <!-- CKEditor 5 beschikbaar als window.CKEditor5 voor nieuwe views -->
+  <!-- <script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script> -->
+
+  <script>
+  $(document).ready(function () {
+    // Datepicker instanties
+    $(".datepicker").datepicker({
+      changeMonth: true, changeYear: true,
+      dateFormat: 'dd-mm-yy',
+      minDate: -60, maxDate: '+2Y',
+      numberOfMonths: [1,2]
+    });
+    $(".datepicker2").datepicker({
+      changeMonth: true, changeYear: true,
+      dateFormat: 'dd-mm-yy',
+      yearRange: '1900:2026',
+      numberOfMonths: [1,2]
+    });
+
+    // Scroll-effect op header
+    const header = document.querySelector('.kavvv-header');
+    if (header) {
+      window.addEventListener('scroll', function () {
+        header.classList.toggle('scrolled', window.scrollY > 8);
+      }, { passive: true });
+    }
+
+    // Drawer menu
+    const overlay = document.querySelector('.kavvv-drawer-overlay');
+    const hamburger = document.querySelector('.kavvv-hamburger');
+    const drawerClose = document.querySelector('.kavvv-drawer-close');
+    function openDrawer()  { document.body.classList.add('drawer-open'); }
+    function closeDrawer() { document.body.classList.remove('drawer-open'); }
+    if (hamburger) hamburger.addEventListener('click', openDrawer);
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    // Fade-in animatie via IntersectionObserver
+    if ('IntersectionObserver' in window) {
+      const fadeEls = document.querySelectorAll('.kavvv-fadein');
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      fadeEls.forEach(function(el) { observer.observe(el); });
+    } else {
+      document.querySelectorAll('.kavvv-fadein').forEach(function(el) {
+        el.classList.add('visible');
+      });
+    }
+
+    // Active menu-item markeren.
+    // Op view alleen matchen volstaat niet: alle CMS-pagina's delen view=page,
+    // waardoor elk pagina-item tegelijk actief leek. Daarom ook op id matchen
+    // zodra beide kanten een id hebben.
+    const urlParams  = new URLSearchParams(window.location.search);
+    const currentView = urlParams.get('view') || '';
+    const currentId   = urlParams.get('id');
+    document.querySelectorAll('.kavvv-nav-pill a, .kavvv-drawer-nav a').forEach(function(a) {
+      const q = new URLSearchParams((a.getAttribute('href') || '').split('?')[1] || '');
+      const view = q.get('view');
+      const id   = q.get('id');
+      if (!view || view !== currentView) return;
+      if (id && currentId && id !== currentId) return;
+      a.classList.add('active');
+    });
+
+    // Hoofditem met subpagina's markeren wanneer een kind actief is
+    document.querySelectorAll('.kavvv-nav-has-sub, .kavvv-drawer-has-sub').forEach(function(li) {
+      if (li.querySelector('a.active')) {
+        li.classList.add('has-active-child');
+        if (li.classList.contains('kavvv-drawer-has-sub')) openDrawerSub(li, true);
+      }
+    });
+
+    // Drawer: subpagina's in-/uitklappen (hoofditem is zelf geen link)
+    function openDrawerSub(li, open) {
+      li.classList.toggle('open', open);
+      const btn = li.querySelector('.kavvv-drawer-parent');
+      if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    document.querySelectorAll('.kavvv-drawer-parent').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const li = btn.closest('.kavvv-drawer-has-sub');
+        openDrawerSub(li, !li.classList.contains('open'));
+      });
+    });
+
+    // Pill-nav: dropdown opent op hover/focus (CSS), klik is er voor touch
+    function closeNavSubs(except) {
+      document.querySelectorAll('.kavvv-nav-has-sub.open').forEach(function(li) {
+        if (li === except) return;
+        li.classList.remove('open');
+        li.querySelector('.kavvv-nav-parent').setAttribute('aria-expanded', 'false');
+      });
+    }
+    document.querySelectorAll('.kavvv-nav-parent').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const li = btn.closest('.kavvv-nav-has-sub');
+        const open = !li.classList.contains('open');
+        closeNavSubs(li);
+        li.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+    document.addEventListener('click', function() { closeNavSubs(null); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeNavSubs(null);
+    });
+  });
+  </script>
+</head>
+<body>
+
+
+<!-- ===== DRAWER (mobiel) ===================================== -->
+<div class="kavvv-drawer-overlay" aria-hidden="true"></div>
+<aside class="kavvv-drawer" role="dialog" aria-label="Navigatiemenu">
+  <div class="kavvv-drawer-header">
+    <a href="index.php" class="kavvv-wordmark" style="gap:10px;">
+      <img src="assets/logo.svg" alt="KAVVV logo" style="height:38px;">
+    </a>
+    <button class="kavvv-drawer-close" aria-label="Sluit menu">✕</button>
+  </div>
+  <ul class="kavvv-drawer-nav">
+                  <li><a href="index.php?view=home&id=0">Home</a></li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Berichten<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=page&id=145">Woordje voorzitter</a></li>
+                          <li><a href="index.php?view=page&id=146">Officiële berichten</a></li>
+                          <li><a href="index.php?view=page&id=147">Activiteiten</a></li>
+                          <li><a href="index.php?view=page&id=171">Kampioenen 2026</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Seizoen 2026-2027<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=clubs_db&id=124">Clubs</a></li>
+                          <li><a href="index.php?view=kalender_db&id=5">Kalender</a></li>
+                          <li><a href="index.php?view=uitslagen_db&id=6">Uitslagen</a></li>
+                          <li><a href="index.php?view=klassement_db&id=7">Klassement</a></li>
+                          <li><a href="index.php?view=page&id=172">Fairplay</a></li>
+                          <li><a href="index.php?view=klassement_historie&id=181">Klassement historie</a></li>
+                          <li><a href="index.php?view=page&id=165">Reeksindeling 26-27</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Info<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=contact&id=20">Contact</a></li>
+                          <li><a href="index.php?view=page&id=148">Handleidingen</a></li>
+                          <li><a href="index.php?view=page&id=21">Nieuwe clubs</a></li>
+                          <li><a href="index.php?view=page&id=151">Bestuur</a></li>
+                          <li><a href="index.php?view=page&id=11">Reglementen</a></li>
+                          <li><a href="index.php?view=page&id=122">Verzekering</a></li>
+                          <li><a href="index.php?view=aanvraag_vriendenwedstrijd&id=16">Aanvraag vriendenmatch</a></li>
+                          <li><a href="index.php?view=page&id=155">Privacy</a></li>
+                          <li><a href="index.php?view=page&id=161">Advertentie scheidsrechte</a></li>
+                      </ul>
+        </li>
+                        <li class="kavvv-drawer-has-sub">
+          <button type="button" class="kavvv-drawer-parent" aria-expanded="false">
+            Schorsingen<span class="kavvv-caret">▾</span>
+          </button>
+          <ul class="kavvv-drawer-sub">
+                          <li><a href="index.php?view=page&id=8">Schorsingen</a></li>
+                          <li><a href="index.php?view=page&id=9">Onderzoekscomite</a></li>
+                          <li><a href="index.php?view=page&id=163">Beroepscomite</a></li>
+                      </ul>
+        </li>
+                        <li><a href="index.php?view=clubnieuws_publiek&id=180">Clubnieuws</a></li>
+            </ul>
+  <div class="kavvv-drawer-cta">
+    <a href="index.php?view=addsr">Word scheidsrechter</a>
+  </div>
+</aside>
+
+<!-- ===== HEADER ============================================= -->
+<header class="kavvv-header">
+  <div class="kavvv-header-inner">
+    <!-- Logo + wordmark -->
+    <a href="index.php" class="kavvv-wordmark">
+      <img src="assets/logo.svg" alt="KAVVV logo">
+      <div class="kavvv-wordmark-text">KAVVV<span>VB&amp;OV</span></div>
+    </a>
+
+    <!-- Pill-nav (desktop) -->
+    <nav aria-label="Hoofdnavigatie">
+      <ul class="kavvv-nav-pill">
+                    <li><a href="index.php?view=home&id=0">Home</a></li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Berichten <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=page&id=145">Woordje voorzitter</a></li>
+                                  <li><a href="index.php?view=page&id=146">Officiële berichten</a></li>
+                                  <li><a href="index.php?view=page&id=147">Activiteiten</a></li>
+                                  <li><a href="index.php?view=page&id=171">Kampioenen 2026</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Seizoen 2026-2027 <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=clubs_db&id=124">Clubs</a></li>
+                                  <li><a href="index.php?view=kalender_db&id=5">Kalender</a></li>
+                                  <li><a href="index.php?view=uitslagen_db&id=6">Uitslagen</a></li>
+                                  <li><a href="index.php?view=klassement_db&id=7">Klassement</a></li>
+                                  <li><a href="index.php?view=page&id=172">Fairplay</a></li>
+                                  <li><a href="index.php?view=klassement_historie&id=181">Klassement historie</a></li>
+                                  <li><a href="index.php?view=page&id=165">Reeksindeling 26-27</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Info <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=contact&id=20">Contact</a></li>
+                                  <li><a href="index.php?view=page&id=148">Handleidingen</a></li>
+                                  <li><a href="index.php?view=page&id=21">Nieuwe clubs</a></li>
+                                  <li><a href="index.php?view=page&id=151">Bestuur</a></li>
+                                  <li><a href="index.php?view=page&id=11">Reglementen</a></li>
+                                  <li><a href="index.php?view=page&id=122">Verzekering</a></li>
+                                  <li><a href="index.php?view=aanvraag_vriendenwedstrijd&id=16">Aanvraag vriendenmatch</a></li>
+                                  <li><a href="index.php?view=page&id=155">Privacy</a></li>
+                                  <li><a href="index.php?view=page&id=161">Advertentie scheidsrechte</a></li>
+                              </ul>
+            </li>
+                      <li class="kavvv-nav-has-sub">
+              <button type="button" class="kavvv-nav-parent" aria-expanded="false" aria-haspopup="true">Schorsingen <span class="kavvv-caret">▾</span></button>
+              <ul class="kavvv-nav-sub">
+                                  <li><a href="index.php?view=page&id=8">Schorsingen</a></li>
+                                  <li><a href="index.php?view=page&id=9">Onderzoekscomite</a></li>
+                                  <li><a href="index.php?view=page&id=163">Beroepscomite</a></li>
+                              </ul>
+            </li>
+                      <li><a href="index.php?view=clubnieuws_publiek&id=180">Clubnieuws</a></li>
+                </ul>
+    </nav>
+
+    <!-- Rechts: scheidsrechter CTA + admin-slot + hamburger -->
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="index.php?view=addsr" class="kavvv-header-cta">Word scheidsrechter</a>
+              <a href="index.php?view=adminc" class="kavvv-admin-btn" title="Login">
+          <i class="fa fa-lock" aria-hidden="true"></i>
+        </a>
+            <button class="kavvv-hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== CONTENT ============================================ -->
+<main class="kavvv-content">
+  <div class="kavvv-page-inner">
+    <script>
+    $(document).ready(function() {
+        $("span").click(function(event) {
+            var td = event.target.id
+            td = td.replace("speeldag-", "");
+            $('#' + td).toggle("slow");
+        });
+    })
+</script>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="titel1" class="titel1">UITSLAGEN</div>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="pageContent">
+                            <div class='table-responsive'>
+                    <table class='table table-striped'>
+                                                    <tr>
+                                <td class='table table-striped'><span class='speeldag' id='speeldag-2026-09-05'><i class='material-icons' id='speeldag-2026-09-05'>expand_more</i>Speeldag 05-09-2026</span></td>
+                            </tr>
+                        <tr><td width='100%'><table id='2026-09-05'><tr><td><b>EERSTE AFDELING</b></td></tr><tr>
+                  <td width='30%' align='center'>FC Depot</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Dynamo Wijndaal </td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>VK Dilbeek</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK De Sjoeters A</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Simca Boys</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Sporting Oppem</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>3</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>KV SKO Vollezele</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC De Leeuwerik</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>5</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>TWEEDE AFDELING A</b></td></tr><tr>
+                  <td width='30%' align='center'>Cristal Boys A</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Flora 1</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Ons Huis</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Caféboontjes A</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>5</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>VC Bleuken Langevelde</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK Opel Boys</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>2</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Stinne Boys</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK De Sjoeters B</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>2</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Sesley Wonck</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Los Palmos</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>TWEEDE AFDELING B</b></td></tr><tr>
+                  <td width='30%' align='center'>Cristal Boys 76</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK 't Gareel A</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>5</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>0</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Pote Age Jette</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Sila United</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>RC Lamme Guiche</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK Buizingen</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Abba</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Celtic Forestois </td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>5</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Stroppen</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Congo</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>4</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>1</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>DERDE AFDELING A</b></td></tr><tr>
+                  <td width='30%' align='center'>VK De Vissers </td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Davidskornuiten</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>4</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Bobo B</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK 't Gareel B</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>2</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>1</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Essenbeek B</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>KV Zuun All Stars</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>1</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>CP Leeuw</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FCS Lembeek </td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>0</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>5</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>VK Klein Leeuw</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Entente Uccloise </td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>4</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>1</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>DERDE AFDELING B</b></td></tr><tr>
+                  <td width='30%' align='center'>VK Eeksken</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VK De Sjoeters 81</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>4</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Sparta den Bos Geel</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Siccard Boys</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>5</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>0</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>VK Vaillant</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Patron</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>3</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>DERDE AFDELING C</b></td></tr><tr>
+                  <td width='30%' align='center'>KBC Voetbal</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>KFC Borneo</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>0</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Eendracht Vilvoorde</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Union-St.-Pils</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>3</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Vc Htm City</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>ZSV Overijse</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>10</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>4</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>DERDE AFDELING D</b></td></tr><tr>
+                  <td width='30%' align='center'>FC Pichichi</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Le But</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>0</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Royal Radio TV Boys </td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Sportkring BNPPF</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>3</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>5</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Foxys </td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC Tref</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>K.sp.Tange A</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>La Lunette FC</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>0</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>0</td><td width='10%' align='center'>&nbsp;</td></tr><tr><td><b>DERDE AFDELING E</b></td></tr><tr>
+                  <td width='30%' align='center'>VK De Vissers Youth</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>VC Visie</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>2</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>4</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Sparta den Bos Zwart</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Hoke</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>2</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>1</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>FC Nederboelare</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>FC 't Kasteeltje</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>1</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>2</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>VK Young Boys</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Sporting Affligem</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>5</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>0</td><td width='10%' align='center'>&nbsp;</td></tr><tr>
+                  <td width='30%' align='center'>Polder United</td>
+                  <td width='2%'>-</td>
+                  <td width='30%' align='center'>Jaga Fc</td>
+                  <td width='4%' align='center'></td><td width='4%' align='center'>0</td>
+                  <td width='2%' align='center'>-</td><td width='4%' align='center'>3</td><td width='10%' align='center'>&nbsp;</td></tr></table></td></tr></table>
+                </div>
+                    </div>
+    </div>
+</div>  </div>
+</main>
+
+<!-- ===== FOOTER ============================================= -->
+<footer class="kavvv-footer">
+  <div class="kavvv-footer-grid">
+    <div class="kavvv-footer-logo">
+      <img src="assets/logo.svg" alt="KAVVV logo">
+      <p class="kavvv-footer-desc">Koninklijke Algemene Vereniging van Vriendenclubs — Voetbal Vlaams-Brabant &amp; Oost-Vlaanderen.</p>
+    </div>
+    <div>
+      <p class="kavvv-footer-heading">Snel naar</p>
+      <ul class="kavvv-footer-links">
+        <li><a href="index.php?view=nieuws">Nieuws</a></li>
+        <li><a href="index.php?view=uitslagen_db">Uitslagen &amp; Kalender</a></li>
+        <li><a href="index.php?view=clubs_db">Clubs</a></li>
+        <li><a href="index.php?view=listsr">Scheidsrechters</a></li>
+        <li><a href="index.php?view=klassement_db">Klassement</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="kavvv-footer-heading">Admin</p>
+      <ul class="kavvv-footer-links">
+        <li><a href="index.php?view=admin">Beheerpaneel</a></li>
+                  <li><a href="index.php?view=adminc">Aanmelden</a></li>
+                <li><a href="http://www.pc-partner.be" target="_blank" rel="noopener">PC Partner</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="kavvv-footer-bottom">
+    &copy; 2026 KAVVV VB&amp;OV — Alle rechten voorbehouden &nbsp;|&nbsp;
+    1 458 723 bezoekers
+  </div>
+</footer>
+
+</body>
+</html>

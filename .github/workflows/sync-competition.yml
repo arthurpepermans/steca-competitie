@@ -1,0 +1,57 @@
+# Geplande sync van kavvv-vb-ov.be naar Supabase.
+# GitHub cron loopt in UTC; de tijden hieronder zijn gekozen voor wintertijd (CET, Brussel).
+# In zomertijd (tot eind oktober en vanaf eind maart) loopt de job één uur later, wat voor uitslagen geen kwaad kan.
+name: sync-competition
+
+on:
+  schedule:
+    - cron: "0 19 * * 6"   # zaterdag 20:00 Brussel (zomertijd 21:00)
+    - cron: "0 17 * * 0"   # zondag 18:00 Brussel (zomertijd 19:00)
+    - cron: "0 8 * * 1"    # maandag 09:00 Brussel (zomertijd 10:00)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Alleen tonen wat zou wijzigen (niets schrijven)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: sync-competition
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Cache van opgehaalde pagina's herstellen (ploegpagina's worden zo maar wekelijks opgehaald)
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: kavvv-pagina-cache-${{ github.run_id }}
+          restore-keys: kavvv-pagina-cache-
+
+      - name: Installeren
+        run: pip install -e .
+
+      - name: Sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SYNC_CONTACT: ${{ secrets.SYNC_CONTACT }}
+        run: sync-competition ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: HTML bewaren als de parser faalde (site gewijzigd)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: incoming-html-${{ github.run_id }}
+          path: tests/fixtures/incoming/
+          if-no-files-found: ignore
+          retention-days: 30
