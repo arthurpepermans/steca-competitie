@@ -1,0 +1,14 @@
+{
+  "name": "Steca Juniors",
+  "short_name": "Steca",
+  "description": "Kalender, uitslagen, klassement, aanwezigheden en opstelling van Steca Juniors",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7a1f2b",
+  "lang": "nl",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

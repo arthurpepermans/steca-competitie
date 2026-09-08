@@ -1,0 +1,141 @@
+import type { Functie } from "./config";
+
+export type Match = {
+  match_key: string;
+  seizoen: string;
+  reeks: string;
+  datum: string | null; // 'JJJJ-MM-DD'
+  uur: string | null; // 'HH:MM'
+  thuis_id: number | null;
+  uit_id: number | null;
+  thuis: string;
+  uit: string;
+  thuis_score: number | null;
+  uit_score: number | null;
+  status: "gepland" | "gespeeld";
+  terrein: string | null;
+  opmerking: string | null;
+};
+
+export type Team = {
+  ploegid: number;
+  seizoen: string;
+  naam: string;
+  reeks: string | null;
+  clubnummer: string | null;
+  afdeling: string | null;
+  terrein: string | null;
+  kleuren: string | null;
+  secretaris: string | null;
+  secretaris_adres: string | null;
+  tel: string | null;
+  gsm: string | null;
+  email: string | null;
+  verantwoordelijke: string | null;
+  verantwoordelijke_tel: string | null;
+  wegwijzer: string | null;
+};
+
+export type Standing = {
+  seizoen: string;
+  reeks: string;
+  ploegid: number;
+  bron: "kavvv" | "berekend";
+  positie: number;
+  ploeg: string;
+  gespeeld: number;
+  gewonnen: number;
+  gelijk: number;
+  verloren: number;
+  doelpunten_voor: number;
+  doelpunten_tegen: number;
+  saldo: number;
+  punten: number;
+  label: string | null;
+  vergelijking_status: string;
+};
+
+export type SyncStatus = {
+  id: string;
+  laatste_poging_at: string | null;
+  laatste_succes_at: string | null;
+  status: string;
+  fout: string | null;
+};
+
+export type LidStatus = "wacht_op_goedkeuring" | "actief" | "inactief";
+
+export type Member = {
+  id: string;
+  user_id: string | null;
+  naam: string;
+  functie: Functie;
+  email: string;
+  telefoon: string | null;
+  geboortedatum: string | null;
+  adres: string | null;
+  status: LidStatus;
+  is_admin: boolean;
+  is_hoofdadmin: boolean;
+  aangemaakt_op?: string;
+};
+
+/** Beperkte weergave (view members_basis) voor supporters. */
+export type MemberBasis = Pick<Member, "id" | "naam" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
+
+export type AanwezigheidStatus = "aanwezig" | "afwezig" | "onzeker";
+
+export type Attendance = {
+  match_key: string;
+  member_id: string;
+  status: AanwezigheidStatus;
+  gezet_door: string | null;
+  updated_at: string;
+};
+
+export type Formatie = "4-3-3" | "4-4-2" | "3-4-3";
+
+export type Lineup = {
+  id: string;
+  match_key: string;
+  formatie: Formatie;
+  gemaakt_door: string | null;
+  updated_at: string;
+};
+
+export type LineupPlayer = {
+  lineup_id: string;
+  member_id: string;
+  positie: string;
+};
+
+export type MatchStat = {
+  match_key: string;
+  member_id: string;
+  gespeeld: boolean;
+  goals: number;
+  assists: number;
+  geel: number;
+  rood: number;
+  ingevoerd_door?: string | null;
+  updated_at?: string;
+};
+
+export type AuditEntry = {
+  id: number;
+  tabel: string;
+  rij_id: string;
+  actie: string;
+  oud: Record<string, unknown> | null;
+  nieuw: Record<string, unknown> | null;
+  door: string | null;
+  op: string;
+};
+
+export type Aanwezigheid24u = {
+  member_id: string;
+  naam: string;
+  functie: Functie;
+  status: AanwezigheidStatus;
+  gezet_op: string;
+};

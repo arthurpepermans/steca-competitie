@@ -4,3 +4,6 @@ tests/fixtures/incoming/
 __pycache__/
 *.egg-info/
 .pytest_cache/
+app/node_modules/
+app/dist/
+app/.env.local

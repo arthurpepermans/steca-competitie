@@ -1,0 +1,69 @@
+import { useState } from "react";
+import { haalAanwezigheden, haalLedenBasis, haalMatches, haalTeams } from "../lib/api";
+import { isSpelerLid, rechten, useAuth } from "../lib/auth";
+import { EIGEN_PLOEGID } from "../lib/config";
+import { fmtDatum, isEigen, sorteerOpDatum } from "../lib/datum";
+import { useAsync } from "../lib/useAsync";
+import { Aanwezigheid } from "../components/Aanwezigheid";
+import { Fout, Laden } from "../components/Layout";
+import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
+import { MatchKaart } from "../components/MatchKaart";
+
+export function Kalender() {
+  const { lid } = useAuth();
+  const r = rechten(lid);
+  const [tab, setTab] = useState<"eigen" | "reeks">("eigen");
+  const [toonGespeeld, setToonGespeeld] = useState(true);
+  const matches = useAsync(haalMatches);
+  const teams = useAsync(haalTeams);
+  const leden = useAsync(haalLedenBasis);
+  const aanw = useAsync(haalAanwezigheden);
+
+  if (matches.laden || teams.laden || leden.laden) return <Laden />;
+  const reeks = teams.data?.find((t) => t.ploegid === EIGEN_PLOEGID)?.reeks ?? "";
+  const spelers = (leden.data ?? []).filter(isSpelerLid).map((m) => ({ id: m.id, naam: m.naam }));
+  const alle = sorteerOpDatum(matches.data ?? []);
+  const lijst = alle.filter((m) => (tab === "eigen" ? isEigen(m) : m.reeks === reeks)).filter((m) => toonGespeeld || m.status === "gepland");
+
+  const perDatum = new Map<string, typeof lijst>();
+  for (const m of lijst) {
+    const k = m.datum ?? "onbekend";
+    perDatum.set(k, [...(perDatum.get(k) ?? []), m]);
+  }
+
+  return (
+    <>
+      <Fout tekst={matches.fout ?? teams.fout ?? leden.fout} />
+      <div className="tabs">
+        <button className={tab === "eigen" ? "actief" : ""} onClick={() => setTab("eigen")}>Steca Juniors</button>
+        <button className={tab === "reeks" ? "actief" : ""} onClick={() => setTab("reeks")}>Hele reeks</button>
+      </div>
+      <label className="klein zacht" style={{ display: "block", marginBottom: 10 }}>
+        <input type="checkbox" checked={toonGespeeld} onChange={(e) => setToonGespeeld(e.target.checked)} /> gespeelde matchen tonen
+      </label>
+      {[...perDatum.entries()].map(([datum, ms]) => (
+        <section key={datum}>
+          {tab === "reeks" && <h3 style={{ marginTop: 12 }}>{fmtDatum(datum === "onbekend" ? null : datum)}</h3>}
+          {ms.map((m) => (
+            <MatchKaart key={m.match_key} match={m} toonDatum={tab === "eigen"}>
+              {isEigen(m) && (
+                <Aanwezigheid
+                  match={m}
+                  spelers={spelers}
+                  aanwezigheden={aanw.data ?? []}
+                  eigenLidId={lid?.id ?? null}
+                  isSpeler={r.isSpeler}
+                  isStaf={r.isStaf}
+                  isAdmin={r.isAdmin}
+                  onGewijzigd={aanw.herlaad}
+                />
+              )}
+            </MatchKaart>
+          ))}
+        </section>
+      ))}
+      {lijst.length === 0 && <div className="kaart zacht">Geen matchen gevonden.</div>}
+      <LaatstBijgewerkt />
+    </>
+  );
+}

@@ -120,3 +120,40 @@ Lezen kan met de anon key (row level security laat lezen toe, schrijven niet).
 2. Vergelijk met de bestaande fixture, pas `competition/parsers.py` aan, vervang de fixture en draai `pytest`.
 3. Fixtures met persoonsgegevens (ploegpagina's): vervang de secretariaatsregels door fictieve
    waarden voor je ze commit, zoals in `tests/fixtures/club_uniek_149.html`.
+
+## Webapp (map `app/`)
+
+Mobile-first website voor spelers, staf en supporters: kalender met aanwezigheden, klassement met
+statistieken, ploegen, opstelling en ledenlijst. Volledige beschrijving in `docs/APP_BRIEF.md`.
+QR-code voor de registratiepagina: `docs/qr-registreer.png`.
+
+Techniek: React + Vite + TypeScript, Supabase Auth en Postgres met row level security. Gehost op
+GitHub Pages via `.github/workflows/deploy-app.yml`, adres https://arthurpepermans.github.io/steca-competitie/.
+
+### Eenmalige instelling
+
+1. Voer `supabase/app_schema.sql` uit in de SQL Editor (na `schema.sql`). De view `members_basis`
+   staat bewust zonder row level security: ze toont alleen naam en functie aan supporters.
+2. Supabase > Authentication > Providers > Email: zet "Confirm email" uit (goedkeuring gebeurt in de app).
+3. Supabase > Authentication > URL Configuration: Site URL `https://arthurpepermans.github.io/steca-competitie/`
+   en dezelfde URL bij Redirect URLs.
+4. GitHub > Settings > Secrets and variables > Actions > Variables: `VITE_SUPABASE_URL` en
+   `VITE_SUPABASE_ANON_KEY` (Supabase > Project Settings > API > anon public).
+5. Push naar `main` of start de workflow "deploy-app" handmatig. GitHub Pages wordt automatisch ingeschakeld.
+6. Maak als eerste een account aan: het allereerste account wordt automatisch hoofdadmin en actief.
+   Daarna de QR-code delen; nieuwe accounts keur je goed onder Leden.
+
+Eigen domein later: `BASE_PATH=/` als repository variable, `app/public/CNAME` met het domein, DNS
+volgens de GitHub Pages-handleiding, Site URL in Supabase aanpassen en de QR-code opnieuw maken
+(`tools/maak_qr.py`).
+
+### Lokaal ontwikkelen
+
+```bash
+cd app
+cp .env.example .env.local   # anon key invullen
+npm install
+npm run dev                  # http://localhost:5173/steca-competitie/
+npm test                     # vitest: formaties, statistieken, datums
+npm run build
+```
