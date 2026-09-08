@@ -68,8 +68,10 @@ class Settings:
         s.uitslagen_id = int(e.get("KAVVV_UITSLAGEN_ID", s.uitslagen_id))
         s.kalender_id = int(e.get("KAVVV_KALENDER_ID", s.kalender_id))
         s.contact = e.get("SYNC_CONTACT", s.contact)
-        s.supabase_url = e.get("SUPABASE_URL") or None
-        s.supabase_key = e.get("SUPABASE_SERVICE_KEY") or None
+        # Witruimte en regeleindes weghalen: een geplakt secret eindigt vaak op een enter,
+        # en dat maakt de HTTP-header ongeldig. URL en key bevatten zelf nooit witruimte.
+        s.supabase_url = "".join(e.get("SUPABASE_URL", "").split()).rstrip("/") or None
+        s.supabase_key = "".join(e.get("SUPABASE_SERVICE_KEY", "").split()) or None
         s.cache_dir = Path(e.get("SYNC_CACHE_DIR", s.cache_dir))
         s.incoming_dir = Path(e.get("SYNC_INCOMING_DIR", s.incoming_dir))
         s.eigen_ploeg = e.get("EIGEN_PLOEG", s.eigen_ploeg)

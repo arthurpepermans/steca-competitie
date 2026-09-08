@@ -396,9 +396,9 @@ def run(settings: Settings, source: PageSource, db: Database, *, dry_run: bool,
 
     try:
         bestaand = db.select("matches")
-    except Exception as exc:  # database onbereikbaar: wel doorgaan, zonder oude rijen
-        log.warning("bestaande wedstrijden niet gelezen: %s", exc)
-        bestaand = []
+    except Exception as exc:  # database onbereikbaar of verkeerde sleutel: meteen stoppen, niets ophalen
+        log.error("database niet bereikbaar (SUPABASE_URL/SUPABASE_SERVICE_KEY juist?): %s", exc)
+        return 1
     try:
         plan = bouw_plan(source, now=now, met_clubs=met_clubs, bestaande_matches=bestaand, bewaar_fout=bewaar)
     except SyncError as exc:
@@ -409,9 +409,13 @@ def run(settings: Settings, source: PageSource, db: Database, *, dry_run: bool,
         if not dry_run:
             schrijf_status(db, now=now, ok=False, fout=str(exc), pagina=pagina)
         return 1
-    diff = pas_toe(plan, db, dry_run=dry_run)
-    if not dry_run:
-        schrijf_status(db, now=now, ok=True)
+    try:
+        diff = pas_toe(plan, db, dry_run=dry_run)
+        if not dry_run:
+            schrijf_status(db, now=now, ok=True)
+    except Exception as exc:
+        log.error("schrijven naar de database mislukt: %s", exc)
+        return 1
     print(rapport(plan, diff, dry_run=dry_run, eigen_ploeg=settings.eigen_ploeg))
     for w in plan.waarschuwingen:
         log.warning(w)
