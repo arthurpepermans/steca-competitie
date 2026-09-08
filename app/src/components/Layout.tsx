@@ -16,7 +16,7 @@ export function Layout() {
     <>
       <header className="kop">
         <h1>Steca Juniors</h1>
-        <Link to="/profiel">{lid?.naam.split(" ")[0] ?? "Profiel"} ▸</Link>
+        <Link to="/profiel">{lid?.voornaam ?? "Profiel"} ▸</Link>
       </header>
       <main className="inhoud">
         <Outlet />

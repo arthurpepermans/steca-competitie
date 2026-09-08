@@ -47,7 +47,8 @@ export function Login() {
 }
 
 export function Registreer() {
-  const [naam, setNaam] = useState("");
+  const [voornaam, setVoornaam] = useState("");
+  const [achternaam, setAchternaam] = useState("");
   const [email, setEmail] = useState("");
   const [functie, setFunctie] = useState<Functie>("speler");
   const [wachtwoord, setWachtwoord] = useState("");
@@ -65,7 +66,7 @@ export function Registreer() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: wachtwoord,
-      options: { data: { naam: naam.trim(), functie } },
+      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie } },
     });
     setBezig(false);
     if (error) return setFout(error.message);
@@ -85,7 +86,8 @@ export function Registreer() {
     <Kader titel="Account aanmaken">
       <form onSubmit={submit}>
         {fout && <div className="melding fout">{fout}</div>}
-        <div className="veld"><label>Voornaam en naam</label><input value={naam} onChange={(e) => setNaam(e.target.value)} required autoComplete="name" /></div>
+        <div className="veld"><label>Voornaam</label><input value={voornaam} onChange={(e) => setVoornaam(e.target.value)} required autoComplete="given-name" /></div>
+        <div className="veld"><label>Achternaam</label><input value={achternaam} onChange={(e) => setAchternaam(e.target.value)} required autoComplete="family-name" /></div>
         <div className="veld"><label>E-mailadres</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></div>
         <div className="veld">
           <label>Ik ben</label>

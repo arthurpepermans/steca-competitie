@@ -68,7 +68,9 @@ export type LidStatus = "wacht_op_goedkeuring" | "actief" | "inactief";
 export type Member = {
   id: string;
   user_id: string | null;
-  naam: string;
+  naam: string; // voornaam + achternaam, afgeleid in de database
+  voornaam: string | null;
+  achternaam: string | null;
   functie: Functie;
   email: string;
   telefoon: string | null;
@@ -81,7 +83,7 @@ export type Member = {
 };
 
 /** Beperkte weergave (view members_basis) voor supporters. */
-export type MemberBasis = Pick<Member, "id" | "naam" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
+export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
 
 export type AanwezigheidStatus = "aanwezig" | "afwezig" | "onzeker";
 

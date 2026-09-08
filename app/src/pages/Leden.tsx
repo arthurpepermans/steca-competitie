@@ -144,20 +144,22 @@ export function LidDetail() {
 }
 
 export function LidFormulier({ lid, onOpslaan, eigen = false }: { lid: Member; onOpslaan: (velden: Partial<Member>) => void; eigen?: boolean }) {
-  const [naam, setNaam] = useState(lid.naam);
+  const [voornaam, setVoornaam] = useState(lid.voornaam ?? "");
+  const [achternaam, setAchternaam] = useState(lid.achternaam ?? "");
   const [functie, setFunctie] = useState<Functie>(lid.functie);
   const [telefoon, setTelefoon] = useState(lid.telefoon ?? "");
   const [geboortedatum, setGeboortedatum] = useState(lid.geboortedatum ?? "");
   const [adres, setAdres] = useState(lid.adres ?? "");
   function submit(e: FormEvent) {
     e.preventDefault();
-    const velden: Partial<Member> = { naam: naam.trim(), telefoon: telefoon.trim() || null, geboortedatum: geboortedatum || null, adres: adres.trim() || null };
+    const velden: Partial<Member> = { voornaam: voornaam.trim(), achternaam: achternaam.trim(), telefoon: telefoon.trim() || null, geboortedatum: geboortedatum || null, adres: adres.trim() || null };
     if (!eigen) velden.functie = functie;
     onOpslaan(velden);
   }
   return (
     <form onSubmit={submit}>
-      <div className="veld"><label>Naam</label><input value={naam} onChange={(e) => setNaam(e.target.value)} required /></div>
+      <div className="veld"><label>Voornaam</label><input value={voornaam} onChange={(e) => setVoornaam(e.target.value)} required autoComplete="given-name" /></div>
+      <div className="veld"><label>Achternaam</label><input value={achternaam} onChange={(e) => setAchternaam(e.target.value)} required autoComplete="family-name" /></div>
       {!eigen && (
         <div className="veld">
           <label>Functie</label>

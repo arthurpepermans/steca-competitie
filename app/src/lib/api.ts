@@ -30,11 +30,11 @@ export async function haalSyncStatus(): Promise<SyncStatus | null> {
 // -------------------------------------------------------------------- leden
 
 export async function haalLeden(): Promise<Member[]> {
-  return check(await supabase.from("members").select("*").order("naam"));
+  return check(await supabase.from("members").select("*").order("achternaam").order("voornaam"));
 }
 
 export async function haalLedenBasis(): Promise<MemberBasis[]> {
-  return check(await supabase.from("members_basis").select("*").order("naam"));
+  return check(await supabase.from("members_basis").select("*").order("achternaam").order("voornaam"));
 }
 
 export async function haalLid(id: string): Promise<Member | null> {

@@ -6,7 +6,9 @@
 create table if not exists members (
   id             uuid primary key default gen_random_uuid(),
   user_id        uuid unique references auth.users (id) on delete set null,
-  naam           text not null,
+  naam           text not null,          -- afgeleid: voornaam + achternaam (trigger members_naam)
+  voornaam       text,
+  achternaam     text,
   functie        text not null default 'speler'
                  check (functie in ('speler', 'spelercoach', 'coach', 'verantwoordelijke', 'supporter')),
   email          text not null,
@@ -21,6 +23,26 @@ create table if not exists members (
   updated_at     timestamptz not null default now()
 );
 create unique index if not exists members_een_hoofdadmin on members (is_hoofdadmin) where is_hoofdadmin;
+alter table members add column if not exists voornaam text;
+alter table members add column if not exists achternaam text;
+update members
+   set voornaam = split_part(naam, ' ', 1),
+       achternaam = nullif(trim(substr(naam, length(split_part(naam, ' ', 1)) + 1)), '')
+ where voornaam is null;
+
+-- Volledige naam altijd afleiden uit voornaam + achternaam.
+create or replace function members_naam() returns trigger
+language plpgsql as $$
+begin
+  new.naam := trim(concat_ws(' ', nullif(trim(coalesce(new.voornaam, '')), ''), nullif(trim(coalesce(new.achternaam, '')), '')));
+  if new.naam = '' then
+    new.naam := split_part(new.email, '@', 1);
+  end if;
+  return new;
+end $$;
+drop trigger if exists members_naam on members;
+create trigger members_naam before insert or update on members
+  for each row execute function members_naam();
 
 -- Bij registratie (auth.users) automatisch een lid aanmaken. Het allereerste lid wordt hoofdadmin.
 create or replace function handle_new_user() returns trigger
@@ -33,10 +55,12 @@ begin
     v_functie := 'speler';
   end if;
   select not exists (select 1 from members) into eerste;
-  insert into members (user_id, naam, email, functie, status, is_admin, is_hoofdadmin)
+  insert into members (user_id, naam, voornaam, achternaam, email, functie, status, is_admin, is_hoofdadmin)
   values (
     new.id,
     coalesce(nullif(trim(new.raw_user_meta_data->>'naam'), ''), split_part(new.email, '@', 1)),
+    nullif(trim(coalesce(new.raw_user_meta_data->>'voornaam', '')), ''),
+    nullif(trim(coalesce(new.raw_user_meta_data->>'achternaam', '')), ''),
     new.email,
     case when eerste then 'verantwoordelijke' else v_functie end,
     case when eerste then 'actief' else 'wacht_op_goedkeuring' end,
@@ -124,7 +148,7 @@ create trigger members_guard before update on members
 
 -- Beperkte weergave voor supporters: alleen naam en functie.
 create or replace view members_basis as
-  select id, naam, functie, status, is_admin, is_hoofdadmin from members;
+  select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam from members;
 revoke all on members_basis from anon;
 grant select on members_basis to authenticated;
 
