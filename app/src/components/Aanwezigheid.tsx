@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Check } from "@phosphor-icons/react/dist/csr/Check";
+import { X } from "@phosphor-icons/react/dist/csr/X";
+import { Question } from "@phosphor-icons/react/dist/csr/Question";
 import { aanwezigheden24u, zetAanwezigheid } from "../lib/api";
 import { fmtTijdstip, magAanwezigheidWijzigen } from "../lib/datum";
 import { foutTekst } from "../lib/useAsync";
@@ -7,7 +10,7 @@ import type { Aanwezigheid24u, AanwezigheidStatus, Attendance, Match } from "../
 const STATUSSEN: { code: AanwezigheidStatus; label: string }[] = [
   { code: "aanwezig", label: "Aanwezig" },
   { code: "afwezig", label: "Afwezig" },
-  { code: "onzeker", label: "Onzeker ?" },
+  { code: "onzeker", label: "Onzeker" },
 ];
 
 type Speler = { id: string; naam: string };
@@ -60,25 +63,22 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
   const zonder = spelers.filter((p) => !perLid.has(p.id));
 
   return (
-    <div style={{ marginTop: 10, borderTop: "1px solid var(--rand)", paddingTop: 10 }}>
+    <div className="aanwezigheid">
       {fout && <div className="melding fout">{fout}</div>}
       {isSpeler && eigenLidId && magWijzigen && (
         <div className="status-knoppen" style={{ marginBottom: 8 }}>
           {STATUSSEN.map((s) => (
-            <button key={s.code} type="button" disabled={bezig} className={`${s.code} ${eigenStatus === s.code ? "actief" : ""}`} onClick={() => zet(eigenLidId, s.code)}>
-              {s.label}
+            <button key={s.code} type="button" disabled={bezig} aria-pressed={eigenStatus === s.code} className={`${s.code} ${eigenStatus === s.code ? "actief" : ""}`} onClick={() => zet(eigenLidId, s.code)}>
+              {s.code === "aanwezig" ? <Check size={20} /> : s.code === "afwezig" ? <X size={20} /> : <Question size={20} />} {s.label}
             </button>
           ))}
         </div>
       )}
-      <div className="rij klein zacht" style={{ marginBottom: 4 }}>
-        <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")}</span>
-        <span>nog niets: {zonder.length}</span>
-      </div>
-      <div className="namen">
-        {groepen.flatMap((g) => g.namen.map((p) => <span key={p.id} className={g.code}>{p.naam}</span>))}
-        {zonder.map((p) => <span key={p.id}>{p.naam}</span>)}
-      </div>
+      <p className="aanwezig-bevestiging" role="status">{bezig ? "Bezig met opslaan…" : eigenStatus ? `Je staat als ${eigenStatus}.` : isSpeler ? "Je hebt nog niet geantwoord." : "Bekijk de aanwezigheid van de ploeg."}</p>
+      <details className="ploeg-aanwezig">
+        <summary><span><strong>{groepen[0].namen.length}</strong> aanwezig <span className="zacht">van {spelers.length} spelers</span></span><span className="details-label">Bekijk ploeg</span></summary>
+        <div className="aanwezig-groepen">{groepen.map((g) => <div key={g.code}><h4>{g.label} <span>{g.namen.length}</span></h4><div className="namen">{g.namen.length ? g.namen.map((p) => <span key={p.id} className={g.code}>{p.naam}</span>) : <span>Nog niemand</span>}</div></div>)}<div><h4>Nog niet geantwoord <span>{zonder.length}</span></h4><div className="namen">{zonder.map((p) => <span key={p.id}>{p.naam}</span>)}</div></div></div>
+      </details>
       {isStaf && magWijzigen && (
         <div style={{ marginTop: 8 }}>
           <button type="button" className="knop licht klein" onClick={() => setAnderen(!anderen)}>
