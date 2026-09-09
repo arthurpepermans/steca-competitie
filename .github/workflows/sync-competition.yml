@@ -1,6 +1,10 @@
 # Geplande sync van kavvv-vb-ov.be naar Supabase.
 # GitHub cron loopt in UTC; de tijden hieronder zijn gekozen voor wintertijd (CET, Brussel).
 # In zomertijd (tot eind oktober en vanaf eind maart) loopt de job één uur later, wat voor uitslagen geen kwaad kan.
+#
+# De job draait elke week, ook zonder matchen. Daardoor blijft het Supabase-project actief (gratis projecten
+# worden na 7 dagen zonder gebruik gepauzeerd) en committeert de job maandelijks docs/LAATSTE_SYNC.md,
+# want GitHub schakelt geplande workflows uit na 60 dagen zonder commits in de repository.
 name: sync-competition
 
 on:
@@ -14,6 +18,9 @@ on:
         description: "Alleen tonen wat zou wijzigen (niets schrijven)"
         type: boolean
         default: false
+
+permissions:
+  contents: write
 
 concurrency:
   group: sync-competition
@@ -55,3 +62,16 @@ jobs:
           path: tests/fixtures/incoming/
           if-no-files-found: ignore
           retention-days: 30
+
+      - name: Rooster actief houden (één commit per maand, raakt de app niet)
+        if: ${{ !inputs.dry_run }}
+        run: |
+          printf 'Laatste automatische synchronisatie: %s\n\nDit bestand wordt maandelijks bijgewerkt door de sync-job, zodat GitHub het rooster niet uitschakelt na 60 dagen zonder commits.\n' "$(date -u +%Y-%m)" > docs/LAATSTE_SYNC.md
+          if ! git diff --quiet -- docs/LAATSTE_SYNC.md; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/LAATSTE_SYNC.md
+            git commit -m "Sync-job actief: $(date -u +%Y-%m)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
