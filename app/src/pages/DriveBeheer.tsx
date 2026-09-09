@@ -40,7 +40,7 @@ export function DriveBeheer() {
       <p>We gebruiken een aparte clubmap. De app krijgt alleen toegang tot bestanden die hij zelf aanmaakt.</p>
       {status.connection && <p><a href={`https://drive.google.com/drive/folders/${encodeURIComponent(status.connection.folder_id)}`} target="_blank" rel="noreferrer">Clubmap openen in Google Drive</a></p>}
       <button className="knop" disabled={bezig} onClick={() => void verbind()}>{bezig ? "Google openen…" : status.connected ? "Opnieuw verbinden" : "Google Drive koppelen"}</button>
-      <p className="klein zacht">Deze stap koppelt de opslag. Wedstrijdalbums gebruiken voorlopig nog de bestaande opslag totdat de Drive-uploadfunctie is getest.</p>
+      <p className="klein zacht">Leden voegen foto's en video's toe via Sfeerbeelden bij een wedstrijd. Ze hoeven zelf geen Google-account te koppelen. Admins kunnen beelden verwijderen.</p>
     </div>}
   </>;
 }
