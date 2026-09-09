@@ -1,3 +1,4 @@
+import { InstallatieHulp } from "../components/InstallatieHulp";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -12,6 +13,7 @@ function Kader({ titel, children }: { titel: string; children: React.ReactNode }
         <h2>{titel}</h2>
         {children}
       </div>
+      <InstallatieHulp />
     </div>
   );
 }

@@ -301,3 +301,14 @@ body{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns
 /* Eénvingerscrollen blijft mogelijk; knijpzoom verandert de appindeling niet. */
 html,body,#root{touch-action:pan-x pan-y}
 @media(pointer:coarse){input,select,textarea{font-size:16px}}
+
+.installatie-hulp{border:1px solid var(--tekst);background:var(--kaart);margin:20px 0;box-shadow:3px 3px 0 var(--vlak)}
+.installatie-hulp summary{display:flex;align-items:center;gap:12px;list-style:none;padding:16px;min-height:76px}
+.installatie-hulp summary::-webkit-details-marker{display:none}.installatie-hulp summary>svg{flex-shrink:0}
+.installatie-hulp summary strong{font:700 24px/1.1 "Barlow Condensed",sans-serif;display:block;text-transform:uppercase}
+.installatie-hulp summary small{font-size:11px;color:var(--tekst-zacht);display:block;margin-top:5px}
+.installatie-plus{margin-left:auto;font-size:25px}.installatie-hulp[open] .installatie-plus{transform:rotate(45deg)}
+.installatie-inhoud{padding:0 16px 16px;border-top:1px dashed var(--rand)}
+.installatie-keuze{display:flex;gap:8px;margin:16px 0}.installatie-keuze button{flex:1;min-height:44px;border:1px solid var(--tekst);background:var(--kaart);font-weight:700}.installatie-keuze button[aria-pressed=true]{background:var(--accent);color:#25291f}
+.installatie-logo{display:flex;gap:12px;align-items:center;margin:18px 0;font-weight:700;font-size:13px}.installatie-logo img{border:1px solid var(--rand);border-radius:10px;flex-shrink:0}.installatie-logo small{display:block;font-weight:400;font-size:11px;color:var(--tekst-zacht);margin-top:4px}
+.installatie-inhoud ol{padding-left:22px;margin:16px 0}.installatie-inhoud li{padding-left:4px;margin-bottom:14px;font-size:13px;line-height:1.6}.installatie-inhoud li::marker{font-weight:700;color:var(--kleur)}.installatie-inhoud li svg{vertical-align:middle}.installatie-tip{font-size:12px;border-top:1px solid var(--rand);padding-top:12px;color:var(--tekst-zacht)}
