@@ -3,7 +3,13 @@ import type { Formatie } from "../lib/types";
 
 type Props = { formatie: Formatie; namen: Record<string, string | undefined>; compact?: boolean };
 function Shirt({ label }: { label: string }) {
-  return <svg viewBox="0 0 60 64" aria-hidden="true"><path d="M19 5 9 10 2 25 13 30 17 23 17 57 43 57 43 23 47 30 58 25 51 10 41 5 36 11 24 11Z" fill="#f5efdb" stroke="#242820" strokeWidth="2"/><path d="M24 12h5v43h-5zM35 12h5v43h-5z" fill="#343c31"/><path d="M21 5q9 14 18 0" fill="none" stroke="#242820" strokeWidth="3"/><rect x="19" y="26" width="22" height="17" fill="#e6c05b"/><text x="30" y="38" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#25291f">{label}</text></svg>;
+  return <svg viewBox="0 0 60 64" aria-hidden="true">
+    <path d="M19 5 9 10 2 25 13 30 17 23 17 57 43 57 43 23 47 30 58 25 51 10 41 5 36 11 24 11Z" fill="#292929" stroke="#171717" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M18 25h24v17H18Z" fill="#f8f5e9"/>
+    <path d="M21 6q9 13 18 0M3 24l10 5M47 29l10-5" fill="none" stroke="#f8f5e9" strokeWidth="2"/>
+    <path d="M20 54h20" stroke="#55534d" strokeWidth="1"/>
+    <text x="30" y="37" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#292929">{label}</text>
+  </svg>;
 }
 export function Veld({ formatie, namen, compact = false }: Props) {
   const plekken = FORMATIES[formatie].flatMap((rij, r) => rij.map((pos, i) => ({ pos, x:100*(i+1)/(rij.length+1), y:[85,65,43,20][r] })));
@@ -11,7 +17,7 @@ export function Veld({ formatie, namen, compact = false }: Props) {
     <div className="tactiek-kop"><strong>STECA JUNIORS</strong><span>{formatie}</span></div>
     <div className="voetbalveld">
       <svg className="veldlijnen" viewBox="0 0 600 740" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="#f0ead0" strokeWidth="2" opacity=".65"><rect x="18" y="18" width="564" height="704"/><path d="M18 370h564M180 18v105h240V18M240 18v40h120V18M180 722V617h240v105M240 722v-40h120v40"/><circle cx="300" cy="370" r="72"/><path d="M250 123q50 48 100 0M250 617q50-48 100 0"/></g><g fill="#f0ead0"><circle cx="300" cy="370" r="3"/><circle cx="300" cy="95" r="3"/><circle cx="300" cy="645" r="3"/></g></svg>
-      {plekken.map(({pos,x,y}) => <div key={namen[pos] ?? pos} className="veldspeler" style={{left:x+"%",top:y+"%"}} aria-label={`${positieLabel(pos)}: ${namen[pos] ?? "Nog niet ingevuld"}`}><Shirt label={positieKort(pos)} /><span>{namen[pos] ?? positieLabel(pos)}</span></div>)}
+      {plekken.map(({pos,x,y}) => <div key={namen[pos] ?? pos} className="veldspeler" style={{left:x+"%",top:y+"%"}} aria-label={`${positieLabel(pos)}: ${namen[pos] ?? "Nog niet ingevuld"}`}><Shirt label={positieKort(pos)} /><span title={namen[pos] ?? positieLabel(pos)}>{namen[pos] ?? positieLabel(pos)}</span></div>)}
     </div>
     <div className="reserve-kop"><h3>De bank</h3><span>4 plaatsen</span></div>
     <div className="reserve-scene">
