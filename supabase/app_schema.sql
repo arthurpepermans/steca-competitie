@@ -774,3 +774,22 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.openbare_spelerscijfers() from public;
 grant execute on function public.openbare_spelerscijfers() to anon, authenticated;
+-- Google Drive: alleen de backend kan de verbinding en eenmalige OAuth-pogingen lezen.
+create table if not exists public.drive_connection (
+  id integer primary key check (id = 1),
+  email text not null,
+  folder_id text not null,
+  refresh_token_cipher text not null,
+  connected_by uuid references auth.users(id) on delete set null,
+  connected_at timestamptz not null default now()
+);
+create table if not exists public.drive_oauth_states (
+  state_hash text primary key,
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  verifier text not null,
+  expires_at timestamptz not null
+);
+alter table public.drive_connection enable row level security;
+alter table public.drive_oauth_states enable row level security;
+revoke all on public.drive_connection, public.drive_oauth_states from public, anon, authenticated;
+grant all on public.drive_connection, public.drive_oauth_states to service_role;

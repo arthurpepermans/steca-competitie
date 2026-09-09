@@ -11,6 +11,7 @@ import { Opstelling } from "./pages/Opstelling";
 import { Leden, LidDetail } from "./pages/Leden";
 import { Profiel } from "./pages/Profiel";
 import { Supporters } from "./pages/Supporters";
+import { DriveBeheer } from "./pages/DriveBeheer";
 
 function Poort() {
   const { klaar, session, lid, fout } = useAuth();
@@ -49,6 +50,7 @@ function Poort() {
         <Route path="/leden" element={<Leden />} />
         <Route path="/leden/:id" element={<LidDetail />} />
         <Route path="/profiel" element={<Profiel />} />
+        <Route path="/drive" element={<DriveBeheer />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

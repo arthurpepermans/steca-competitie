@@ -1,0 +1,3 @@
+[functions.drive-connect]
+# Google-callback heeft geen Supabase-JWT. POST-acties controleren auth en adminrecht zelf.
+verify_jwt = false
