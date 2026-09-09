@@ -111,6 +111,7 @@ export function Opstelling() {
 
       {match && bewerken && r.isStaf && (
         <div className="kaart">
+          <Veld formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} compact />
           <div className="veld">
             <label>Formatie</label>
             <select value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
