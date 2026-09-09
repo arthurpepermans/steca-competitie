@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { stem, trekStemIn } from "../lib/api";
 import { fmtDatum, tegenstander } from "../lib/datum";
-import { PUNTEN, juniorVanDeMatch, kandidaten, magStemmen, matchRanglijst, seizoenRanglijst } from "../lib/stemmen";
+import { PUNTEN, juniorVanDeMatch, kandidaten, magStemmen, matchRanglijst, seizoenRanglijst, stemDeadline, stemmingOpen, stemtOpZichzelf } from "../lib/stemmen";
 import { foutTekst } from "../lib/useAsync";
 import type { Attendance, Match, MatchVote, VoteCount, VotePoints } from "../lib/types";
 
@@ -24,8 +24,10 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
   const lijst = matchRanglijst(punten, match.match_key);
   const winnaars = juniorVanDeMatch(punten, match.match_key);
   const aantalStemmers = stemmers.find((s) => s.match_key === match.match_key)?.stemmers ?? 0;
+  const open = stemmingOpen(match);
+  const deadline = stemDeadline(match);
   const mag = magStemmen(match, aanwezigheden, eigenLidId);
-  const keuze = kandidaten(match, aanwezigheden, spelers, eigenLidId);
+  const keuze = kandidaten(match, aanwezigheden, spelers);
   const [bewerk, setBewerk] = useState(false);
   const [eerste, setEerste] = useState(mijnStem?.eerste ?? "");
   const [tweede, setTweede] = useState(mijnStem?.tweede ?? "");
@@ -51,6 +53,10 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
     e.preventDefault();
     if (!eerste || !tweede || !derde) return setFout("Kies drie spelers.");
     if (new Set([eerste, tweede, derde]).size < 3) return setFout("Kies drie verschillende spelers.");
+    if (stemtOpZichzelf(eigenLidId, [eerste, tweede, derde])) {
+      alert("Egotripper! Op jezelf stemmen telt niet. Kies drie andere spelers.");
+      return setFout("Stem ongeldig: je stemde op jezelf.");
+    }
     await doe(() => stem(match.match_key, eerste, tweede, derde));
   }
 
@@ -60,7 +66,10 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
     <div style={{ marginTop: 10, borderTop: "1px solid var(--rand)", paddingTop: 10 }}>
       <div className="rij">
         <strong>Junior van de match</strong>
-        <span className="klein zacht">{aantalStemmers === 0 ? "nog geen stemmen" : `${aantalStemmers} ${aantalStemmers === 1 ? "stem" : "stemmen"}`}</span>
+        <span className="klein zacht">
+          {aantalStemmers === 0 ? "nog geen stemmen" : `${aantalStemmers} ${aantalStemmers === 1 ? "stem" : "stemmen"}`}
+          {deadline ? (open ? `, stemmen tot ${fmtDatum(deadline)}` : ", stemming gesloten") : ""}
+        </span>
       </div>
       {lijst.length > 0 && (
         <ol style={{ margin: "6px 0 0", paddingLeft: 22 }}>
@@ -106,7 +115,7 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
           </div>
         </form>
       )}
-      {!mag && match.status === "gespeeld" && eigenLidId && (
+      {!mag && open && eigenLidId && (
         <p className="klein zacht" style={{ margin: "6px 0 0" }}>Alleen wie op deze match als aanwezig stond, kan stemmen.</p>
       )}
     </div>
@@ -144,7 +153,7 @@ export function JuniorDor({ matches, punten, stemmers, ledenNamen, eigenLidId }:
           </tbody>
         </table>
       </div>
-      <p className="klein zacht">Na elke match kiest wie aanwezig was de beste drie spelers (3, 2 en 1 punt). Stemmen kan bij de match in de kalender.</p>
+      <p className="klein zacht">Na elke match kiest wie aanwezig was de beste drie spelers (3, 2 en 1 punt), tot 7 dagen na de match. Stemmen kan bij de match in de kalender.</p>
       <h3 style={{ marginTop: 14 }}>Junior van de match</h3>
       <ul className="lijst omrand">
         {gespeeld.map((m) => {

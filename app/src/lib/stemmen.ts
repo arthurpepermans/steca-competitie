@@ -1,3 +1,4 @@
+import { naarDate, vandaagIso } from "./datum";
 import type { Attendance, Match, VotePoints } from "./types";
 
 /** Punten voor de eerste, tweede en derde plaats op een stembrief. */
@@ -42,14 +43,35 @@ export function seizoenRanglijst(punten: VotePoints[]): SeizoenRij[] {
   return [...out.values()].sort((a, b) => b.punten - a.punten || b.gewonnen - a.gewonnen || b.matchen - a.matchen);
 }
 
-/** Stemmen mag wie op de match als aanwezig stond, zodra de match gespeeld is. */
-export function magStemmen(match: Match, aanwezigheden: Attendance[], lidId: string | null): boolean {
-  if (!lidId || match.status !== "gespeeld") return false;
+/** De stemming sluit 7 dagen na de match. */
+export const STEM_DAGEN = 7;
+
+/** Laatste dag waarop gestemd kan worden ('JJJJ-MM-DD'), of null zonder matchdatum. */
+export function stemDeadline(match: Match): string | null {
+  if (!match.datum) return null;
+  const d = naarDate(match.datum);
+  d.setDate(d.getDate() + STEM_DAGEN);
+  return vandaagIso(d);
+}
+
+/** Open zodra de match gespeeld is, tot en met 7 dagen na de matchdatum. */
+export function stemmingOpen(match: Match, vandaag: string = vandaagIso()): boolean {
+  const deadline = stemDeadline(match);
+  return match.status === "gespeeld" && deadline !== null && vandaag <= deadline;
+}
+
+/** Stemmen mag wie op de match als aanwezig stond, zolang de stemming open is. */
+export function magStemmen(match: Match, aanwezigheden: Attendance[], lidId: string | null, vandaag: string = vandaagIso()): boolean {
+  if (!lidId || !stemmingOpen(match, vandaag)) return false;
   return aanwezigheden.some((a) => a.match_key === match.match_key && a.member_id === lidId && a.status === "aanwezig");
 }
 
-/** Kandidaten: de spelers die aanwezig waren, zonder jezelf. */
-export function kandidaten<T extends { id: string }>(match: Match, aanwezigheden: Attendance[], spelers: T[], lidId: string | null): T[] {
+/** Kandidaten: alle spelers die aanwezig waren. Jezelf staat erbij; wie op zichzelf stemt, is een egotripper en de stem telt niet. */
+export function kandidaten<T extends { id: string }>(match: Match, aanwezigheden: Attendance[], spelers: T[]): T[] {
   const aanwezig = new Set(aanwezigheden.filter((a) => a.match_key === match.match_key && a.status === "aanwezig").map((a) => a.member_id));
-  return spelers.filter((p) => aanwezig.has(p.id) && p.id !== lidId);
+  return spelers.filter((p) => aanwezig.has(p.id));
+}
+
+export function stemtOpZichzelf(lidId: string | null, keuzes: string[]): boolean {
+  return lidId !== null && keuzes.includes(lidId);
 }

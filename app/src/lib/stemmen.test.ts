@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { juniorVanDeMatch, kandidaten, magStemmen, matchRanglijst, seizoenRanglijst } from "./stemmen";
+import { juniorVanDeMatch, kandidaten, magStemmen, matchRanglijst, seizoenRanglijst, stemDeadline, stemmingOpen, stemtOpZichzelf } from "./stemmen";
 import type { Attendance, Match, VotePoints } from "./types";
 
 const match = (key: string, status: Match["status"]): Match => ({
@@ -27,13 +27,28 @@ describe("stemmen", () => {
     expect(r.map((x) => [x.member_id, x.punten, x.matchen, x.gewonnen])).toEqual([["a", 8, 2, 1], ["b", 8, 2, 1], ["c", 3, 1, 1]]);
   });
 
-  it("laat alleen aanwezige spelers stemmen op gespeelde matchen, niet op zichzelf", () => {
+  it("laat alleen aanwezige spelers stemmen op gespeelde matchen", () => {
     const aanwezigheden = [aanw("m1", "ik", "aanwezig"), aanw("m1", "a", "aanwezig"), aanw("m1", "b", "afwezig"), aanw("m1", "c", "aanwezig")];
     const spelers = [{ id: "ik" }, { id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
-    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, "ik")).toBe(true);
-    expect(magStemmen(match("m1", "gepland"), aanwezigheden, "ik")).toBe(false);
-    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, "b")).toBe(false);
-    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, null)).toBe(false);
-    expect(kandidaten(match("m1", "gespeeld"), aanwezigheden, spelers, "ik").map((s) => s.id)).toEqual(["a", "c"]);
+    const vandaag = "2026-09-06";
+    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, "ik", vandaag)).toBe(true);
+    expect(magStemmen(match("m1", "gepland"), aanwezigheden, "ik", vandaag)).toBe(false);
+    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, "b", vandaag)).toBe(false);
+    expect(magStemmen(match("m1", "gespeeld"), aanwezigheden, null, vandaag)).toBe(false);
+    expect(kandidaten(match("m1", "gespeeld"), aanwezigheden, spelers).map((s) => s.id)).toEqual(["ik", "a", "c"]);
+  });
+
+  it("sluit de stemming 7 dagen na de match", () => {
+    const m = match("m1", "gespeeld"); // gespeeld op 2026-09-05
+    expect(stemDeadline(m)).toBe("2026-09-12");
+    expect(stemmingOpen(m, "2026-09-12")).toBe(true);
+    expect(stemmingOpen(m, "2026-09-13")).toBe(false);
+    expect(stemmingOpen({ ...m, datum: null }, "2026-09-06")).toBe(false);
+  });
+
+  it("herkent een egotripper", () => {
+    expect(stemtOpZichzelf("ik", ["a", "ik", "c"])).toBe(true);
+    expect(stemtOpZichzelf("ik", ["a", "b", "c"])).toBe(false);
+    expect(stemtOpZichzelf(null, ["a"])).toBe(false);
   });
 });

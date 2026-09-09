@@ -644,11 +644,13 @@ create table if not exists match_votes (
   check (voter_id <> eerste and voter_id <> tweede and voter_id <> derde)
 );
 
--- Geldigheid van een stembrief: match gespeeld, stemmer aanwezig, alle drie de gekozen spelers aanwezig.
+-- Geldigheid van een stembrief: match gespeeld en hoogstens 7 dagen geleden, stemmer aanwezig,
+-- alle drie de gekozen spelers aanwezig, niet op jezelf.
 create or replace function stem_geldig(p_match_key text, p_eerste uuid, p_tweede uuid, p_derde uuid) returns boolean
 language sql stable security definer set search_path = public as $$
   select is_actief()
-    and exists (select 1 from matches m where m.match_key = p_match_key and m.status = 'gespeeld')
+    and exists (select 1 from matches m where m.match_key = p_match_key and m.status = 'gespeeld'
+                  and m.datum is not null and current_date <= m.datum + 7)
     and exists (select 1 from attendance a where a.match_key = p_match_key and a.member_id = my_member_id() and a.status = 'aanwezig')
     and (select count(*) from attendance a where a.match_key = p_match_key and a.status = 'aanwezig'
            and a.member_id in (p_eerste, p_tweede, p_derde)) = 3
