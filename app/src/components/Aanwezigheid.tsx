@@ -26,6 +26,7 @@ type Props = {
 export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpeler, isStaf, isAdmin, onGewijzigd }: Props) {
   const [fout, setFout] = useState<string | null>(null);
   const [bezig, setBezig] = useState(false);
+  const [namenOpen, setNamenOpen] = useState(false);
   const [anderen, setAnderen] = useState(false);
   const [lijst24, setLijst24] = useState<Aanwezigheid24u[] | null>(null);
   const magWijzigen = magAanwezigheidWijzigen(match);
@@ -58,6 +59,8 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
     namen: spelers.filter((p) => perLid.get(p.id) === s.code),
   }));
   const zonder = spelers.filter((p) => !perLid.has(p.id));
+  // Standaard alleen de tellingen; de namen per status zijn open te klappen.
+  const blokken = [...groepen.map((g) => ({ code: g.code as string, label: g.label.replace(" ?", ""), namen: g.namen })), { code: "", label: "Nog niets", namen: zonder }];
 
   return (
     <div style={{ marginTop: 10, borderTop: "1px solid var(--rand)", paddingTop: 10 }}>
@@ -71,14 +74,24 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
           ))}
         </div>
       )}
-      <div className="rij klein zacht" style={{ marginBottom: 4 }}>
-        <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")}</span>
-        <span>nog niets: {zonder.length}</span>
+      <div className="rij klein zacht">
+        <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")} · nog niets: {zonder.length}</span>
+        <button type="button" className="knop licht klein" onClick={() => setNamenOpen(!namenOpen)}>
+          {namenOpen ? "Namen verbergen" : "Namen tonen"}
+        </button>
       </div>
-      <div className="namen">
-        {groepen.flatMap((g) => g.namen.map((p) => <span key={p.id} className={g.code}>{p.naam}</span>))}
-        {zonder.map((p) => <span key={p.id}>{p.naam}</span>)}
-      </div>
+      {namenOpen && (
+        <div style={{ marginTop: 8 }}>
+          {blokken.filter((b) => b.namen.length > 0).map((b) => (
+            <div key={b.label} style={{ marginBottom: 8 }}>
+              <div className="klein zacht" style={{ marginBottom: 4 }}>{b.label} ({b.namen.length})</div>
+              <div className="namen">
+                {b.namen.map((p) => <span key={p.id} className={b.code}>{p.naam}</span>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {isStaf && magWijzigen && (
         <div style={{ marginTop: 8 }}>
           <button type="button" className="knop licht klein" onClick={() => setAnderen(!anderen)}>
