@@ -43,6 +43,7 @@ export function installeerTestgegevens() {
     const url = new URL(request.url);
     if (url.origin === location.origin) return origineleFetch(input, init);
     const antwoord = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+    if (url.pathname === "/storage/v1/object/list/match-sfeerbeelden") return antwoord([]);
     if (!url.pathname.startsWith("/rest/v1/")) return antwoord({ message: "Dit ontwerpvoorbeeld gebruikt geen echte accounts." }, 400);
     const tabel = url.pathname.slice("/rest/v1/".length);
     if (request.method !== "GET") {

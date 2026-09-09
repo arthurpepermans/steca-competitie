@@ -8,6 +8,7 @@ import { Aanwezigheid } from "../components/Aanwezigheid";
 import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MatchKaart } from "../components/MatchKaart";
+import { Sfeerbeelden } from "../components/Sfeerbeelden";
 
 export function Kalender() {
   const { lid } = useAuth();
@@ -58,6 +59,7 @@ export function Kalender() {
                   onGewijzigd={aanw.herlaad}
                 />
               )}
+              {isEigen(m) && <Sfeerbeelden matchKey={m.match_key} />}
             </MatchKaart>
           ))}
         </section>
