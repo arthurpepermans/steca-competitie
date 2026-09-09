@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BANK, basisPosities, controleerOpstelling, radOpstelling } from "./formaties";
+import { BANK, FORMATIES, basisPosities, controleerOpstelling, radOpstelling } from "./formaties";
 
 /** Vaste, herhaalbare 'toevalsgenerator' voor de test. */
 function vasteReeks(): () => number {
@@ -13,6 +13,35 @@ function vasteReeks(): () => number {
 const spelers = Array.from({ length: 17 }, (_, i) => `s${i + 1}`);
 
 describe("het rad", () => {
+  it("houdt basis- en bankspelers op hun vergrendelde positie bij elke draai", () => {
+    const random = vasteReeks();
+    for (let i = 0; i < 100; i++) {
+      const keuze = radOpstelling("4-3-3", spelers, random, { GK: "s1", LW: "s2", BANK4: "s3" });
+      expect(keuze).toMatchObject({ GK: "s1", LW: "s2", BANK4: "s3" });
+      expect(controleerOpstelling("4-3-3", keuze)).toEqual([]);
+    }
+  });
+  it("loot een vaste bankspeler niet mee om een ontbrekende basisspeler op te vullen", () => {
+    expect(radOpstelling("4-3-3", spelers.slice(0, 11), vasteReeks(), { BANK1: "s1" })).toEqual({});
+    const keuze = radOpstelling("4-3-3", spelers.slice(0, 12), vasteReeks(), { BANK4: "s1" });
+    expect(controleerOpstelling("4-3-3", keuze)).toEqual([]);
+    expect(keuze.BANK4).toBe("s1");
+    expect(keuze.BANK1).toBeNull();
+  });
+  it("weigert afwezige, dubbele of ongeldige vergrendelingen", () => {
+    const ongeldig: Record<string, string | null>[] = [{ GK: "afwezig" }, { GK: "s1", ST: "s1" }, { LM: "s1" }];
+    for (const vast of ongeldig) {
+      expect(() => radOpstelling("4-3-3", spelers, vasteReeks(), vast)).toThrow(/vergrendelde/);
+    }
+  });
+  it("tekent linkerposities links en rechterposities rechts", () => {
+    for (const rijen of Object.values(FORMATIES)) {
+      for (const [links, rechts] of [["LB", "RB"], ["LW", "RW"], ["LM", "RM"]]) {
+        const rij = rijen.find(r => r.includes(links));
+        if (rij) expect(rij.indexOf(links)).toBeLessThan(rij.indexOf(rechts));
+      }
+    }
+  });
   it("vult de elf basisposities en de bank met aanwezige spelers, niemand dubbel", () => {
     const keuze = radOpstelling("4-3-3", spelers, vasteReeks());
     expect(controleerOpstelling("4-3-3", keuze)).toEqual([]);

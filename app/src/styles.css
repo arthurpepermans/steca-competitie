@@ -329,3 +329,9 @@ html,body,#root{touch-action:pan-x pan-y}
 .supporters-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
 .supporters-tabs .knop { flex: 1; }
 .supporters-inhoud { padding-bottom: 32px; }
+
+.positie-keuze { display:flex; gap:8px; align-items:stretch; }
+.positie-keuze select { flex:1; min-width:0; }
+.positie-slot { min-width:46px; display:grid; place-items:center; padding:8px; }
+.positie-slot[aria-pressed="true"] { background:var(--accent); color:var(--op-accent); border-color:var(--tekst); }
+.veld-slot { position:absolute; top:0; right:0; display:grid; place-items:center; padding:3px; border:1px solid #332e24; border-radius:3px; background:#e8bf53; color:#25291f; }
