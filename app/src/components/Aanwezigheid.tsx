@@ -96,10 +96,10 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
           ))}
         </div>
       )}
-      {isStaf && magWijzigen && (
+      {isStaf && (
         <div style={{ marginTop: 8 }}>
           <button type="button" className="knop licht klein" onClick={() => setAnderen(!anderen)}>
-            {anderen ? "Sluiten" : "Aanwezigheid van anderen zetten"}
+            {anderen ? "Sluiten" : "Aanwezigheden aanpassen"}
           </button>
           {anderen && (
             <ul className="lijst omrand" style={{ marginTop: 8 }}>

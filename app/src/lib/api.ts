@@ -95,14 +95,7 @@ export async function haalOpstellingSpelers(lineupId: string): Promise<LineupPla
 }
 
 export async function bewaarOpstelling(matchKey: string, formatie: Formatie, keuze: Record<string, string | null>): Promise<void> {
-  const lineup = check<Lineup>(
-    await supabase.from("lineups").upsert({ match_key: matchKey, formatie }, { onConflict: "match_key" }).select("*").single(),
-  );
-  check(await supabase.from("lineup_players").delete().eq("lineup_id", lineup.id));
-  const rijen = Object.entries(keuze)
-    .filter(([, memberId]) => memberId)
-    .map(([positie, memberId]) => ({ lineup_id: lineup.id, member_id: memberId, positie }));
-  if (rijen.length) check(await supabase.from("lineup_players").insert(rijen).select("positie"));
+  check(await supabase.rpc("bewaar_opstelling", { p_match_key: matchKey, p_formatie: formatie, p_keuze: keuze }));
 }
 
 // ----------------------------------------------------------- statistieken
