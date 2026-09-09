@@ -40,7 +40,7 @@ export function Home() {
               <div className="affiche-meta"><span>WEDSTRIJDTICKET · {volgende.reeks.replace("DERDE AFDELING", "3e afdeling")}</span><span className="locatie-label">{isThuis(volgende) ? "Thuismatch" : "Uitmatch"}</span></div>
               <div className="affiche-ploegen">
                 <div className="team-naam"><span className="team-boven">{volgende.thuis}</span><span className="versus">tegen</span><span className="team-onder">{volgende.uit}</span></div>
-                <img className="affiche-logo" src={import.meta.env.BASE_URL + "logo.png"} alt="Clublogo Steca Juniors" width="150" height="174" />
+                <img className="affiche-logo" src={import.meta.env.BASE_URL + "logo-retro.png"} alt="Clublogo Steca Juniors" width="150" height="174" />
               </div>
               <div className="match-moment"><CalendarBlank size={22} /><span>{fmtDatum(volgende.datum)}</span><strong>{volgende.uur ?? "uur volgt"}</strong></div>
               <div className="match-terrein"><MapPin size={20} /><span>{volgende.terrein ?? "Terrein nog niet bekend"}</span><MapsKnop terrein={volgende.terrein} /></div>
@@ -52,7 +52,7 @@ export function Home() {
           </> : <div className="lege-staat"><CalendarBlank size={32} /><h3>Even geen match gepland</h3><p>De volgende match verschijnt hier zodra de kalender is bijgewerkt.</p><Link to="/kalender">Bekijk de kalender <ArrowRight size={16} /></Link></div>}
         </section>
         <aside className="home-zijde">
-          <div className="club-embleem"><span>SAMEN UIT. SAMEN THUIS.</span><img src={import.meta.env.BASE_URL + "logo.png"} alt="Steca Juniors" /><span>DE DERDE HELFT</span><strong>BACOTIME.</strong></div>
+          <div className="club-embleem"><span>SAMEN UIT. SAMEN THUIS.</span><img src={import.meta.env.BASE_URL + "logo-retro.png"} alt="Steca Juniors" /><span>DE DERDE HELFT</span><strong>BACOTIME.</strong></div>
           <section className="stand-blok">
             <div className="sectie-kop"><h2>02 / De rangschikking</h2><Trophy size={23} /></div>
             {eigen ? <>

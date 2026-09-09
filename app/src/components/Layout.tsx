@@ -40,8 +40,8 @@ export function Layout() {
       <a href="#inhoud" className="skip-link" onClick={(event) => { event.preventDefault(); document.getElementById("inhoud")?.focus(); }}>Naar inhoud</a>
       <header className="kop">
         <Link to="/" className="clubmerk">
-          <img src={import.meta.env.BASE_URL + "logo.png"} alt="" width="44" height="52" />
-          <span>STECA JUNIORS</span>
+          <img src={import.meta.env.BASE_URL + "logo-retro.png"} alt="" width="44" height="52" />
+          <span>STECA JUNIORS<small>CLUBAPP</small></span>
         </Link>
         <div className="kop-acties">
           <button className="thema-knop" type="button" onClick={() => setDonker(!donker)} aria-label={donker ? "Licht thema" : "Donker thema"}>
