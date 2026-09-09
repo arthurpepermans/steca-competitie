@@ -321,11 +321,40 @@ begin
   if not exists (select 1 from members where id = new.member_id and status = 'actief' and speelt) then
     raise exception 'alleen actieve leden die meespelen kunnen opgesteld worden';
   end if;
+  perform 1 from attendance a join lineups l on l.match_key = a.match_key
+    where l.id = new.lineup_id and a.member_id = new.member_id and a.status = 'aanwezig'
+    for share of a;
+  if not found then
+    raise exception 'Alleen spelers die voor deze match op aanwezig staan kunnen opgesteld worden. Vernieuw de aanwezigheden.';
+  end if;
   return new;
 end $$;
 drop trigger if exists lineup_players_check on lineup_players;
 create trigger lineup_players_check before insert or update on lineup_players
   for each row execute function lineup_players_check();
+
+-- Eén transactie: een gewijzigde aanwezigheid mag de vorige opstelling niet wissen.
+create or replace function bewaar_opstelling(p_match_key text, p_formatie text, p_keuze jsonb) returns void
+language plpgsql security invoker set search_path = public as $$
+declare
+  v_lineup uuid;
+begin
+  if not is_actief() or not is_staf() then
+    raise exception 'Alleen bevoegde staf mag een opstelling maken.';
+  end if;
+  if p_keuze is null or jsonb_typeof(p_keuze) <> 'object' then
+    raise exception 'Ongeldige opstelling.';
+  end if;
+  insert into lineups (match_key, formatie) values (p_match_key, p_formatie)
+    on conflict (match_key) do update set formatie = excluded.formatie
+    returning id into v_lineup;
+  delete from lineup_players where lineup_id = v_lineup;
+  insert into lineup_players (lineup_id, positie, member_id)
+    select v_lineup, key, value::uuid from jsonb_each_text(p_keuze)
+    where value is not null and value <> '';
+end $$;
+revoke all on function bewaar_opstelling(text, text, jsonb) from public, anon;
+grant execute on function bewaar_opstelling(text, text, jsonb) to authenticated;
 drop trigger if exists lineups_log on lineups;
 create trigger lineups_log after insert or update or delete on lineups
   for each row execute function log_wijziging();

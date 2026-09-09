@@ -46,6 +46,15 @@ export function installeerTestgegevens() {
     if (!url.pathname.startsWith("/rest/v1/")) return antwoord({ message: "Dit ontwerpvoorbeeld gebruikt geen echte accounts." }, 400);
     const tabel = url.pathname.slice("/rest/v1/".length);
     if (request.method !== "GET") {
+      if (tabel === "rpc/bewaar_opstelling" && request.method === "POST") {
+        const waarde = await request.json();
+        const keuzes = Object.entries(waarde.p_keuze as Record<string, string | null>).filter(([, id]) => id);
+        if (keuzes.some(([, id]) => !aanwezigheden.some((a) => a.match_key === waarde.p_match_key && a.member_id === id && a.status === "aanwezig"))) return antwoord({ message: "Alleen aanwezige spelers kunnen opgesteld worden." }, 400);
+        const rij: Lineup = { id: voorbeeldLineups.find((l) => l.match_key === waarde.p_match_key)?.id ?? "voorbeeld-" + waarde.p_match_key, match_key: waarde.p_match_key, formatie: waarde.p_formatie, gemaakt_door: null, updated_at: new Date().toISOString() };
+        voorbeeldLineups = [...voorbeeldLineups.filter((l) => l.id !== rij.id), rij];
+        voorbeeldOpstelling = [...voorbeeldOpstelling.filter((p) => p.lineup_id !== rij.id), ...keuzes.map(([positie, id]) => ({ lineup_id: rij.id, positie, member_id: id! }))];
+        return antwoord(null);
+      }
       if (tabel === "lineups" && request.method === "POST") {
         const waarde = await request.json();
         const rij: Lineup = { ...waarde, id:voorbeeldLineups.find(l=>l.match_key===waarde.match_key)?.id ?? "voorbeeld-"+waarde.match_key, gemaakt_door:null, updated_at:new Date().toISOString() };
