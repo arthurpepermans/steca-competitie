@@ -1,3 +1,5 @@
+import { copyFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -9,6 +11,10 @@ function versieBestand(): Plugin {
   return {
     name: "versie-bestand",
     apply: "build",
+    writeBundle(options) {
+      const map = options.dir ?? "dist";
+      copyFileSync(resolve(map, "index.html"), resolve(map, "installeren.html"));
+    },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ versie }) });
     },

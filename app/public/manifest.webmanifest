@@ -1,6 +1,6 @@
 {
   "name": "Steca Juniors Clubapp",
-  "short_name": "Steca Clubapp",
+  "short_name": "Steca Juniors Clubapp",
   "description": "Kalender, uitslagen, klassement, aanwezigheden en opstelling van Steca Juniors",
   "start_url": "./",
   "scope": "./",
