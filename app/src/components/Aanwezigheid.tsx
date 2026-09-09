@@ -59,8 +59,8 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
     namen: spelers.filter((p) => perLid.get(p.id) === s.code),
   }));
   const zonder = spelers.filter((p) => !perLid.has(p.id));
-  // Standaard alleen de tellingen; de namen per status zijn open te klappen.
-  const blokken = [...groepen.map((g) => ({ code: g.code as string, label: g.label.replace(" ?", ""), namen: g.namen })), { code: "", label: "Nog niets", namen: zonder }];
+  // Standaard alleen de tellingen; open te klappen zijn enkel de spelers die al geantwoord hebben.
+  const blokken = groepen.map((g) => ({ code: g.code as string, label: g.label.replace(" ?", ""), namen: g.namen }));
 
   return (
     <div style={{ marginTop: 10, borderTop: "1px solid var(--rand)", paddingTop: 10 }}>
