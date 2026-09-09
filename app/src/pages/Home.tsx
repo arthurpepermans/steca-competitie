@@ -14,6 +14,7 @@ import { Aanwezigheid } from "../components/Aanwezigheid";
 import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MapsKnop } from "../components/MatchKaart";
+import { InstallatieHulp } from "../components/InstallatieHulp";
 
 export function Home() {
   const { lid } = useAuth();
@@ -31,6 +32,7 @@ export function Home() {
   return (
     <div className="home-pagina">
       <Fout tekst={matches.fout ?? klassement.fout ?? leden.fout} />
+      <InstallatieHulp open wegklikbaar />
       <div className="matchdag-kop"><h1>Matchdag</h1><span>Seizoen {volgende?.seizoen ?? eigen?.seizoen ?? "2026-2027"}</span></div>
       <div className="home-grid">
         <section className="match-blok" aria-labelledby="volgende-titel">

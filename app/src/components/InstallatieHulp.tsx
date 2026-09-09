@@ -5,11 +5,22 @@ import { DotsThreeVertical } from "@phosphor-icons/react/dist/csr/DotsThreeVerti
 
 type InstallatieEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
-export function InstallatieHulp() {
+const VERBORGEN_SLEUTEL = "steca-installatie-verborgen";
+
+/** open: meteen opengeklapt tonen. wegklikbaar: met een knop om de hulp op dit scherm niet meer te tonen. */
+export function InstallatieHulp({ open = false, wegklikbaar = false }: { open?: boolean; wegklikbaar?: boolean } = {}) {
   const [toestel, setToestel] = useState<"iphone" | "android">(() => /Android/i.test(navigator.userAgent) ? "android" : "iphone");
   const [prompt, setPrompt] = useState<InstallatieEvent | null>(null);
   const [bezig, setBezig] = useState(false);
   const [melding, setMelding] = useState("");
+  const [verborgen, setVerborgen] = useState(() => {
+    if (!wegklikbaar) return false;
+    try { return localStorage.getItem(VERBORGEN_SLEUTEL) === "1"; } catch { return false; }
+  });
+  function verberg() {
+    try { localStorage.setItem(VERBORGEN_SLEUTEL, "1"); } catch { /* Optionele voorkeur. */ }
+    setVerborgen(true);
+  }
   const [geinstalleerd, setGeinstalleerd] = useState(() => window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
   useEffect(() => {
     const beschikbaar = (event: Event) => { event.preventDefault(); setPrompt(event as InstallatieEvent); };
@@ -31,8 +42,8 @@ export function InstallatieHulp() {
     } catch { setMelding("Gebruik de stappen hieronder om de app toe te voegen."); }
     finally { setPrompt(null); setBezig(false); }
   }
-  if (geinstalleerd) return null;
-  return <details className="installatie-hulp">
+  if (geinstalleerd || verborgen) return null;
+  return <details className="installatie-hulp" open={open}>
     <summary><DeviceMobile size={27} aria-hidden="true" /><span><strong>Zet op je beginscherm</strong><small>Open Steca rechtstreeks via het app-icoon.</small></span><span className="installatie-plus" aria-hidden="true">+</span></summary>
     <div className="installatie-inhoud">
       <div className="installatie-keuze" role="group" aria-label="Kies je telefoon"><button type="button" aria-pressed={toestel === "iphone"} onClick={() => setToestel("iphone")}>iPhone</button><button type="button" aria-pressed={toestel === "android"} onClick={() => setToestel("android")}>Android</button></div>
@@ -49,6 +60,7 @@ export function InstallatieHulp() {
       {melding && <p className="klein" role="status">{melding}</p>}
       <p className="installatie-tip">Geopend vanuit WhatsApp, Facebook of Instagram? Open de link eerst in {toestel === "iphone" ? "Safari" : "Chrome"} via het menu van die app.</p>
       <p className="klein zacht">Je hoeft niets uit de App Store of Play Store te downloaden.</p>
+      {wegklikbaar && <button type="button" className="knop licht breed" onClick={verberg}>Al gedaan, niet meer tonen</button>}
     </div>
   </details>;
 }
