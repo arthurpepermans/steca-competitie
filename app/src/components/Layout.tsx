@@ -9,6 +9,7 @@ import { UsersThree } from "@phosphor-icons/react/dist/csr/UsersThree";
 import { Moon } from "@phosphor-icons/react/dist/csr/Moon";
 import { Sun } from "@phosphor-icons/react/dist/csr/Sun";
 import { useAuth } from "../lib/auth";
+import { NieuweVersie } from "./NieuweVersie";
 
 const TABS = [
   { to: "/", label: "Home", Icon: House },
@@ -52,7 +53,7 @@ export function Layout() {
           </Link>
         </div>
       </header>
-      <main id="inhoud" className="inhoud" tabIndex={-1}><Outlet /></main>
+      <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><Outlet /></main>
       <nav className="nav" aria-label="Hoofdnavigatie">
         {TABS.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => isActive ? "actief" : ""}>
