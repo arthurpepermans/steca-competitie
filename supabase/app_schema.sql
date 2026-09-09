@@ -844,3 +844,21 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.openbare_opstellingen() from public;
 grant execute on function public.openbare_opstellingen() to anon, authenticated;
+
+-- Automatisch opslaan controleert de laatst gelezen versie binnen dezelfde transactie.
+create or replace function public.bewaar_opstelling_auto(p_match_key text, p_formatie text, p_keuze jsonb, p_slotjes text[], p_verwacht timestamptz)
+returns jsonb language plpgsql security invoker set search_path = public as $$
+declare v_huidig timestamptz; v_resultaat jsonb;
+begin
+  if not is_actief() or not is_staf() then raise exception 'Alleen bevoegde staf mag een opstelling maken.'; end if;
+  perform pg_advisory_xact_lock(hashtextextended(p_match_key, 0));
+  select updated_at into v_huidig from lineups where match_key=p_match_key for update;
+  if v_huidig is distinct from p_verwacht then
+    raise exception 'Deze opstelling is ondertussen gewijzigd. Herlaad de nieuwste opstelling voordat je verder bewerkt.';
+  end if;
+  perform bewaar_opstelling_met_slotjes(p_match_key, p_formatie, p_keuze, p_slotjes);
+  select to_jsonb(l) into v_resultaat from lineups l where match_key=p_match_key;
+  return v_resultaat;
+end $$;
+revoke all on function public.bewaar_opstelling_auto(text, text, jsonb, text[], timestamptz) from public, anon;
+grant execute on function public.bewaar_opstelling_auto(text, text, jsonb, text[], timestamptz) to authenticated;

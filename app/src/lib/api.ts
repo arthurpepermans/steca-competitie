@@ -98,6 +98,10 @@ export async function bewaarOpstelling(matchKey: string, formatie: Formatie, keu
   check(await supabase.rpc("bewaar_opstelling_met_slotjes", { p_match_key: matchKey, p_formatie: formatie, p_keuze: keuze, p_slotjes: slotjes }));
 }
 
+export async function bewaarOpstellingAutomatisch(matchKey: string, formatie: Formatie, keuze: Record<string, string | null>, slotjes: string[], verwacht: string | null): Promise<Lineup> {
+  return check(await supabase.rpc("bewaar_opstelling_auto", { p_match_key: matchKey, p_formatie: formatie, p_keuze: keuze, p_slotjes: slotjes, p_verwacht: verwacht }));
+}
+
 // ----------------------------------------------------------- statistieken
 
 export async function haalStats(): Promise<MatchStat[]> {
