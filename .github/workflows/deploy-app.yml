@@ -1,6 +1,8 @@
 # Bouwt de webapp (app/) en publiceert ze op GitHub Pages.
 # Vereist twee repository variables (Settings > Secrets and variables > Actions > Variables):
 #   VITE_SUPABASE_URL en VITE_SUPABASE_ANON_KEY (de anon key is bedoeld voor de browser; rechten zitten in de database).
+# Het basispad volgt automatisch de Pages-instellingen: met een eigen domein (stecajuniors.app) bouwt de app op "/",
+# zonder eigen domein op "/steca-competitie/". Lokaal blijft "/steca-competitie/" de standaard (zie app/vite.config.ts).
 name: deploy-app
 
 on:
@@ -31,17 +33,20 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: app/package-lock.json
+      - id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - run: npm ci
       - run: npm test
       - name: Bouwen
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-          BASE_PATH: ${{ vars.BASE_PATH }}
-        run: npm run build
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+        run: |
+          echo "Basispad: $BASE_PATH (site: ${{ steps.pages.outputs.base_url }})"
+          npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: app/dist
