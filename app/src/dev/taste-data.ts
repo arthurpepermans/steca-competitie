@@ -83,7 +83,7 @@ export function installeerTestgegevens() {
     const db: Record<string, object[]> = {
       matches, standings_current: stand, members: leden, members_basis: leden.map((m) => ({ ...m, heeft_account: true })),
       teams, attendance: aanwezigheden, lineups: voorbeeldLineups, lineup_players: voorbeeldOpstelling, match_stats: [], audit_log: [],
-      sync_status: [],
+      sync_status: [], fines: [], match_vote_points: [], match_vote_counts: [], match_votes: [],
     };
     if (!(tabel in db)) return antwoord({ message: "Geen voorbeeldgegevens voor dit onderdeel." }, 400);
     let rijen = db[tabel];

@@ -573,3 +573,138 @@ drop policy if exists "sfeerbeelden verwijderen" on storage.objects;
 create policy "sfeerbeelden verwijderen" on storage.objects for delete to authenticated
   using (bucket_id = 'match-sfeerbeelden' and public.is_actief()
     and (owner_id = auth.uid()::text or public.is_admin()));
+
+-- --------------------------------------------------------------- boetepot
+
+-- Migratie 2026-09-09: boetepot.
+-- Handmatig ingevoerde boetes per speler (kaarten komen uit match_stats en staan hier niet in).
+-- Lezen: alle actieve leden. Invoeren, wijzigen en verwijderen: coach, spelercoach, verantwoordelijke of admin.
+-- Elke wijziging komt in audit_log. Plakken in de Supabase SQL Editor en op Run klikken; veilig om te herhalen.
+
+create table if not exists fines (
+  id             uuid primary key default gen_random_uuid(),
+  member_id      uuid not null references members (id) on delete cascade,
+  match_key      text references matches (match_key) on delete set null,
+  datum          date not null default current_date,
+  soort          text not null,
+  aantal         integer not null default 1 check (aantal > 0),
+  bedrag_cent    integer not null default 0 check (bedrag_cent >= 0),
+  bak_bier       integer not null default 0 check (bak_bier >= 0),
+  opmerking      text,
+  ingevoerd_door uuid references members (id),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+create index if not exists fines_member_idx on fines (member_id, datum desc);
+
+create or replace function fines_stamp() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if TG_OP = 'INSERT' then
+    new.ingevoerd_door := coalesce(new.ingevoerd_door, my_member_id());
+    new.created_at := now();
+  end if;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists fines_stamp on fines;
+create trigger fines_stamp before insert or update on fines
+  for each row execute function fines_stamp();
+drop trigger if exists fines_log on fines;
+create trigger fines_log after insert or update or delete on fines
+  for each row execute function log_wijziging();
+
+alter table fines enable row level security;
+drop policy if exists "boetes lezen" on fines;
+create policy "boetes lezen" on fines for select to authenticated using (is_actief());
+drop policy if exists "boetes beheren" on fines;
+create policy "boetes beheren" on fines for all to authenticated using (is_staf()) with check (is_staf());
+
+drop policy if exists "logboek lezen" on audit_log;
+create policy "logboek lezen" on audit_log for select to authenticated
+  using (is_admin() or (is_staf() and tabel in ('match_stats', 'lineups', 'lineup_players', 'attendance', 'fines')));
+
+-- --------------------------------------------------------------- junior van de match
+
+-- Migratie 2026-09-09: Junior van de match (stemming per match) en Junior d'or (seizoen).
+-- Wie op een gespeelde match als aanwezig stond, kiest de beste drie spelers van die match:
+-- 3, 2 en 1 punt. Je kunt niet op jezelf stemmen en alleen op spelers die aanwezig waren.
+-- Eigen stem is alleen zichtbaar voor de stemmer (en admins); iedereen ziet de opgetelde punten.
+-- Plakken in de Supabase SQL Editor en op Run klikken; veilig om te herhalen.
+
+create table if not exists match_votes (
+  match_key  text not null references matches (match_key) on delete cascade,
+  voter_id   uuid not null references members (id) on delete cascade,
+  eerste     uuid not null references members (id) on delete cascade,
+  tweede     uuid not null references members (id) on delete cascade,
+  derde      uuid not null references members (id) on delete cascade,
+  updated_at timestamptz not null default now(),
+  primary key (match_key, voter_id),
+  check (eerste <> tweede and eerste <> derde and tweede <> derde),
+  check (voter_id <> eerste and voter_id <> tweede and voter_id <> derde)
+);
+
+-- Geldigheid van een stembrief: match gespeeld, stemmer aanwezig, alle drie de gekozen spelers aanwezig.
+create or replace function stem_geldig(p_match_key text, p_eerste uuid, p_tweede uuid, p_derde uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select is_actief()
+    and exists (select 1 from matches m where m.match_key = p_match_key and m.status = 'gespeeld')
+    and exists (select 1 from attendance a where a.match_key = p_match_key and a.member_id = my_member_id() and a.status = 'aanwezig')
+    and (select count(*) from attendance a where a.match_key = p_match_key and a.status = 'aanwezig'
+           and a.member_id in (p_eerste, p_tweede, p_derde)) = 3
+    and my_member_id() not in (p_eerste, p_tweede, p_derde)
+    and p_eerste <> p_tweede and p_eerste <> p_derde and p_tweede <> p_derde;
+$$;
+revoke all on function stem_geldig(text, uuid, uuid, uuid) from public, anon;
+grant execute on function stem_geldig(text, uuid, uuid, uuid) to authenticated;
+
+create or replace function match_votes_stamp() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists match_votes_stamp on match_votes;
+create trigger match_votes_stamp before insert or update on match_votes
+  for each row execute function match_votes_stamp();
+drop trigger if exists match_votes_log on match_votes;
+create trigger match_votes_log after insert or update or delete on match_votes
+  for each row execute function log_wijziging();
+
+alter table match_votes enable row level security;
+drop policy if exists "eigen stem lezen" on match_votes;
+create policy "eigen stem lezen" on match_votes for select to authenticated
+  using (voter_id = my_member_id() or is_admin());
+drop policy if exists "stem uitbrengen" on match_votes;
+create policy "stem uitbrengen" on match_votes for insert to authenticated
+  with check (voter_id = my_member_id() and stem_geldig(match_key, eerste, tweede, derde));
+drop policy if exists "stem wijzigen" on match_votes;
+create policy "stem wijzigen" on match_votes for update to authenticated
+  using (voter_id = my_member_id())
+  with check (voter_id = my_member_id() and stem_geldig(match_key, eerste, tweede, derde));
+drop policy if exists "stem intrekken" on match_votes;
+create policy "stem intrekken" on match_votes for delete to authenticated
+  using (voter_id = my_member_id());
+
+-- Opgetelde punten per match en speler, zonder te tonen wie op wie stemde.
+-- 'stemmen' = aantal stembrieven waarop de speler voorkomt.
+create or replace view match_vote_points as
+  select s.match_key, s.member_id, sum(s.punten)::int as punten, count(*)::int as stemmen
+  from (
+    select match_key, eerste as member_id, 3 as punten from match_votes
+    union all select match_key, tweede, 2 from match_votes
+    union all select match_key, derde, 1 from match_votes
+  ) s
+  where is_actief()
+  group by s.match_key, s.member_id;
+revoke all on match_vote_points from anon;
+grant select on match_vote_points to authenticated;
+
+-- Aantal stemmers per match.
+create or replace view match_vote_counts as
+  select match_key, count(*)::int as stemmers
+  from match_votes
+  where is_actief()
+  group by match_key;
+revoke all on match_vote_counts from anon;
+grant select on match_vote_counts to authenticated;

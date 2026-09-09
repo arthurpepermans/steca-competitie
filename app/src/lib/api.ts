@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import type {
   Aanwezigheid24u, AanwezigheidStatus, Attendance, AuditEntry, Formatie, Lineup, LineupPlayer,
-  Match, MatchStat, Member, MemberBasis, Standing, SyncStatus, Team,
+  Fine, Match, MatchStat, MatchVote, Member, MemberBasis, Standing, SyncStatus, Team, VoteCount, VotePoints,
 } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -122,4 +122,45 @@ export async function haalLogboek(tabel: string, rijPrefix: string): Promise<Aud
   return check(
     await supabase.from("audit_log").select("*").eq("tabel", tabel).like("rij_id", `${rijPrefix}%`).order("op", { ascending: false }).limit(200),
   );
+}
+
+// ---------------------------------------------------------------- boetepot
+
+export async function haalBoetes(): Promise<Fine[]> {
+  return check(await supabase.from("fines").select("*").order("datum", { ascending: false }));
+}
+
+export async function voegBoeteToe(boete: Omit<Fine, "id" | "ingevoerd_door" | "created_at" | "updated_at">): Promise<void> {
+  check(await supabase.from("fines").insert(boete));
+}
+
+export async function verwijderBoete(id: string): Promise<void> {
+  check(await supabase.from("fines").delete().eq("id", id));
+}
+
+// ---------------------------------------------------------------- junior van de match
+
+export async function haalStemPunten(): Promise<VotePoints[]> {
+  return check(await supabase.from("match_vote_points").select("*"));
+}
+
+export async function haalStemmers(): Promise<VoteCount[]> {
+  return check(await supabase.from("match_vote_counts").select("*"));
+}
+
+/** Alleen de eigen stembrieven (RLS). */
+export async function haalMijnStemmen(): Promise<MatchVote[]> {
+  return check(await supabase.from("match_votes").select("*"));
+}
+
+export async function stem(matchKey: string, eerste: string, tweede: string, derde: string): Promise<void> {
+  const lid = check<Member | null>(await supabase.rpc("mijn_lid"));
+  if (!lid) throw new Error("Geen lid gevonden bij dit account.");
+  check(await supabase.from("match_votes").upsert({ match_key: matchKey, voter_id: lid.id, eerste, tweede, derde }, { onConflict: "match_key,voter_id" }));
+}
+
+export async function trekStemIn(matchKey: string): Promise<void> {
+  const lid = check<Member | null>(await supabase.rpc("mijn_lid"));
+  if (!lid) throw new Error("Geen lid gevonden bij dit account.");
+  check(await supabase.from("match_votes").delete().eq("match_key", matchKey).eq("voter_id", lid.id));
 }

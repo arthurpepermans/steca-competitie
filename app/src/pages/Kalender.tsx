@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { haalAanwezigheden, haalLedenBasis, haalMatches, haalTeams } from "../lib/api";
+import { haalAanwezigheden, haalLedenBasis, haalMatches, haalMijnStemmen, haalStemPunten, haalStemmers, haalTeams } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum } from "../lib/datum";
@@ -9,6 +9,7 @@ import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MatchKaart } from "../components/MatchKaart";
 import { Sfeerbeelden } from "../components/Sfeerbeelden";
+import { JuniorStemming } from "../components/Junior";
 
 export function Kalender() {
   const { lid } = useAuth();
@@ -19,6 +20,10 @@ export function Kalender() {
   const teams = useAsync(haalTeams);
   const leden = useAsync(haalLedenBasis);
   const aanw = useAsync(haalAanwezigheden);
+  const stemPunten = useAsync(haalStemPunten);
+  const stemmers = useAsync(haalStemmers);
+  const mijnStemmen = useAsync(haalMijnStemmen);
+  const herlaadStemmen = async () => { await Promise.all([stemPunten.herlaad(), stemmers.herlaad(), mijnStemmen.herlaad()]); };
 
   if (matches.laden || teams.laden || leden.laden) return <Laden />;
   const reeks = teams.data?.find((t) => t.ploegid === EIGEN_PLOEGID)?.reeks ?? "";
@@ -57,6 +62,18 @@ export function Kalender() {
                   isStaf={r.isStaf}
                   isAdmin={r.isAdmin}
                   onGewijzigd={aanw.herlaad}
+                />
+              )}
+              {isEigen(m) && m.status === "gespeeld" && (
+                <JuniorStemming
+                  match={m}
+                  spelers={spelers}
+                  aanwezigheden={aanw.data ?? []}
+                  punten={stemPunten.data ?? []}
+                  stemmers={stemmers.data ?? []}
+                  mijnStem={(mijnStemmen.data ?? []).find((v) => v.match_key === m.match_key) ?? null}
+                  eigenLidId={lid?.id ?? null}
+                  onGewijzigd={herlaadStemmen}
                 />
               )}
               {isEigen(m) && <Sfeerbeelden matchKey={m.match_key} />}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { haalKlassement, haalLedenBasis, haalMatches, haalStats } from "../lib/api";
+import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalStemmers } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander } from "../lib/datum";
@@ -9,6 +9,8 @@ import { Klassementstabel } from "../components/Klassementstabel";
 import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { StatsInvoer } from "../components/StatsInvoer";
+import { Boetepot } from "../components/Boetepot";
+import { JuniorDor } from "../components/Junior";
 
 const KOLOMMEN: { veld: keyof Totalen; label: string }[] = [
   { veld: "goals", label: "Topschutter" },
@@ -22,7 +24,7 @@ const KOLOMMEN: { veld: keyof Totalen; label: string }[] = [
 export function Klassement() {
   const { lid } = useAuth();
   const r = rechten(lid);
-  const [tab, setTab] = useState<"klassement" | "stats">("klassement");
+  const [tab, setTab] = useState<"klassement" | "stats" | "boetes" | "junior">("klassement");
   const [reeks, setReeks] = useState<string | null>(null);
   const [sorteer, setSorteer] = useState<keyof Totalen>("goals");
   const [invoerMatch, setInvoerMatch] = useState<string>("");
@@ -30,8 +32,11 @@ export function Klassement() {
   const matches = useAsync(haalMatches);
   const leden = useAsync(haalLedenBasis);
   const stats = useAsync(haalStats);
+  const boetes = useAsync(haalBoetes);
+  const stemPunten = useAsync(haalStemPunten);
+  const stemmers = useAsync(haalStemmers);
 
-  if (klassement.laden || matches.laden || leden.laden || stats.laden) return <Laden />;
+  if (klassement.laden || matches.laden || leden.laden || stats.laden || boetes.laden || stemPunten.laden) return <Laden />;
   const rijen = klassement.data ?? [];
   const eigenReeks = rijen.find((s) => s.ploegid === EIGEN_PLOEGID)?.reeks ?? rijen[0]?.reeks ?? "";
   const reeksen = [...new Set(rijen.map((s) => s.reeks))].sort();
@@ -45,10 +50,12 @@ export function Klassement() {
 
   return (
     <>
-      <Fout tekst={klassement.fout ?? matches.fout ?? stats.fout} />
+      <Fout tekst={klassement.fout ?? matches.fout ?? stats.fout ?? boetes.fout ?? stemPunten.fout} />
       <div className="tabs">
         <button className={tab === "klassement" ? "actief" : ""} onClick={() => setTab("klassement")}>Klassement</button>
         <button className={tab === "stats" ? "actief" : ""} onClick={() => setTab("stats")}>Statistieken</button>
+        <button className={tab === "boetes" ? "actief" : ""} onClick={() => setTab("boetes")}>Boetepot</button>
+        <button className={tab === "junior" ? "actief" : ""} onClick={() => setTab("junior")}>Junior d'or</button>
       </div>
 
       {tab === "klassement" && (
@@ -102,6 +109,14 @@ export function Klassement() {
             </div>
           )}
         </>
+      )}
+
+      {tab === "boetes" && (
+        <Boetepot fines={boetes.data ?? []} stats={stats.data ?? []} matches={eigenMatches} spelers={spelers} ledenNamen={ledenNamen} eigenLidId={lid?.id ?? null} isStaf={r.isStaf} onGewijzigd={boetes.herlaad} />
+      )}
+
+      {tab === "junior" && (
+        <JuniorDor matches={eigenMatches} punten={stemPunten.data ?? []} stemmers={stemmers.data ?? []} ledenNamen={ledenNamen} eigenLidId={lid?.id ?? null} />
       )}
     </>
   );

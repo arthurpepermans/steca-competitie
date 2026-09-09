@@ -146,3 +146,42 @@ export type Aanwezigheid24u = {
   status: AanwezigheidStatus;
   gezet_op: string;
 };
+
+export type Fine = {
+  id: string;
+  member_id: string;
+  match_key: string | null;
+  datum: string; // 'JJJJ-MM-DD'
+  soort: string; // code uit BOETE_SOORTEN
+  aantal: number;
+  bedrag_cent: number;
+  bak_bier: number;
+  opmerking: string | null;
+  ingevoerd_door: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+/** Stembrief van één lid voor één match: beste drie spelers. */
+export type MatchVote = {
+  match_key: string;
+  voter_id: string;
+  eerste: string;
+  tweede: string;
+  derde: string;
+  updated_at?: string;
+};
+
+/** Opgetelde punten per match en speler (view match_vote_points). */
+export type VotePoints = {
+  match_key: string;
+  member_id: string;
+  punten: number;
+  stemmen: number;
+};
+
+/** Aantal stemmers per match (view match_vote_counts). */
+export type VoteCount = {
+  match_key: string;
+  stemmers: number;
+};
