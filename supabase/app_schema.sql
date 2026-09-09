@@ -793,3 +793,21 @@ alter table public.drive_connection enable row level security;
 alter table public.drive_oauth_states enable row level security;
 revoke all on public.drive_connection, public.drive_oauth_states from public, anon, authenticated;
 grant all on public.drive_connection, public.drive_oauth_states to service_role;
+
+-- Metadata voor privébeelden in de gedeelde Google Drive. Alleen de Edge Function beheert deze tabel.
+create table if not exists public.drive_media (
+  id uuid primary key,
+  match_key text not null references public.matches(match_key),
+  owner_id uuid references auth.users(id) on delete set null,
+  drive_id text unique,
+  name text not null,
+  mime_type text not null,
+  bytes bigint not null check(bytes > 0 and bytes <= 52428800),
+  status text not null check(status in ('pending', 'ready', 'deleted')),
+  created_at timestamptz not null default now(),
+  check(status <> 'ready' or drive_id is not null)
+);
+create index if not exists drive_media_album on public.drive_media(match_key, status, created_at desc, id);
+alter table public.drive_media enable row level security;
+revoke all on public.drive_media from public, anon, authenticated;
+grant all on public.drive_media to service_role;

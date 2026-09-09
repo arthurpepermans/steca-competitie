@@ -54,7 +54,7 @@ function Album({ matchKey }: { matchKey: string }) {
       const ongeldig = controleerMedia(files[i]);
       if (ongeldig) { fouten.push(`${files[i].name}: ${ongeldig}`); continue; }
       try { await uploadSfeerbeeld(matchKey, files[i]); gelukt++; }
-      catch { fouten.push(`${files[i].name}: upload mislukt. Controleer je verbinding en probeer dit bestand opnieuw.`); }
+      catch (e) { fouten.push(`${files[i].name}: ${e instanceof Error ? e.message : "Upload mislukt. Probeer opnieuw."}`); }
     }
     if (!actief.current) return;
     setMelding(`${gelukt} ${gelukt === 1 ? "bestand toegevoegd" : "bestanden toegevoegd"}.`);

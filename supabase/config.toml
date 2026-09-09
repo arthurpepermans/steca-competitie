@@ -1,3 +1,7 @@
 [functions.drive-connect]
 # Google-callback heeft geen Supabase-JWT. POST-acties controleren auth en adminrecht zelf.
 verify_jwt = false
+
+[functions.drive-media]
+# POST valideert lidmaatschap; GET vereist een ondertekende tijdelijke beeldlink.
+verify_jwt = false
