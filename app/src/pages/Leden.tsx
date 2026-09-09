@@ -21,9 +21,10 @@ export function Leden() {
   const [functie, setFunctie] = useState<string>("");
   const [toevoegen, setToevoegen] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
-  const leden = useAsync<MemberBasis[]>(() => (r.zietGegevens ? haalLeden() : haalLedenBasis()), [r.zietGegevens]);
+  const leden = useAsync<Array<Member | MemberBasis>>(() => (r.zietGegevens ? haalLeden() : haalLedenBasis()), [r.zietGegevens]);
   if (leden.laden) return <Laden />;
   const alle = leden.data ?? [];
+  const heeftAccount = (m: Member | MemberBasis) => ("heeft_account" in m ? m.heeft_account : m.user_id !== null);
   const wachtend = alle.filter((m) => m.status === "wacht_op_goedkeuring");
   const lijst = alle
     .filter((m) => m.status !== "wacht_op_goedkeuring" || r.isAdmin)
@@ -71,7 +72,7 @@ export function Leden() {
                 <strong>{m.naam}</strong>{m.is_hoofdadmin ? " ★" : m.is_admin ? " ☆" : ""}
                 <br />
                 <span className="zacht klein">
-                  {FUNCTIE_LABEL[m.functie]}{m.status !== "actief" ? ` · ${STATUS_LABEL[m.status]}` : ""}{!m.heeft_account ? " · geen account" : ""}
+                  {FUNCTIE_LABEL[m.functie]}{m.status !== "actief" ? ` · ${STATUS_LABEL[m.status]}` : ""}{!heeftAccount(m) ? " · geen account" : ""}
                 </span>
               </span>
               <span>›</span>
