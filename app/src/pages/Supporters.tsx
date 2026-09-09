@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { Home } from "./Home";
+import { OpenbareOpstelling } from "../components/OpenbareOpstelling";
 import { haalSupportersData } from "../lib/supporters";
 import { useAsync } from "../lib/useAsync";
 import { isEigen, sorteerOpDatum } from "../lib/datum";
@@ -11,7 +13,9 @@ import { OpenbareStatistieken } from "../components/OpenbareStatistieken";
 
 export function Supporters() {
   const info = useAsync(haalSupportersData);
-  const [tab, setTab] = useState("Kalender");
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") ?? "Home";
+  const setTab = (naam: string) => setParams({ tab: naam });
   const [ranglijst, setRanglijst] = useState("Ploegenklassement");
   const [reeks, setReeks] = useState<string | null>(null);
   const data = info.data;
@@ -27,13 +31,15 @@ export function Supporters() {
     </header>
     <main className="inhoud supporters-inhoud">
       <h1>Volg Steca Juniors</h1>
-      <p className="zacht">Wedstrijden, uitslagen en de weg naar het terrein.</p>
+      <p className="zacht">Matchdag, opstellingen, uitslagen en de weg naar het terrein.</p>
       <nav className="supporters-tabs" aria-label="Supportersnavigatie">
-        {["Kalender", "Klassement", "Ploegen"].map((naam) => <button type="button" key={naam} className={`knop ${tab === naam ? "" : "licht"}`} aria-pressed={tab === naam} onClick={() => setTab(naam)}>{naam}</button>)}
+        {["Home", "Kalender", "Klassement", "Opstelling", "Ploegen"].map((naam) => <button type="button" key={naam} className={`knop ${tab === naam ? "" : "licht"}`} aria-pressed={tab === naam} onClick={() => setTab(naam)}>{naam}</button>)}
       </nav>
       {info.laden && <Laden />}
       <Fout tekst={info.fout} />
       {info.fout && <button className="knop" onClick={() => window.location.reload()}>Opnieuw proberen</button>}
+      {data && tab === "Home" && <Home openbaar={data} />}
+      {data && tab === "Opstelling" && <OpenbareOpstelling matches={matches} />}
       {data && tab === "Kalender" && <>
         <h2>Volgende wedstrijden</h2>
         {!komende.length && <p>Er zijn nog geen wedstrijden gepland.</p>}

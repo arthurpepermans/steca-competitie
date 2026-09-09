@@ -20,3 +20,11 @@ export async function haalSupportersData(): Promise<SupportersData> {
   if (error) throw new Error("De wedstrijdinformatie kon niet geladen worden. Probeer opnieuw.");
   return data as SupportersData;
 }
+
+// Opstellingen voor bezoekers bevatten alleen de formatie en de namen per positie.
+export type OpenbareOpstelling = { match_key: string; formatie: import("./types").Formatie; spelers: { positie: string; naam: string }[] };
+export async function haalOpenbareOpstellingen(): Promise<OpenbareOpstelling[]> {
+  const { data, error } = await supabase.rpc("openbare_opstellingen");
+  if (error) throw new Error("De opstellingen konden niet geladen worden.");
+  return data as OpenbareOpstelling[];
+}

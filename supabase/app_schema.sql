@@ -829,3 +829,18 @@ begin
 end $$;
 revoke all on function public.bewaar_opstelling_met_slotjes(text, text, jsonb, text[]) from public, anon;
 grant execute on function public.bewaar_opstelling_met_slotjes(text, text, jsonb, text[]) to authenticated;
+
+-- Supporters mogen de opgeslagen veld- en bankindeling bekijken, zonder bewerkrechten.
+create or replace function public.openbare_opstellingen() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'match_key', l.match_key, 'formatie', l.formatie,
+    'spelers', coalesce((select jsonb_agg(jsonb_build_object('positie', p.positie, 'naam', m.naam) order by p.positie)
+      from public.lineup_players p join public.members m on m.id=p.member_id
+      where p.lineup_id=l.id), '[]'::jsonb)
+  ) order by l.match_key), '[]'::jsonb)
+  from public.lineups l join public.matches w on w.match_key=l.match_key
+  where w.thuis_id=152 or w.uit_id=152;
+$$;
+revoke all on function public.openbare_opstellingen() from public;
+grant execute on function public.openbare_opstellingen() to anon, authenticated;
