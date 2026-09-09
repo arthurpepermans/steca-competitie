@@ -14,6 +14,7 @@ function versieBestand(): Plugin {
     writeBundle(options) {
       const map = options.dir ?? "dist";
       copyFileSync(resolve(map, "index.html"), resolve(map, "installeren.html"));
+      copyFileSync(resolve(map, "index.html"), resolve(map, "clubapp.html"));
     },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ versie }) });
