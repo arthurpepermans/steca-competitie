@@ -27,6 +27,21 @@ seizoen 2026-2027). Alles in het Nederlands, ook code-commentaar en commitberich
   speelt = functie in (speler, spelercoach, verantwoordelijke).
 - Elke wijziging aan members, attendance, lineups, lineup_players en match_stats komt in `audit_log`.
 
+## Eerste keer opstarten (nieuwe medewerker)
+
+Als iemand vraagt om te "opstarten" of "beginnen", loop dan deze stappen af en controleer ze:
+
+1. `cd app && npm install` (Node 22 of nieuwer).
+2. Maak `app/.env.local` op basis van `app/.env.example`. `VITE_SUPABASE_URL` staat al in het voorbeeld.
+   De `VITE_SUPABASE_ANON_KEY` moet de gebruiker zelf kopiëren uit Supabase (Project Settings > API,
+   "anon public") en in het bestand plakken; sleutels nooit zelf in bestanden zetten of in de chat vragen.
+3. `npm test` en `npm run build` moeten slagen. `npm run dev` start de app op http://localhost:5173/steca-competitie/.
+4. Voor het Python-deel (alleen nodig bij werk aan de sync): `pip install -e ".[dev]"` in de repo-root en
+   `python -m pytest`. Een `.env` met de service-role key is niet nodig voor de tests; een echte sync
+   gebeurt via GitHub Actions.
+5. Werk altijd op een eigen branch (`git switch -c naam-van-de-wijziging`), commit, push en open een
+   pull request op GitHub. Nooit rechtstreeks naar `main` pushen.
+
 ## Werkwijze
 
 - Werk op een branch en maak een pull request: elke push naar `main` in `app/` gaat meteen live.
