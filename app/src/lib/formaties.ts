@@ -75,3 +75,19 @@ export function veranderFormatie(van: Formatie, naar: Formatie, keuze: Opstellin
   for (const p of posities) nieuw[p] = behouden.has(p) ? keuze[p] : over.shift() ?? null;
   return nieuw;
 }
+
+/** HET RAD: een willekeurige opstelling uit de aanwezige spelers. Elf in de basis, de rest (max. vier) op de bank.
+ *  Met minder dan elf spelers komt er niets uit. `random` is vervangbaar voor tests. */
+export function radOpstelling(formatie: Formatie, aanwezig: string[], random: () => number = Math.random): OpstellingKeuze {
+  const basis = basisPosities(formatie);
+  if (aanwezig.length < basis.length) return {};
+  const pot = [...aanwezig];
+  for (let i = pot.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [pot[i], pot[j]] = [pot[j], pot[i]];
+  }
+  const keuze: OpstellingKeuze = {};
+  for (const p of basis) keuze[p] = pot.shift() ?? null;
+  for (const p of BANK) keuze[p] = pot.shift() ?? null;
+  return keuze;
+}

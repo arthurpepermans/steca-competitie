@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { bewaarOpstelling, haalAanwezigheden, haalLedenBasis, haalMatches, haalOpstellingSpelers, haalOpstellingen } from "../lib/api";
 import { aanwezigeSpelerIds, nietAanwezigeKeuzes } from "../lib/opstellingAanwezigheid";
 import { Aanwezigheid } from "../components/Aanwezigheid";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander, vandaagIso, volgendeMatch } from "../lib/datum";
-import { BANK, FORMATIE_KEUZES, STANDAARD_FORMATIE, allePosities, basisPosities, controleerOpstelling, positieLabel, veranderFormatie, type OpstellingKeuze } from "../lib/formaties";
+import { BANK, FORMATIE_KEUZES, STANDAARD_FORMATIE, allePosities, basisPosities, controleerOpstelling, positieLabel, radOpstelling, veranderFormatie, type OpstellingKeuze } from "../lib/formaties";
 import { foutTekst, useAsync } from "../lib/useAsync";
 import { Fout, Laden } from "../components/Layout";
 import { Veld } from "../components/Veld";
@@ -26,6 +26,9 @@ export function Opstelling() {
   const [keuze, setKeuze] = useState<OpstellingKeuze>({});
   const [fout, setFout] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [radDraait, setRadDraait] = useState(false);
+  const radTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (radTimer.current) window.clearInterval(radTimer.current); }, []);
 
   const eigenMatches = sorteerOpDatum((matches.data ?? []).filter(isEigen));
   const volgende = volgendeMatch(matches.data ?? []);
@@ -86,6 +89,27 @@ export function Opstelling() {
     }
   }
 
+  /** HET RAD: laat de namen een seconde rondtollen en zet dan een willekeurige opstelling uit de aanwezige spelers. */
+  function draaiRad(f: Formatie = formatie) {
+    if (radDraait || beschikbaar.length < basisPosities(f).length) return;
+    const ids = beschikbaar.map((p) => p.id);
+    setOk(null);
+    setFout(null);
+    setRadDraait(true);
+    let stap = 0;
+    radTimer.current = window.setInterval(() => {
+      stap += 1;
+      setKeuze(radOpstelling(f, ids));
+      if (stap >= 10) {
+        if (radTimer.current) window.clearInterval(radTimer.current);
+        radTimer.current = null;
+        setRadDraait(false);
+      }
+    }, 90);
+  }
+
+  const radKanDraaien = beschikbaar.length >= basisPosities(formatie).length;
+
   function wisselFormatie(f: Formatie) {
     setKeuze(veranderFormatie(formatie, f, keuze));
     setFormatie(f);
@@ -124,7 +148,12 @@ export function Opstelling() {
           <div className="kaart midden">
             <Veld formatie={STANDAARD_FORMATIE} namen={{}} />
             <p>Opstelling voor {(match.datum ?? "") >= vandaag && match.match_key === volgende?.match_key ? "de volgende match" : "deze match"} nog niet gemaakt.</p>
-            {r.isStaf && <button type="button" className="knop" onClick={() => setBewerken(true)}>Opstelling maken</button>}
+            {r.isStaf && (
+              <div className="knoppen" style={{ justifyContent: "center" }}>
+                <button type="button" className="knop" onClick={() => setBewerken(true)}>Opstelling maken</button>
+                <button type="button" className="knop licht" disabled={!radKanDraaien} onClick={() => { setBewerken(true); draaiRad(); }}>HET RAD</button>
+              </div>
+            )}
           </div>
         )
       )}
@@ -137,6 +166,12 @@ export function Opstelling() {
             <select id="opstelling-formatie" value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
               {FORMATIE_KEUZES.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
+          </div>
+          <div className="rij" style={{ marginBottom: 12 }}>
+            <button type="button" className="knop" onClick={() => draaiRad()} disabled={radDraait || !radKanDraaien} aria-live="polite">
+              {radDraait ? "HET RAD DRAAIT…" : "HET RAD"}
+            </button>
+            <span className="klein zacht">{radKanDraaien ? "Willekeurige opstelling uit de aanwezige spelers." : `Minstens ${basisPosities(formatie).length} aanwezige spelers nodig, nu ${beschikbaar.length}.`}</span>
           </div>
           {[...basisPosities(formatie), ...BANK].map((pos) => {
             const gekozenElders = new Set(Object.entries(keuze).filter(([p, id]) => p !== pos && id).map(([, id]) => id));
