@@ -1,3 +1,4 @@
+import { ZoomGedrag } from "../components/ZoomGedrag";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, Route, Routes } from "react-router-dom";
@@ -15,6 +16,7 @@ import "../styles.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <ZoomGedrag />
     <AuthContext.Provider value={{ klaar: true, lid: voorbeeldLid, session: null, fout: null, herlaad: async () => {} }}>
       <div className="voorbeeld-balk">Ontwerpvoorbeeld met testgegevens. Aanwezigheid en opstelling worden tijdelijk bewaard.</div>
       <HashRouter><Routes><Route element={<Layout />}>
