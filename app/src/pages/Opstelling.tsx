@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { LockSimple } from "@phosphor-icons/react/dist/csr/LockSimple";
+import { LockSimpleOpen } from "@phosphor-icons/react/dist/csr/LockSimpleOpen";
 import { bewaarOpstelling, haalAanwezigheden, haalLedenBasis, haalMatches, haalOpstellingSpelers, haalOpstellingen } from "../lib/api";
 import { aanwezigeSpelerIds, nietAanwezigeKeuzes } from "../lib/opstellingAanwezigheid";
 import { Aanwezigheid } from "../components/Aanwezigheid";
@@ -24,6 +26,7 @@ export function Opstelling() {
   const [bewerken, setBewerken] = useState(false);
   const [formatie, setFormatie] = useState<Formatie>(STANDAARD_FORMATIE);
   const [keuze, setKeuze] = useState<OpstellingKeuze>({});
+  const [slotjes, setSlotjes] = useState<string[]>([]);
   const [fout, setFout] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [radDraait, setRadDraait] = useState(false);
@@ -42,6 +45,10 @@ export function Opstelling() {
 
   useEffect(() => {
     let actief = true;
+    if (radTimer.current) window.clearInterval(radTimer.current);
+    radTimer.current = null;
+    setRadDraait(false);
+    setSlotjes([]);
     setBewerken(false);
     setOk(null);
     setFout(null);
@@ -58,6 +65,7 @@ export function Opstelling() {
       setSpelersVanLineup(rows);
       setFormatie(lineup.formatie);
       setKeuze(Object.fromEntries(rows.map((x) => [x.positie, x.member_id])));
+      setSlotjes(rows.filter(x => x.vergrendeld).map(x => x.positie));
     }).catch((e) => { if (actief) setFout(foutTekst(e)); })
       .finally(() => { if (actief) setSpelersLaden(false); });
     return () => { actief = false; };
@@ -77,7 +85,7 @@ export function Opstelling() {
     setOpslaanBezig(true);
     try {
       const geldige = Object.fromEntries(allePosities(formatie).map((p) => [p, keuze[p] ?? null]));
-      await bewaarOpstelling(match.match_key, formatie, geldige);
+      await bewaarOpstelling(match.match_key, formatie, geldige, slotjes);
       await lineups.herlaad();
       setBewerken(false);
       setOk("Opstelling opgeslagen.");
@@ -91,15 +99,16 @@ export function Opstelling() {
 
   /** HET RAD: laat de namen een seconde rondtollen en zet dan een willekeurige opstelling uit de aanwezige spelers. */
   function draaiRad(f: Formatie = formatie) {
-    if (radDraait || beschikbaar.length < basisPosities(f).length) return;
+    if (radDraait || !radKanDraaien) return;
     const ids = beschikbaar.map((p) => p.id);
+    const vast = Object.fromEntries(slotjes.map(pos => [pos, keuze[pos]]));
     setOk(null);
     setFout(null);
     setRadDraait(true);
     let stap = 0;
     radTimer.current = window.setInterval(() => {
       stap += 1;
-      setKeuze(radOpstelling(f, ids));
+      setKeuze(radOpstelling(f, ids, Math.random, vast));
       if (stap >= 10) {
         if (radTimer.current) window.clearInterval(radTimer.current);
         radTimer.current = null;
@@ -108,9 +117,13 @@ export function Opstelling() {
     }, 90);
   }
 
-  const radKanDraaien = beschikbaar.length >= basisPosities(formatie).length;
+  const radNodig = basisPosities(formatie).length + slotjes.filter(pos => BANK.includes(pos)).length;
+  const radKanDraaien = beschikbaar.length >= radNodig && slotjes.every(pos => keuze[pos] && beschikbaar.some(p => p.id === keuze[pos]));
 
   function wisselFormatie(f: Formatie) {
+    const verdwenen = slotjes.filter(pos => !allePosities(f).includes(pos));
+    if (verdwenen.length) { setFout(`Ontgrendel eerst ${verdwenen.map(positieLabel).join(", ")}. Die positie bestaat niet in ${f}.`); return; }
+    setFout(null);
     setKeuze(veranderFormatie(formatie, f, keuze));
     setFormatie(f);
   }
@@ -123,7 +136,7 @@ export function Opstelling() {
       {ok && <div className="melding ok">{ok}</div>}
       <div className="veld">
         <label htmlFor="opstelling-match">Match</label>
-        <select id="opstelling-match" disabled={opslaanBezig} value={gekozenKey ?? ""} onChange={(e) => setMatchKey(e.target.value)}>
+        <select id="opstelling-match" disabled={opslaanBezig || radDraait} value={gekozenKey ?? ""} onChange={(e) => setMatchKey(e.target.value)}>
           {eigenMatches.map((m) => (
             <option key={m.match_key} value={m.match_key}>
               {fmtDatum(m.datum)} · {tegenstander(m)}{(lineups.data ?? []).some((l) => l.match_key === m.match_key) ? " ✓" : ""}{m.match_key === volgende?.match_key ? " (volgende)" : ""}
@@ -141,7 +154,7 @@ export function Opstelling() {
               <span className="zacht">Formatie {lineup.formatie}{lineup.gemaakt_door ? ` · door ${namen.get(lineup.gemaakt_door) ?? (leden.data ?? []).find((m) => m.id === lineup.gemaakt_door)?.naam ?? "staf"}` : ""}</span>
               {r.isStaf && <button type="button" className="knop klein" disabled={spelersLaden || Boolean(fout)} onClick={() => setBewerken(true)}>Bewerken</button>}
             </div>
-            <Veld formatie={lineup.formatie} namen={veldNamen} />
+            <Veld formatie={lineup.formatie} namen={veldNamen} slotjes={spelersVanLineup.filter(p => p.vergrendeld).map(p => p.positie)} />
             {r.isStaf && !spelersLaden && spelersVanLineup.some((p) => !aanwezig.has(p.member_id)) && <p className="melding waarschuwing">Deze opstelling bevat spelers die niet op aanwezig staan. Controleer de aanwezigheden en pas de opstelling aan.</p>}
           </>
         ) : (
@@ -160,36 +173,40 @@ export function Opstelling() {
 
       {match && bewerken && r.isStaf && (
         <div className="kaart">
-          <Veld formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} compact />
+          <Veld formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} slotjes={slotjes} compact />
           <div className="veld">
             <label htmlFor="opstelling-formatie">Formatie</label>
-            <select id="opstelling-formatie" value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
+            <select id="opstelling-formatie" disabled={radDraait || opslaanBezig} value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
               {FORMATIE_KEUZES.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
           <div className="rij" style={{ marginBottom: 12 }}>
-            <button type="button" className="knop" onClick={() => draaiRad()} disabled={radDraait || !radKanDraaien} aria-live="polite">
+            <button type="button" className="knop" onClick={() => draaiRad()} disabled={radDraait || opslaanBezig || !radKanDraaien} aria-live="polite">
               {radDraait ? "HET RAD DRAAIT…" : "HET RAD"}
             </button>
-            <span className="klein zacht">{radKanDraaien ? "Willekeurige opstelling uit de aanwezige spelers." : `Minstens ${basisPosities(formatie).length} aanwezige spelers nodig, nu ${beschikbaar.length}.`}</span>
+            <span className="klein zacht">{radKanDraaien ? "Het rad verdeelt aanwezige spelers. Gesloten slotjes blijven staan." : `Minstens ${radNodig} aanwezige spelers nodig, inclusief alle vergrendelde spelers. Nu beschikbaar: ${beschikbaar.length}.`}</span>
           </div>
+          <p className="klein zacht">Kies een speler en sluit het slotje om hem op die positie vast te zetten. Slotjes worden samen met de opstelling opgeslagen.</p>
           {[...basisPosities(formatie), ...BANK].map((pos) => {
             const gekozenElders = new Set(Object.entries(keuze).filter(([p, id]) => p !== pos && id).map(([, id]) => id));
             return (
               <div className="veld" key={pos}>
                 <label htmlFor={"positie-" + pos} className={BANK.includes(pos) ? "" : "verplicht"}>{positieLabel(pos)}</label>
-                <select id={"positie-" + pos} value={keuze[pos] ?? ""} onChange={(e) => setKeuze({ ...keuze, [pos]: e.target.value || null })}>
+                <div className="positie-keuze">
+                <select id={"positie-" + pos} disabled={slotjes.includes(pos) || radDraait || opslaanBezig} value={keuze[pos] ?? ""} onChange={(e) => setKeuze({ ...keuze, [pos]: e.target.value || null })}>
                   <option value="">—</option>
                   {keuze[pos] && !beschikbaar.some((p) => p.id === keuze[pos]) && <option value={keuze[pos]!} disabled>{namen.get(keuze[pos]!) ?? "Speler"} (niet beschikbaar)</option>}
                   {beschikbaar.filter((p) => !gekozenElders.has(p.id)).map((p) => <option key={p.id} value={p.id}>{p.naam}</option>)}
                 </select>
+                <button type="button" className="knop licht positie-slot" disabled={!keuze[pos] || radDraait || opslaanBezig} aria-label={`${positieLabel(pos)}: ${slotjes.includes(pos) ? "ontgrendelen" : "vergrendelen"}`} aria-pressed={slotjes.includes(pos)} title={slotjes.includes(pos) ? "Ontgrendelen" : "Vastzetten voor het rad"} onClick={() => setSlotjes(oud => oud.includes(pos) ? oud.filter(p => p !== pos) : [...oud, pos])}>{slotjes.includes(pos) ? <LockSimple size={22} weight="fill" /> : <LockSimpleOpen size={22} />}</button>
+                </div>
               </div>
             );
           })}
           {fouten.length > 0 && <div className="melding waarschuwing">{fouten.join(" ")}</div>}
           <div className="knoppen">
-            <button type="button" className="knop" onClick={opslaan} disabled={opslaanBezig || Boolean(aanwezigheden.fout) || fouten.length > 0}>{opslaanBezig ? "Opslaan…" : "Opslaan"}</button>
-            <button type="button" className="knop licht" onClick={() => setBewerken(false)}>Annuleren</button>
+            <button type="button" className="knop" onClick={opslaan} disabled={opslaanBezig || radDraait || Boolean(aanwezigheden.fout) || fouten.length > 0}>{opslaanBezig ? "Opslaan…" : "Opslaan"}</button>
+            <button type="button" className="knop licht" disabled={radDraait || opslaanBezig} onClick={() => { setFormatie(lineup?.formatie ?? STANDAARD_FORMATIE); setKeuze(Object.fromEntries(spelersVanLineup.map(p => [p.positie, p.member_id]))); setSlotjes(spelersVanLineup.filter(p => p.vergrendeld).map(p => p.positie)); setBewerken(false); }}>Annuleren</button>
           </div>
         </div>
       )}

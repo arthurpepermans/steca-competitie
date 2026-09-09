@@ -114,6 +114,7 @@ export type LineupPlayer = {
   lineup_id: string;
   member_id: string;
   positie: string;
+  vergrendeld?: boolean;
 };
 
 export type MatchStat = {

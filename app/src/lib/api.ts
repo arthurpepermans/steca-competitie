@@ -94,8 +94,8 @@ export async function haalOpstellingSpelers(lineupId: string): Promise<LineupPla
   return check(await supabase.from("lineup_players").select("*").eq("lineup_id", lineupId));
 }
 
-export async function bewaarOpstelling(matchKey: string, formatie: Formatie, keuze: Record<string, string | null>): Promise<void> {
-  check(await supabase.rpc("bewaar_opstelling", { p_match_key: matchKey, p_formatie: formatie, p_keuze: keuze }));
+export async function bewaarOpstelling(matchKey: string, formatie: Formatie, keuze: Record<string, string | null>, slotjes: string[] = []): Promise<void> {
+  check(await supabase.rpc("bewaar_opstelling_met_slotjes", { p_match_key: matchKey, p_formatie: formatie, p_keuze: keuze, p_slotjes: slotjes }));
 }
 
 // ----------------------------------------------------------- statistieken

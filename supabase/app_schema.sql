@@ -811,3 +811,21 @@ create index if not exists drive_media_album on public.drive_media(match_key, st
 alter table public.drive_media enable row level security;
 revoke all on public.drive_media from public, anon, authenticated;
 grant all on public.drive_media to service_role;
+
+-- Posities vastzetten voor het rad; voorkeuren worden met de opstelling opgeslagen.
+alter table public.lineup_players add column if not exists vergrendeld boolean not null default false;
+create or replace function public.bewaar_opstelling_met_slotjes(p_match_key text, p_formatie text, p_keuze jsonb, p_slotjes text[])
+returns void language plpgsql security invoker set search_path = public as $$
+begin
+  if p_slotjes is null or cardinality(p_slotjes) > 15 or exists (
+    select 1 from unnest(p_slotjes) p where p is null or nullif(p_keuze->>p, '') is null
+  ) then
+    raise exception 'Vergrendel alleen posities met een gekozen speler.';
+  end if;
+  perform bewaar_opstelling(p_match_key, p_formatie, p_keuze);
+  update lineup_players set vergrendeld = true
+    where lineup_id = (select id from lineups where match_key = p_match_key)
+      and positie = any(p_slotjes);
+end $$;
+revoke all on function public.bewaar_opstelling_met_slotjes(text, text, jsonb, text[]) from public, anon;
+grant execute on function public.bewaar_opstelling_met_slotjes(text, text, jsonb, text[]) to authenticated;

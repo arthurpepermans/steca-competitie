@@ -2,9 +2,9 @@ import type { Formatie } from "./types";
 
 /** Rijen van achter (doelman) naar voor (aanval). */
 export const FORMATIES: Record<Formatie, string[][]> = {
-  "4-3-3": [["GK"], ["RB", "CB1", "CB2", "LB"], ["CM1", "CM2", "CM3"], ["RW", "ST", "LW"]],
-  "4-4-2": [["GK"], ["RB", "CB1", "CB2", "LB"], ["RM", "CM1", "CM2", "LM"], ["ST1", "ST2"]],
-  "3-4-3": [["GK"], ["CB1", "CB2", "CB3"], ["RM", "CM1", "CM2", "LM"], ["RW", "ST", "LW"]],
+  "4-3-3": [["GK"], ["LB", "CB1", "CB2", "RB"], ["CM1", "CM2", "CM3"], ["LW", "ST", "RW"]],
+  "4-4-2": [["GK"], ["LB", "CB1", "CB2", "RB"], ["LM", "CM1", "CM2", "RM"], ["ST1", "ST2"]],
+  "3-4-3": [["GK"], ["CB1", "CB2", "CB3"], ["LM", "CM1", "CM2", "RM"], ["LW", "ST", "RW"]],
 };
 
 export const FORMATIE_KEUZES: Formatie[] = ["4-3-3", "4-4-2", "3-4-3"];
@@ -78,16 +78,22 @@ export function veranderFormatie(van: Formatie, naar: Formatie, keuze: Opstellin
 
 /** HET RAD: een willekeurige opstelling uit de aanwezige spelers. Elf in de basis, de rest (max. vier) op de bank.
  *  Met minder dan elf spelers komt er niets uit. `random` is vervangbaar voor tests. */
-export function radOpstelling(formatie: Formatie, aanwezig: string[], random: () => number = Math.random): OpstellingKeuze {
+export function radOpstelling(formatie: Formatie, aanwezig: string[], random: () => number = Math.random, vast: OpstellingKeuze = {}): OpstellingKeuze {
   const basis = basisPosities(formatie);
-  if (aanwezig.length < basis.length) return {};
-  const pot = [...aanwezig];
+  const posities = allePosities(formatie);
+  const gekozen = Object.entries(vast).filter(([, id]) => Boolean(id));
+  const vasteIds = new Set(gekozen.map(([, id]) => id));
+  if (gekozen.some(([pos, id]) => !posities.includes(pos) || !aanwezig.includes(id!)) || vasteIds.size !== gekozen.length) {
+    throw new Error("Controleer de vergrendelde spelers en hun aanwezigheid voordat je het rad draait.");
+  }
+  const uniekeAanwezigen = [...new Set(aanwezig)];
+  if (uniekeAanwezigen.length < basis.length + gekozen.filter(([pos]) => BANK.includes(pos)).length) return {};
+  const pot = uniekeAanwezigen.filter(id => !vasteIds.has(id));
   for (let i = pot.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [pot[i], pot[j]] = [pot[j], pot[i]];
   }
   const keuze: OpstellingKeuze = {};
-  for (const p of basis) keuze[p] = pot.shift() ?? null;
-  for (const p of BANK) keuze[p] = pot.shift() ?? null;
+  for (const p of posities) keuze[p] = vast[p] || pot.shift() || null;
   return keuze;
 }
