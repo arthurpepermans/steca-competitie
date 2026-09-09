@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Check } from "@phosphor-icons/react/dist/csr/Check";
+import { X } from "@phosphor-icons/react/dist/csr/X";
+import { Question } from "@phosphor-icons/react/dist/csr/Question";
 import { aanwezigheden24u, zetAanwezigheid } from "../lib/api";
 import { fmtTijdstip, magAanwezigheidWijzigen } from "../lib/datum";
 import { foutTekst } from "../lib/useAsync";
@@ -7,7 +10,7 @@ import type { Aanwezigheid24u, AanwezigheidStatus, Attendance, Match } from "../
 const STATUSSEN: { code: AanwezigheidStatus; label: string }[] = [
   { code: "aanwezig", label: "Aanwezig" },
   { code: "afwezig", label: "Afwezig" },
-  { code: "onzeker", label: "Onzeker ?" },
+  { code: "onzeker", label: "Onzeker" },
 ];
 
 type Speler = { id: string; naam: string };
@@ -63,17 +66,18 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
   const blokken = groepen.map((g) => ({ code: g.code as string, label: g.label.replace(" ?", ""), namen: g.namen }));
 
   return (
-    <div style={{ marginTop: 10, borderTop: "1px solid var(--rand)", paddingTop: 10 }}>
+    <div className="aanwezigheid">
       {fout && <div className="melding fout">{fout}</div>}
       {isSpeler && eigenLidId && magWijzigen && (
         <div className="status-knoppen" style={{ marginBottom: 8 }}>
           {STATUSSEN.map((s) => (
-            <button key={s.code} type="button" disabled={bezig} className={`${s.code} ${eigenStatus === s.code ? "actief" : ""}`} onClick={() => zet(eigenLidId, s.code)}>
-              {s.label}
+            <button key={s.code} type="button" disabled={bezig} aria-pressed={eigenStatus === s.code} className={`${s.code} ${eigenStatus === s.code ? "actief" : ""}`} onClick={() => zet(eigenLidId, s.code)}>
+              {s.code === "aanwezig" ? <Check size={20} /> : s.code === "afwezig" ? <X size={20} /> : <Question size={20} />} {s.label}
             </button>
           ))}
         </div>
       )}
+      <p className="aanwezig-bevestiging" role="status">{bezig ? "Bezig met opslaan…" : eigenStatus ? `Je staat als ${eigenStatus}.` : isSpeler ? "Je hebt nog niet geantwoord." : "Bekijk de aanwezigheid van de ploeg."}</p>
       <div className="rij klein zacht">
         <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")} · nog niets: {zonder.length}</span>
         <button type="button" className="knop licht klein" onClick={() => setNamenOpen(!namenOpen)}>

@@ -65,3 +65,13 @@ export function controleerOpstelling(formatie: Formatie, keuze: OpstellingKeuze)
   if (dubbel.length) fouten.push("Een speler staat meer dan één keer in de opstelling.");
   return fouten;
 }
+
+/** Behoud bestaande posities waar mogelijk en verdeel overige basisspelers zonder verlies. */
+export function veranderFormatie(van: Formatie, naar: Formatie, keuze: OpstellingKeuze): OpstellingKeuze {
+  const nieuw: OpstellingKeuze = Object.fromEntries(BANK.map(p => [p, keuze[p] ?? null]));
+  const posities = basisPosities(naar);
+  const behouden = new Set(posities.filter(p => keuze[p]));
+  const over = basisPosities(van).filter(p => !behouden.has(p)).map(p => keuze[p]).filter((id): id is string => Boolean(id));
+  for (const p of posities) nieuw[p] = behouden.has(p) ? keuze[p] : over.shift() ?? null;
+  return nieuw;
+}

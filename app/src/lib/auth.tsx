@@ -13,7 +13,8 @@ type AuthState = {
   herlaad: () => Promise<void>;
 };
 
-const Ctx = createContext<AuthState>({ klaar: false, session: null, lid: null, fout: null, herlaad: async () => {} });
+export const AuthContext = createContext<AuthState>({ klaar: false, session: null, lid: null, fout: null, herlaad: async () => {} });
+const Ctx = AuthContext;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

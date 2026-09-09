@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ArrowUpRight } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
 import { fmtDatum, isEigen, mapsUrl, resultaat, score } from "../lib/datum";
 import { EIGEN_PLOEGID } from "../lib/config";
 import type { Match } from "../lib/types";
@@ -7,7 +8,7 @@ export function MapsKnop({ terrein }: { terrein: string | null }) {
   if (!terrein) return null;
   return (
     <a className="knop licht klein" href={mapsUrl(terrein)} target="_blank" rel="noreferrer">
-      📍 Route
+      Route <ArrowUpRight size={17} aria-hidden="true" />
     </a>
   );
 }

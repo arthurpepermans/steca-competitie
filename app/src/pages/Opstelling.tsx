@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { bewaarOpstelling, haalLedenBasis, haalMatches, haalOpstellingSpelers, haalOpstellingen } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander, vandaagIso, volgendeMatch } from "../lib/datum";
-import { BANK, FORMATIE_KEUZES, STANDAARD_FORMATIE, allePosities, basisPosities, controleerOpstelling, positieLabel, type OpstellingKeuze } from "../lib/formaties";
+import { BANK, FORMATIE_KEUZES, STANDAARD_FORMATIE, allePosities, basisPosities, controleerOpstelling, positieLabel, veranderFormatie, type OpstellingKeuze } from "../lib/formaties";
 import { foutTekst, useAsync } from "../lib/useAsync";
 import { Fout, Laden } from "../components/Layout";
 import { Veld } from "../components/Veld";
@@ -67,10 +67,8 @@ export function Opstelling() {
   }
 
   function wisselFormatie(f: Formatie) {
-    // spelers die op een positie stonden die in de nieuwe formatie niet bestaat, vallen weg
-    const toegestaan = new Set(allePosities(f));
+    setKeuze(veranderFormatie(formatie, f, keuze));
     setFormatie(f);
-    setKeuze(Object.fromEntries(Object.entries(keuze).filter(([p]) => toegestaan.has(p))));
   }
 
   const vandaag = vandaagIso();
@@ -80,8 +78,8 @@ export function Opstelling() {
       <Fout tekst={matches.fout ?? lineups.fout ?? leden.fout ?? fout} />
       {ok && <div className="melding ok">{ok}</div>}
       <div className="veld">
-        <label>Match</label>
-        <select value={gekozenKey ?? ""} onChange={(e) => setMatchKey(e.target.value)}>
+        <label htmlFor="opstelling-match">Match</label>
+        <select id="opstelling-match" value={gekozenKey ?? ""} onChange={(e) => setMatchKey(e.target.value)}>
           {eigenMatches.map((m) => (
             <option key={m.match_key} value={m.match_key}>
               {fmtDatum(m.datum)} · {tegenstander(m)}{(lineups.data ?? []).some((l) => l.match_key === m.match_key) ? " ✓" : ""}{m.match_key === volgende?.match_key ? " (volgende)" : ""}
@@ -103,6 +101,7 @@ export function Opstelling() {
           </>
         ) : (
           <div className="kaart midden">
+            <Veld formatie={STANDAARD_FORMATIE} namen={{}} />
             <p>Opstelling voor {(match.datum ?? "") >= vandaag && match.match_key === volgende?.match_key ? "de volgende match" : "deze match"} nog niet gemaakt.</p>
             {r.isStaf && <button type="button" className="knop" onClick={() => setBewerken(true)}>Opstelling maken</button>}
           </div>
@@ -113,8 +112,8 @@ export function Opstelling() {
         <div className="kaart">
           <Veld formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} compact />
           <div className="veld">
-            <label>Formatie</label>
-            <select value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
+            <label htmlFor="opstelling-formatie">Formatie</label>
+            <select id="opstelling-formatie" value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>
               {FORMATIE_KEUZES.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
@@ -122,8 +121,8 @@ export function Opstelling() {
             const gekozenElders = new Set(Object.entries(keuze).filter(([p, id]) => p !== pos && id).map(([, id]) => id));
             return (
               <div className="veld" key={pos}>
-                <label className={BANK.includes(pos) ? "" : "verplicht"}>{positieLabel(pos)}</label>
-                <select value={keuze[pos] ?? ""} onChange={(e) => setKeuze({ ...keuze, [pos]: e.target.value || null })}>
+                <label htmlFor={"positie-" + pos} className={BANK.includes(pos) ? "" : "verplicht"}>{positieLabel(pos)}</label>
+                <select id={"positie-" + pos} value={keuze[pos] ?? ""} onChange={(e) => setKeuze({ ...keuze, [pos]: e.target.value || null })}>
                   <option value="">—</option>
                   {spelers.filter((p) => !gekozenElders.has(p.id)).map((p) => <option key={p.id} value={p.id}>{p.naam}</option>)}
                 </select>
