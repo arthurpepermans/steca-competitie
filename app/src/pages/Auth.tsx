@@ -7,7 +7,7 @@ import { useAuth } from "../lib/auth";
 function Kader({ titel, children }: { titel: string; children: React.ReactNode }) {
   return (
     <div className="auth">
-      <h1>Steca Juniors</h1>
+      <h1>Steca Juniors Clubapp</h1>
       <div className="kaart">
         <h2>{titel}</h2>
         {children}
