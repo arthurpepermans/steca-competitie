@@ -1,6 +1,6 @@
 import { InstallatieHulp } from "../components/InstallatieHulp";
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { wijzigLid } from "../lib/api";
 import { rechten, useAuth } from "../lib/auth";
 import { FUNCTIE_LABEL } from "../lib/config";
@@ -51,6 +51,7 @@ export function Profiel() {
       {fout && <div className="melding fout">{fout}</div>}
       {ok && <div className="melding ok">{ok}</div>}
       <InstallatieHulp />
+      {r.isAdmin && <p><Link className="knop licht" to="/drive">Google Drive beheren</Link></p>}
       <div className="kaart">
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
