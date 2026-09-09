@@ -1,3 +1,4 @@
+import { InstallatieHulp } from "../components/InstallatieHulp";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { wijzigLid } from "../lib/api";
@@ -49,6 +50,7 @@ export function Profiel() {
       {onboarding && <div className="melding info">Telefoonnummer, geboortedatum en adres zijn verplicht voor spelers en staf. Na het opslaan kom je in de app.</div>}
       {fout && <div className="melding fout">{fout}</div>}
       {ok && <div className="melding ok">{ok}</div>}
+      <InstallatieHulp />
       <div className="kaart">
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
@@ -63,7 +65,7 @@ export function Profiel() {
             </form>
           </div>
           <div className="kaart">
-            <p className="klein zacht">Tip: zet deze app op je beginscherm. iPhone: Deel-knop, "Zet op beginscherm". Android: menu, "Toevoegen aan startscherm".</p>
+
             <button type="button" className="knop licht" onClick={() => supabase.auth.signOut()}>Uitloggen</button>
           </div>
         </>
