@@ -29,6 +29,6 @@ export default defineConfig({
   define: { __APP_VERSIE__: JSON.stringify(versie) },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
   },
 });

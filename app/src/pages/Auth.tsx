@@ -14,6 +14,7 @@ function Kader({ titel, children }: { titel: string; children: React.ReactNode }
         {children}
       </div>
       <InstallatieHulp />
+      <Link className="knop licht breed" to="/supporters">Verder als supporter</Link>
     </div>
   );
 }
@@ -94,7 +95,7 @@ export function Registreer() {
         <div className="veld">
           <label>Ik ben</label>
           <select value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-            {FUNCTIES.map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+            {FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
           </select>
         </div>
         <div className="veld"><label>Wachtwoord (minstens 8 tekens)</label><input type="password" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} required autoComplete="new-password" /></div>

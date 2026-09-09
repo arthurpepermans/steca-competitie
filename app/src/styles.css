@@ -324,3 +324,7 @@ html,body,#root{touch-action:pan-x pan-y}
 .sfeer-meta { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; margin: 10px 0; }
 .sfeer-leeg, .sfeer-fallback { padding: 24px 12px; text-align: center; border: 1px dashed var(--rand); }
 .sfeer-wissen p { margin: 6px 0; }
+
+.supporters-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+.supporters-tabs .knop { flex: 1; }
+.supporters-inhoud { padding-bottom: 32px; }

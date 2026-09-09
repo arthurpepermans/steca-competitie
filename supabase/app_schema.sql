@@ -710,3 +710,67 @@ create or replace view match_vote_counts as
   group by match_key;
 revoke all on match_vote_counts from anon;
 grant select on match_vote_counts to authenticated;
+
+-- Openbare supporterstoegang: alleen onderstaande velden, nooit contactgegevens of clubadministratie.
+create or replace function public.openbare_clubinfo() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'matches', coalesce((select jsonb_agg(to_jsonb(m) order by datum, uur) from (
+      select match_key, seizoen, reeks, datum, uur, thuis_id, uit_id, thuis, uit,
+             thuis_score, uit_score, status, terrein, null::text as opmerking
+      from public.matches where thuis_id = 152 or uit_id = 152
+    ) m), '[]'::jsonb),
+    'klassement', coalesce((select jsonb_agg(to_jsonb(s) order by reeks, positie) from (
+      select seizoen, reeks, ploegid, bron, positie, ploeg, gespeeld, gewonnen, gelijk, verloren,
+             doelpunten_voor, doelpunten_tegen, saldo, punten, label, vergelijking_status
+      from public.standings_current
+    ) s), '[]'::jsonb),
+    'ploegen', coalesce((select jsonb_agg(to_jsonb(t) order by naam) from (
+      select ploegid, naam, reeks, terrein, kleuren from public.teams
+    ) t), '[]'::jsonb)
+  );
+$$;
+revoke all on function public.openbare_clubinfo() from public;
+grant execute on function public.openbare_clubinfo() to anon, authenticated;
+
+-- Bezoekers lezen uitsluitend via openbare_clubinfo, niet via de onderliggende tabellen/views.
+revoke all on public.teams, public.matches, public.standings, public.standings_state,
+ public.standings_current, public.sync_status, public.members, public.members_basis,
+ public.attendance, public.lineups, public.lineup_players, public.match_stats,
+ public.audit_log, public.fines, public.match_votes, public.match_vote_points, public.match_vote_counts from anon;
+
+-- Bestaande supporteraccounts blijven bestaan. Nieuwe supporters hebben geen account nodig.
+create or replace function public.geen_nieuwe_supporterregistratie() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  if new.raw_user_meta_data->>'functie' = 'supporter' then
+    raise exception 'Supporters hebben geen account nodig. Kies Verder als supporter.';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.geen_nieuwe_supporterregistratie() from public, anon, authenticated;
+drop trigger if exists geen_nieuwe_supporterregistratie on auth.users;
+create trigger geen_nieuwe_supporterregistratie before insert on auth.users
+ for each row execute function public.geen_nieuwe_supporterregistratie();
+
+
+-- Openbare spelersnamen, wedstrijdcijfers en boetes. Contactgegevens en vrije opmerkingen blijven intern.
+create or replace function public.openbare_spelerscijfers() returns jsonb
+language sql stable security definer set search_path = public as $$
+ select jsonb_build_object(
+ 'spelers', coalesce((select jsonb_agg(to_jsonb(p) order by naam) from (
+ select id, naam from members where speelt or exists (select 1 from match_stats where member_id = members.id) or exists (select 1 from fines where member_id = members.id)
+ ) p), '[]'::jsonb),
+ 'stats', coalesce((select jsonb_agg(to_jsonb(s)) from (
+ select s.match_key, s.member_id, s.gespeeld, s.goals, s.assists, s.geel, s.rood from match_stats s
+ join matches m on m.match_key = s.match_key where m.thuis_id = 152 or m.uit_id = 152
+ ) s), '[]'::jsonb),
+ 'boetes', coalesce((select jsonb_agg(to_jsonb(f) order by datum desc) from (
+ select id, member_id, match_key, datum, soort, aantal, bedrag_cent, bak_bier,
+ null::text as opmerking, null::uuid as ingevoerd_door from fines
+ ) f), '[]'::jsonb)
+ );
+$$;
+revoke all on function public.openbare_spelerscijfers() from public;
+grant execute on function public.openbare_spelerscijfers() to anon, authenticated;
