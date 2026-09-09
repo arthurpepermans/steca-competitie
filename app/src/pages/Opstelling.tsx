@@ -110,14 +110,6 @@ export function Opstelling() {
 
       {!match && <div className="kaart zacht">Geen match gekozen.</div>}
 
-      {match && r.isStaf && (
-        <div className="kaart">
-          <h2>Aanwezigheid</h2>
-          <p>Alleen aanwezige spelers kunnen in de basis of op de bank staan. Momenteel beschikbaar: {beschikbaar.length}.</p>
-          <Aanwezigheid key={match.match_key} match={match} spelers={spelers} aanwezigheden={aanwezigheden.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanwezigheden.herlaad} />
-        </div>
-      )}
-
       {match && !bewerken && (
         lineup ? (
           <>
@@ -166,6 +158,14 @@ export function Opstelling() {
           </div>
         </div>
       )}
+      {match && r.isStaf && (
+        <div className="kaart">
+          <h2>Aanwezigheid</h2>
+          <p>Alleen aanwezige spelers kunnen in de basis of op de bank staan. Momenteel beschikbaar: {beschikbaar.length}.</p>
+          <Aanwezigheid key={match.match_key} match={match} spelers={spelers} aanwezigheden={aanwezigheden.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanwezigheden.herlaad} />
+        </div>
+      )}
+
     </>
   );
 }
