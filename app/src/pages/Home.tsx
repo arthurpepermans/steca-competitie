@@ -16,13 +16,13 @@ import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MapsKnop } from "../components/MatchKaart";
 import { InstallatieHulp } from "../components/InstallatieHulp";
 
-export function Home() {
+export function Home({ openbaar }: { openbaar?: import("../lib/supporters").SupportersData }) {
   const { lid } = useAuth();
   const r = rechten(lid);
-  const matches = useAsync(haalMatches);
-  const klassement = useAsync(haalKlassement);
-  const leden = useAsync(haalLedenBasis);
-  const aanw = useAsync(haalAanwezigheden);
+  const matches = useAsync(() => openbaar ? Promise.resolve(openbaar.matches) : haalMatches(), [openbaar]);
+  const klassement = useAsync(() => openbaar ? Promise.resolve(openbaar.klassement) : haalKlassement(), [openbaar]);
+  const leden = useAsync(() => openbaar ? Promise.resolve([]) : haalLedenBasis(), [openbaar]);
+  const aanw = useAsync(() => openbaar ? Promise.resolve([]) : haalAanwezigheden(), [openbaar]);
   if (matches.laden || klassement.laden || leden.laden) return <Laden />;
   const volgende = volgendeMatch(matches.data ?? []);
   const laatste = laatsteUitslag(matches.data ?? []);
@@ -36,7 +36,7 @@ export function Home() {
       <div className="matchdag-kop"><h1>Matchdag</h1><span>Seizoen {volgende?.seizoen ?? eigen?.seizoen ?? "2026-2027"}</span></div>
       <div className="home-grid">
         <section className="match-blok" aria-labelledby="volgende-titel">
-          <div className="sectie-kop"><h2 id="volgende-titel">01 / Volgende match</h2><Link to="/kalender" aria-label="Bekijk de kalender"><ArrowUpRight size={23} /></Link></div>
+          <div className="sectie-kop"><h2 id="volgende-titel">01 / Volgende match</h2><Link to={openbaar ? "/supporters?tab=Kalender" : "/kalender"} aria-label="Bekijk de kalender"><ArrowUpRight size={23} /></Link></div>
           {volgende ? <>
             <div className="match-affiche">
               <div className="affiche-meta"><span>WEDSTRIJDTICKET · {volgende.reeks.replace("DERDE AFDELING", "3e afdeling")}</span><span className="locatie-label">{isThuis(volgende) ? "Thuismatch" : "Uitmatch"}</span></div>
@@ -47,11 +47,11 @@ export function Home() {
               <div className="match-moment"><CalendarBlank size={22} /><span>{fmtDatum(volgende.datum)}</span><strong>{volgende.uur ?? "uur volgt"}</strong></div>
               <div className="match-terrein"><MapPin size={20} /><span>{volgende.terrein ?? "Terrein nog niet bekend"}</span><MapsKnop terrein={volgende.terrein} /></div>
             </div>
-            <div className="match-aanwezigheid">
+            {!openbaar && <div className="match-aanwezigheid">
               <div className="sectie-kop"><h3>{r.isSpeler ? "Ben je erbij?" : "Wie is erbij?"}</h3>{r.isSpeler && <span className="zacht">Laat je ploeg iets weten.</span>}</div>
               {aanw.laden ? <Laden tekst="Aanwezigheden laden…" /> : <><Fout tekst={aanw.fout} /><Aanwezigheid match={volgende} spelers={spelers} aanwezigheden={aanw.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanw.herlaad} /></>}
-            </div>
-          </> : <div className="lege-staat"><CalendarBlank size={32} /><h3>Even geen match gepland</h3><p>De volgende match verschijnt hier zodra de kalender is bijgewerkt.</p><Link to="/kalender">Bekijk de kalender <ArrowRight size={16} /></Link></div>}
+            </div>}
+          </> : <div className="lege-staat"><CalendarBlank size={32} /><h3>Even geen match gepland</h3><p>De volgende match verschijnt hier zodra de kalender is bijgewerkt.</p><Link to={openbaar ? "/supporters?tab=Kalender" : "/kalender"}>Bekijk de kalender <ArrowRight size={16} /></Link></div>}
         </section>
         <aside className="home-zijde">
           <div className="club-embleem"><span>SAMEN UIT. SAMEN THUIS.</span><img src={import.meta.env.BASE_URL + "logo-retro.png"} alt="Steca Juniors" /><span>DE DERDE HELFT</span><strong>BACOTIME.</strong></div>
@@ -63,17 +63,17 @@ export function Home() {
               <div className="stand-statistieken"><div><strong>{eigen.punten}</strong><span>punten</span></div><div><strong>{eigen.gespeeld}</strong><span>gespeeld</span></div><div><strong>{eigen.doelpunten_voor}</strong><span>goals</span></div></div>
               {eigen.label && <span className="badge waarschuwing">{eigen.label}</span>}
             </> : <p className="zacht">Het klassement is nog niet beschikbaar.</p>}
-            <Link className="tekst-link" to="/klassement">Volledig klassement <ArrowUpRight size={19} /></Link>
+            <Link className="tekst-link" to={openbaar ? "/supporters?tab=Klassement" : "/klassement"}>Volledig klassement <ArrowUpRight size={19} /></Link>
           </section>
           <section className="resultaat-blok"><div className="sectie-kop"><h2>Laatste uitslag</h2><SoccerBall size={23} /></div>
             {laatste ? <><p className="zacht">{fmtDatum(laatste.datum)}</p><div className="laatste-score"><strong>{laatste.thuis_score} : {laatste.uit_score}</strong><span className={"res " + resultaat(laatste)}>{resultaat(laatste)}</span></div><p>{laatste.thuis} - {laatste.uit}</p></> : <><h3>Nog geen uitslag</h3><p className="zacht">Er zijn nog geen gespeelde wedstrijden.</p></>}
           </section>
         </aside>
-        {daarna.length > 0 && <section className="binnenkort"><div className="sectie-kop"><h2>Daarna op de kalender</h2><Link className="tekst-link" to="/kalender">Alle matchen <ArrowRight size={18} /></Link></div>
-          <div className="komende-lijst">{daarna.map((m) => <Link className="komende-match" key={m.match_key} to="/kalender"><time dateTime={m.datum ?? undefined}><strong>{m.datum ? Number(m.datum.slice(8)) : "?"}</strong><span>{m.datum ? new Date(m.datum + "T12:00:00").toLocaleDateString("nl-BE", { month: "short" }) : "datum volgt"}</span></time><div><h3>{tegenstander(m)}</h3><p>{isThuis(m) ? "Thuis" : "Uit"} <span> / </span> {m.uur ?? "uur volgt"}</p></div><ArrowUpRight size={22} /></Link>)}</div>
+        {daarna.length > 0 && <section className="binnenkort"><div className="sectie-kop"><h2>Daarna op de kalender</h2><Link className="tekst-link" to={openbaar ? "/supporters?tab=Kalender" : "/kalender"}>Alle matchen <ArrowRight size={18} /></Link></div>
+          <div className="komende-lijst">{daarna.map((m) => <Link className="komende-match" key={m.match_key} to={openbaar ? "/supporters?tab=Kalender" : "/kalender"}><time dateTime={m.datum ?? undefined}><strong>{m.datum ? Number(m.datum.slice(8)) : "?"}</strong><span>{m.datum ? new Date(m.datum + "T12:00:00").toLocaleDateString("nl-BE", { month: "short" }) : "datum volgt"}</span></time><div><h3>{tegenstander(m)}</h3><p>{isThuis(m) ? "Thuis" : "Uit"} <span> / </span> {m.uur ?? "uur volgt"}</p></div><ArrowUpRight size={22} /></Link>)}</div>
         </section>}
       </div>
-      <LaatstBijgewerkt />
+      {!openbaar && <LaatstBijgewerkt />}
     </div>
   );
 }
