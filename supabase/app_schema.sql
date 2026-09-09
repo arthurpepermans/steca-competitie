@@ -544,3 +544,32 @@ drop policy if exists "leden lezen" on standings_state;
 create policy "leden lezen" on standings_state for select to authenticated using (true);
 drop policy if exists "leden lezen" on sync_status;
 create policy "leden lezen" on sync_status for select to authenticated using (true);
+
+-- ------------------------------------------------------ sfeerbeelden
+-- Privébestanden per wedstrijd; geen openbare bucket of overschrijven.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('match-sfeerbeelden', 'match-sfeerbeelden', false, 52428800,
+  array['image/jpeg','image/png','image/webp','image/gif','image/heic','image/heif','video/mp4','video/quicktime','video/webm'])
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+create or replace function public.is_match_mediamap(p_name text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select is_actief() and exists (
+    select 1 from matches where (thuis_id = 152 or uit_id = 152)
+      and encode(convert_to(match_key, 'UTF8'), 'hex') = split_part(p_name, '/', 1)
+  ) and array_length(string_to_array(p_name, '/'), 1) = 2
+$$;
+revoke all on function public.is_match_mediamap(text) from public, anon;
+grant execute on function public.is_match_mediamap(text) to authenticated;
+
+drop policy if exists "sfeerbeelden lezen" on storage.objects;
+create policy "sfeerbeelden lezen" on storage.objects for select to authenticated
+  using (bucket_id = 'match-sfeerbeelden' and public.is_actief());
+drop policy if exists "sfeerbeelden toevoegen" on storage.objects;
+create policy "sfeerbeelden toevoegen" on storage.objects for insert to authenticated
+  with check (bucket_id = 'match-sfeerbeelden' and public.is_match_mediamap(name)
+    and split_part(split_part(name, '/', 2), '_', 1) = auth.uid()::text);
+drop policy if exists "sfeerbeelden verwijderen" on storage.objects;
+create policy "sfeerbeelden verwijderen" on storage.objects for delete to authenticated
+  using (bucket_id = 'match-sfeerbeelden' and public.is_actief()
+    and (owner_id = auth.uid()::text or public.is_admin()));

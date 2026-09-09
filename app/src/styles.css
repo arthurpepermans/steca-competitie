@@ -312,3 +312,15 @@ html,body,#root{touch-action:pan-x pan-y}
 .installatie-keuze{display:flex;gap:8px;margin:16px 0}.installatie-keuze button{flex:1;min-height:44px;border:1px solid var(--tekst);background:var(--kaart);font-weight:700}.installatie-keuze button[aria-pressed=true]{background:var(--accent);color:#25291f}
 .installatie-logo{display:flex;gap:12px;align-items:center;margin:18px 0;font-weight:700;font-size:13px}.installatie-logo img{border:1px solid var(--rand);border-radius:10px;flex-shrink:0}.installatie-logo small{display:block;font-weight:400;font-size:11px;color:var(--tekst-zacht);margin-top:4px}
 .installatie-inhoud ol{padding-left:22px;margin:16px 0}.installatie-inhoud li{padding-left:4px;margin-bottom:14px;font-size:13px;line-height:1.6}.installatie-inhoud li::marker{font-weight:700;color:var(--kleur)}.installatie-inhoud li svg{vertical-align:middle}.installatie-tip{font-size:12px;border-top:1px solid var(--rand);padding-top:12px;color:var(--tekst-zacht)}
+
+/* Wedstrijdalbum: dezelfde papieren kaders als de rest van de clubapp. */
+.sfeerbeelden { margin-top: 18px; border-top: 1px solid var(--rand); padding-top: 14px; }
+.sfeer-open { width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; }
+.sfeer-open span { margin-left: auto; font-size: .75rem; }
+.sfeer-album { padding-top: 8px; }
+.sfeer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin: 16px 0; }
+.sfeer-item { min-width: 0; padding: 8px; border: 1px solid var(--rand); background: var(--kaart); }
+.sfeer-item img, .sfeer-item video { display: block; width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #282922; }
+.sfeer-meta { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; margin: 10px 0; }
+.sfeer-leeg, .sfeer-fallback { padding: 24px 12px; text-align: center; border: 1px dashed var(--rand); }
+.sfeer-wissen p { margin: 6px 0; }
