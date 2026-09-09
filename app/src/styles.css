@@ -54,6 +54,7 @@ p { margin-bottom: 8px; }
 .nav a { flex: 1; min-width: 0; display: flex; gap: 5px; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--tekst-zacht); font-size: 12px; border-top: 3px solid transparent; }
 .nav a.actief { color: var(--kleur); border-top-color: var(--accent); font-weight: 700; }
 .nav a:hover { background: var(--vlak); }
+.nav[data-viewport="zichtbaar"] { top: var(--nav-schermonderkant); bottom: auto; transform: translateY(-100%); }
 .welkom { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; gap: 20px; }
 .welkom p { color: var(--tekst-zacht); margin-bottom: 6px; }
 .seizoen { color: var(--tekst-zacht); font-size: 12px; white-space: nowrap; padding-bottom: 3px; }
