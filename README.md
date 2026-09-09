@@ -128,14 +128,14 @@ statistieken, ploegen, opstelling en ledenlijst. Volledige beschrijving in `docs
 QR-code voor de registratiepagina: `docs/qr-registreer.png`.
 
 Techniek: React + Vite + TypeScript, Supabase Auth en Postgres met row level security. Gehost op
-GitHub Pages via `.github/workflows/deploy-app.yml`, adres https://arthurpepermans.github.io/steca-competitie/.
+GitHub Pages via `.github/workflows/deploy-app.yml`, adres https://stecajuniors.app/ (eigen domein bij Porkbun, DNS naar GitHub Pages; de oude link https://arthurpepermans.github.io/steca-competitie/ verwijst door). Het basispad volgt automatisch de Pages-instellingen.
 
 ### Eenmalige instelling
 
 1. Voer `supabase/app_schema.sql` uit in de SQL Editor (na `schema.sql`). De view `members_basis`
    staat bewust zonder row level security: ze toont alleen naam en functie aan supporters.
 2. Supabase > Authentication > Providers > Email: zet "Confirm email" uit (goedkeuring gebeurt in de app).
-3. Supabase > Authentication > URL Configuration: Site URL `https://arthurpepermans.github.io/steca-competitie/`
+3. Supabase > Authentication > URL Configuration: Site URL `https://stecajuniors.app/`
    en dezelfde URL bij Redirect URLs.
 4. GitHub > Settings > Secrets and variables > Actions > Variables: `VITE_SUPABASE_URL` en
    `VITE_SUPABASE_ANON_KEY` (Supabase > Project Settings > API > anon public).

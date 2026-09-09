@@ -118,7 +118,7 @@ Nieuw:
 - React + Vite + TypeScript, map `app/` in deze repo. Supabase JS-client met de anon key;
   Supabase Auth voor accounts; Postgres met row level security voor de rechten.
 - Hosting gratis op GitHub Pages vanuit deze repo (eigen workflow), voorlopig op
-  `https://arthurpepermans.github.io/steca-competitie/`. Arthur koopt een eigen domein; dat wordt
+  `https://stecajuniors.app/`. Arthur koopt een eigen domein; dat wordt
   daarna aan GitHub Pages gekoppeld (CNAME) en de QR-code wordt opnieuw gemaakt.
 - PWA-manifest zodat de site op het beginscherm van de telefoon kan.
 - In Supabase moet eenmalig ingesteld worden: Authentication > Providers > Email >

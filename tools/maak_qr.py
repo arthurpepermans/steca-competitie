@@ -8,7 +8,7 @@ from pathlib import Path
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 
-URL = sys.argv[1] if len(sys.argv) > 1 else "https://arthurpepermans.github.io/steca-competitie/#/registreer"
+URL = sys.argv[1] if len(sys.argv) > 1 else "https://stecajuniors.app/#/registreer"
 DOEL = Path(__file__).resolve().parents[1] / "docs" / "qr-registreer.png"
 
 qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=12, border=3)
