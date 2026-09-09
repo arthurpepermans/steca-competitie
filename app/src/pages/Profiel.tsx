@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { bewaarGevoelig, haalGevoelig, wijzigLid } from "../lib/api";
+import { wijzigLid } from "../lib/api";
 import { rechten, useAuth } from "../lib/auth";
 import { FUNCTIE_LABEL } from "../lib/config";
 import { supabase } from "../lib/supabase";
@@ -14,14 +14,7 @@ export function Profiel() {
   const [fout, setFout] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [ww, setWw] = useState("");
-  const [rrn, setRrn] = useState("");
-  const [rrnGeladen, setRrnGeladen] = useState(false);
   const onboarding = !r.gegevensVolledig;
-
-  useEffect(() => {
-    if (!lid || onboarding) return;
-    haalGevoelig(lid.id).then((g) => { setRrn(g?.rijksregisternummer ?? ""); setRrnGeladen(true); }).catch(() => setRrnGeladen(false));
-  }, [lid?.id, onboarding]);
 
   if (!lid) return null;
 
@@ -36,17 +29,6 @@ export function Profiel() {
         return;
       }
       setOk("Gegevens opgeslagen.");
-    } catch (e) {
-      setFout(foutTekst(e));
-    }
-  }
-
-  async function bewaarRrn() {
-    setFout(null);
-    setOk(null);
-    try {
-      await bewaarGevoelig(lid!.id, rrn.trim() || null);
-      setOk("Rijksregisternummer opgeslagen.");
     } catch (e) {
       setFout(foutTekst(e));
     }
@@ -73,16 +55,6 @@ export function Profiel() {
       </div>
       {!onboarding && (
         <>
-          {rrnGeladen && (
-            <div className="kaart">
-              <h3>Rijksregisternummer</h3>
-              <p className="klein zacht">Alleen jij en de beheerders kunnen dit zien. Nodig voor de inschrijving bij de federatie.</p>
-              <div className="rij" style={{ gap: 6 }}>
-                <input value={rrn} onChange={(e) => setRrn(e.target.value)} placeholder="JJ.MM.DD-XXX.XX" style={{ flex: 1, padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }} />
-                <button type="button" className="knop licht" onClick={bewaarRrn}>Opslaan</button>
-              </div>
-            </div>
-          )}
           <div className="kaart">
             <h3>Wachtwoord wijzigen</h3>
             <form onSubmit={wachtwoord}>

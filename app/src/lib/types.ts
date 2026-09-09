@@ -90,8 +90,6 @@ export type Member = {
 /** Beperkte weergave (view members_basis) voor supporters. */
 export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "speelt" | "functie" | "status" | "is_admin" | "is_hoofdadmin"> & { heeft_account: boolean };
 
-export type MemberGevoelig = { member_id: string; rijksregisternummer: string | null };
-
 export type AanwezigheidStatus = "aanwezig" | "afwezig" | "onzeker";
 
 export type Attendance = {

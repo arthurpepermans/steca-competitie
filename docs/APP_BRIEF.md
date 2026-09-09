@@ -19,7 +19,6 @@ seizoen opgeslagen zodat volgende seizoenen erbij kunnen.
   gegevens van het lid staan en wordt een latere registratie er opnieuw aan gekoppeld.
 - **Goedkeuren**: een admin keurt goed, kent de functie toe en kan gegevens aanpassen. Admins kunnen ook
   zelf leden toevoegen zonder account.
-- **Rijksregisternummer** staat in een aparte tabel die alleen admins en de persoon zelf kunnen lezen.
 - **Wachtwoorden** kiest iedereen zelf bij registratie. Ze worden gehasht opgeslagen door Supabase
   Auth; niemand kan ze lezen, ook admins niet. Iedereen kan zijn eigen wachtwoord wijzigen. Een
   admin kan voor elk lid een nieuw wachtwoord instellen, ook voor andere admins, maar niet voor de

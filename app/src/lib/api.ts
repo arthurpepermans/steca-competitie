@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import type {
   Aanwezigheid24u, AanwezigheidStatus, Attendance, AuditEntry, Formatie, Lineup, LineupPlayer,
-  Match, MatchStat, Member, MemberBasis, MemberGevoelig, Standing, SyncStatus, Team,
+  Match, MatchStat, Member, MemberBasis, Standing, SyncStatus, Team,
 } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -68,14 +68,6 @@ export async function mijnLid(): Promise<Member | null> {
 
 export async function voegLidToe(velden: Partial<Member>): Promise<Member> {
   return check(await supabase.from("members").insert({ ...velden, bron: "admin", status: "actief" }).select("*").single());
-}
-
-export async function haalGevoelig(memberId: string): Promise<MemberGevoelig | null> {
-  return check(await supabase.from("members_gevoelig").select("*").eq("member_id", memberId).maybeSingle());
-}
-
-export async function bewaarGevoelig(memberId: string, rijksregisternummer: string | null): Promise<void> {
-  check(await supabase.from("members_gevoelig").upsert({ member_id: memberId, rijksregisternummer }, { onConflict: "member_id" }).select("member_id"));
 }
 
 // ----------------------------------------------------------- aanwezigheden

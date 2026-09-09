@@ -33,13 +33,8 @@ alter table members add column if not exists ingeschreven boolean;       -- inge
 alter table members add column if not exists mail_inschrijving boolean;
 alter table members add column if not exists bron text not null default 'registratie';  -- import | registratie | admin
 create index if not exists members_email_idx on members (lower(email));
+drop table if exists members_gevoelig cascade;  -- rijksregisternummer wordt niet bijgehouden
 
--- Gevoelige gegevens apart: alleen admins en de persoon zelf kunnen ze lezen.
-create table if not exists members_gevoelig (
-  member_id           uuid primary key references members (id) on delete cascade,
-  rijksregisternummer text,
-  updated_at          timestamptz not null default now()
-);
 update members
    set voornaam = split_part(naam, ' ', 1),
        achternaam = nullif(trim(substr(naam, length(split_part(naam, ' ', 1)) + 1)), '')
@@ -203,24 +198,6 @@ end $$;
 revoke all on function mijn_lid() from public, anon;
 grant execute on function mijn_lid() to authenticated;
 
--- Gevoelige gegevens: admins en de persoon zelf; de hoofdadmin alleen door zichzelf.
-create or replace function members_gevoelig_guard() returns trigger
-language plpgsql security definer set search_path = public as $$
-begin
-  if auth.uid() is null then
-    return new;
-  end if;
-  if exists (select 1 from members where id = new.member_id and is_hoofdadmin)
-     and not is_hoofdadmin() then
-    raise exception 'de gegevens van de hoofdadmin kunnen alleen door de hoofdadmin zelf gewijzigd worden';
-  end if;
-  new.updated_at := now();
-  return new;
-end $$;
-drop trigger if exists members_gevoelig_guard on members_gevoelig;
-create trigger members_gevoelig_guard before insert or update on members_gevoelig
-  for each row execute function members_gevoelig_guard();
-
 -- Beperkte weergave voor supporters: alleen naam en functie.
 create or replace view members_basis as
   select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam, speelt,
@@ -256,9 +233,6 @@ begin
 end $$;
 drop trigger if exists members_log on members;
 create trigger members_log after insert or update or delete on members
-  for each row execute function log_wijziging();
-drop trigger if exists members_gevoelig_log on members_gevoelig;
-create trigger members_gevoelig_log after insert or update or delete on members_gevoelig
   for each row execute function log_wijziging();
 
 -- ---------------------------------------------------------- aanwezigheden
@@ -470,7 +444,6 @@ grant execute on function admin_verwijder_lid(uuid) to authenticated;
 -- ------------------------------------------------------- toegangsregels
 
 alter table members enable row level security;
-alter table members_gevoelig enable row level security;
 alter table attendance enable row level security;
 alter table lineups enable row level security;
 alter table lineup_players enable row level security;
@@ -488,14 +461,6 @@ create policy "leden wijzigen" on members for update to authenticated
   using (user_id = auth.uid() or is_admin())
   with check (user_id = auth.uid() or is_admin());
 
--- gevoelige gegevens
-drop policy if exists "gevoelig lezen" on members_gevoelig;
-create policy "gevoelig lezen" on members_gevoelig for select to authenticated
-  using (is_admin() or member_id = my_member_id());
-drop policy if exists "gevoelig schrijven" on members_gevoelig;
-create policy "gevoelig schrijven" on members_gevoelig for all to authenticated
-  using (is_admin() or (is_actief() and member_id = my_member_id()))
-  with check (is_admin() or (is_actief() and member_id = my_member_id()));
 
 -- aanwezigheden
 drop policy if exists "aanwezigheid lezen" on attendance;

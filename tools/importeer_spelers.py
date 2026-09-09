@@ -5,7 +5,7 @@ Gebruik:  python tools/importeer_spelers.py "pad/naar/Spelerslijst.xlsx" [--dry-
 - Koppelt op e-mailadres, anders op voor- en achternaam. Bestaande leden (ook met account) worden
   aangevuld: alleen lege velden worden ingevuld, niets wordt overschreven.
 - Nieuwe leden krijgen functie speler, status actief, bron import, zonder account.
-- Het rijksregisternummer gaat naar members_gevoelig (alleen admins en de persoon zelf).
+- Het rijksregisternummer wordt bewust niet ingelezen.
 - Vereist .env met SUPABASE_URL en SUPABASE_SERVICE_KEY (zoals de sync).
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ from competition.supabase_client import SupabaseRest  # noqa: E402
 
 KOLOMMEN = {
     "nr": "Nr", "voornaam": "Voornaam", "achternaam": "Achternaam", "geboortedatum": "Geboortedatum",
-    "rijksregisternummer": "Rijksregisternummer", "adres": "Adres", "nationaliteit": "Nationaliteit",
+    "adres": "Adres", "nationaliteit": "Nationaliteit",
     "telefoon": "GSM", "email": "Email", "mail_inschrijving": "Mail Inschrijving", "ingeschreven": "Ingeschreven",
 }
 AANVULBAAR = ("email", "telefoon", "geboortedatum", "adres", "nationaliteit", "nr", "ingeschreven", "mail_inschrijving")
@@ -98,7 +98,6 @@ def lees_lijst(pad: Path) -> list[dict]:
             "nr": int(r[idx["nr"]]) if r[idx["nr"]] not in (None, "") else None,
             "ingeschreven": bool(r[idx["ingeschreven"]]) if r[idx["ingeschreven"]] is not None else None,
             "mail_inschrijving": bool(r[idx["mail_inschrijving"]]) if r[idx["mail_inschrijving"]] is not None else None,
-            "rijksregisternummer": tekst(r[idx["rijksregisternummer"]]),
         })
     return out
 
@@ -123,25 +122,18 @@ def main() -> int:
 
     nieuw: list[dict] = []
     updates: list[tuple[dict, dict]] = []
-    gevoelig: list[tuple[str | None, dict, str]] = []  # (member_id of None, spelerrij, rrn)
     for p in lijst:
         m = (op_email.get(p["email"]) if p["email"] else None) or op_naam.get((p["voornaam"].lower(), p["achternaam"].lower()))
-        rrn = p.pop("rijksregisternummer")
         if m is None:
             nieuw.append({**p, "functie": "speler", "status": "actief", "bron": "import"})
-            if rrn:
-                gevoelig.append((None, p, rrn))
             continue
         velden = {k: v for k, v in p.items() if k in AANVULBAAR and v is not None and not m.get(k)}
         if velden:
             updates.append((m, velden))
-        if rrn:
-            gevoelig.append((m["id"], p, rrn))
 
     print(f"spelerslijst: {len(lijst)} personen | in database: {len(bestaand)} leden")
     print(f"  nieuw toe te voegen: {len(nieuw)}: " + ", ".join(f"{p['voornaam']} {p['achternaam']}" for p in nieuw))
     print(f"  bestaand aan te vullen: {len(updates)}: " + ", ".join(f"{m['voornaam']} {m['achternaam']} ({', '.join(v)})" for m, v in updates))
-    print(f"  rijksregisternummers: {len(gevoelig)}")
     if dry_run:
         print("dry-run: niets geschreven")
         return 0
@@ -157,23 +149,7 @@ def main() -> int:
         if resp.status_code >= 300:
             print("update mislukt:", m["voornaam"], resp.status_code, resp.text[:300])
             return 1
-
-    # ids ophalen voor de gevoelige gegevens
-    na = db.select("members", "id,email,voornaam,achternaam")
-    op_email = {(m["email"] or "").lower(): m for m in na if m.get("email")}
-    op_naam = {((m["voornaam"] or "").lower(), (m["achternaam"] or "").lower()): m for m in na}
-    rijen = []
-    for member_id, p, rrn in gevoelig:
-        if member_id is None:
-            m = (op_email.get(p["email"]) if p["email"] else None) or op_naam.get((p["voornaam"].lower(), p["achternaam"].lower()))
-            member_id = m["id"] if m else None
-        if member_id:
-            rijen.append({"member_id": member_id, "rijksregisternummer": rrn})
-    bestaand_rrn = {g["member_id"] for g in db.select("members_gevoelig", "member_id,rijksregisternummer") if g.get("rijksregisternummer")}
-    rijen = [r for r in rijen if r["member_id"] not in bestaand_rrn]
-    if rijen:
-        db.upsert("members_gevoelig", rijen, ["member_id"])
-    print(f"klaar: {len(nieuw)} toegevoegd, {len(updates)} aangevuld, {len(rijen)} rijksregisternummers bewaard")
+    print(f"klaar: {len(nieuw)} toegevoegd, {len(updates)} aangevuld")
     return 0
 
 

@@ -1,7 +1,7 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  adminOntkoppelAccount, adminVerwijderLid, adminZetWachtwoord, bewaarGevoelig, haalGevoelig, haalLeden,
+  adminOntkoppelAccount, adminVerwijderLid, adminZetWachtwoord, haalLeden,
   haalLedenBasis, haalLid, haalLidBasis, voegLidToe, wijzigLid,
 } from "../lib/api";
 import { rechten, useAuth } from "../lib/auth";
@@ -120,14 +120,6 @@ export function LidDetail() {
   const data = useAsync<Member | MemberBasis | null>(() => (r.zietGegevens ? haalLid(id!) : haalLidBasis(id!)), [id, r.zietGegevens]);
   const [fout, setFout] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [rrn, setRrn] = useState<string>("");
-  const [rrnGeladen, setRrnGeladen] = useState(false);
-
-  useEffect(() => {
-    setRrnGeladen(false);
-    if (!r.isAdmin || !id) return;
-    haalGevoelig(id).then((g) => { setRrn(g?.rijksregisternummer ?? ""); setRrnGeladen(true); }).catch((e) => setFout(foutTekst(e)));
-  }, [id, r.isAdmin]);
 
   if (data.laden) return <Laden />;
   const m = data.data;
@@ -146,6 +138,12 @@ export function LidDetail() {
     } catch (e) {
       setFout(foutTekst(e));
     }
+  }
+
+  async function volledigVerwijderen(v: Member) {
+    if (!confirm(`${v.naam} volledig verwijderen? Zowel het account als alle gegevens (adres, telefoon, geboortedatum) verdwijnen.`)) return;
+    if (!confirm(`Ben je zeker? Dit kan niet ongedaan gemaakt worden. ${v.naam} wordt definitief verwijderd.`)) return;
+    await doe(async () => { await adminVerwijderLid(v.id); navigate("/leden"); }, "");
   }
 
   async function afwijzen(v: Member) {
@@ -199,15 +197,6 @@ export function LidDetail() {
                 </div>
               )}
               <LidFormulier lid={vol} onOpslaan={(velden) => doe(() => wijzigLid(vol.id, velden), "Gegevens opgeslagen.")} />
-              {rrnGeladen && (
-                <div className="veld" style={{ marginTop: 10 }}>
-                  <label>Rijksregisternummer (alleen zichtbaar voor admins en de persoon zelf)</label>
-                  <div className="rij" style={{ gap: 6 }}>
-                    <input value={rrn} onChange={(e) => setRrn(e.target.value)} placeholder="JJ.MM.DD-XXX.XX" />
-                    <button type="button" className="knop licht klein" onClick={() => doe(() => bewaarGevoelig(vol.id, rrn.trim() || null), "Rijksregisternummer opgeslagen.")}>Opslaan</button>
-                  </div>
-                </div>
-              )}
               <div className="knoppen" style={{ marginTop: 10 }}>
                 {vol.status === "actief" && <button type="button" className="knop licht" onClick={() => doe(() => wijzigLid(vol.id, { status: "inactief" }), "Lid gedeactiveerd.")}>Deactiveren</button>}
                 {vol.status === "inactief" && <button type="button" className="knop licht" onClick={() => doe(() => wijzigLid(vol.id, { status: "actief" }), "Lid opnieuw actief.")}>Opnieuw activeren</button>}
@@ -226,7 +215,7 @@ export function LidDetail() {
                   <button type="button" className="knop licht" onClick={() => { if (confirm(`Account van ${vol.naam} verwijderen? De gegevens blijven staan; bij een nieuwe registratie worden ze opnieuw gekoppeld.`)) doe(() => adminOntkoppelAccount(vol.id), "Account verwijderd, gegevens bewaard."); }}>Account verwijderen</button>
                 )}
                 {!vol.is_hoofdadmin && vol.id !== lid?.id && (
-                  <button type="button" className="knop gevaar" onClick={() => { if (confirm(`${vol.naam} volledig verwijderen, inclusief gegevens en account? Dit kan niet ongedaan gemaakt worden.`)) doe(async () => { await adminVerwijderLid(vol.id); navigate("/leden"); }, ""); }}>Volledig verwijderen</button>
+                  <button type="button" className="knop gevaar" onClick={() => volledigVerwijderen(vol)}>Volledig verwijderen</button>
                 )}
               </div>
             </>
