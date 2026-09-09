@@ -32,6 +32,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
   const [namenOpen, setNamenOpen] = useState(false);
   const [anderen, setAnderen] = useState(false);
   const [lijst24, setLijst24] = useState<Aanwezigheid24u[] | null>(null);
+  const [lijst24Laden, setLijst24Laden] = useState(false);
   const magWijzigen = magAanwezigheidWijzigen(match);
   const perLid = new Map(aanwezigheden.filter((a) => a.match_key === match.match_key).map((a) => [a.member_id, a.status]));
   const eigenStatus = eigenLidId ? perLid.get(eigenLidId) : undefined;
@@ -50,10 +51,15 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
   }
 
   async function haal24() {
+    if (lijst24 !== null) { setLijst24(null); return; }
+    if (lijst24Laden) return;
+    setLijst24Laden(true);
     try {
       setLijst24(await aanwezigheden24u(match.match_key));
     } catch (e) {
       setFout(foutTekst(e));
+    } finally {
+      setLijst24Laden(false);
     }
   }
 
@@ -121,7 +127,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
       )}
       {isAdmin && (
         <div style={{ marginTop: 8 }}>
-          <button type="button" className="knop licht klein" onClick={haal24}>Lijst 24 u voor aftrap</button>
+          <button type="button" className="knop licht klein" disabled={lijst24Laden} aria-expanded={lijst24 !== null} onClick={haal24}>{lijst24Laden ? "Lijst laden…" : lijst24 !== null ? "Lijst 24 u voor aftrap verbergen" : "Lijst 24 u voor aftrap"}</button>
           {lijst24 && (
             <ul className="lijst omrand log" style={{ marginTop: 8 }}>
               {lijst24.length === 0 && <li className="zacht">Niemand had toen al iets aangegeven.</li>}
