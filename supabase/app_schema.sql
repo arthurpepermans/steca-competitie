@@ -27,6 +27,19 @@ create unique index if not exists members_een_hoofdadmin on members (is_hoofdadm
 alter table members add column if not exists voornaam text;
 alter table members add column if not exists achternaam text;
 alter table members add column if not exists speelt boolean not null default false;
+alter table members add column if not exists nationaliteit text;
+alter table members add column if not exists nr integer;                 -- volgnummer op de spelerslijst
+alter table members add column if not exists ingeschreven boolean;       -- ingeschreven bij de federatie
+alter table members add column if not exists mail_inschrijving boolean;
+alter table members add column if not exists bron text not null default 'registratie';  -- import | registratie | admin
+create index if not exists members_email_idx on members (lower(email));
+
+-- Gevoelige gegevens apart: alleen admins en de persoon zelf kunnen ze lezen.
+create table if not exists members_gevoelig (
+  member_id           uuid primary key references members (id) on delete cascade,
+  rijksregisternummer text,
+  updated_at          timestamptz not null default now()
+);
 update members
    set voornaam = split_part(naam, ' ', 1),
        achternaam = nullif(trim(substr(naam, length(split_part(naam, ' ', 1)) + 1)), '')
@@ -48,27 +61,51 @@ drop trigger if exists members_naam on members;
 create trigger members_naam before insert or update on members
   for each row execute function members_naam();
 
--- Bij registratie (auth.users) automatisch een lid aanmaken. Het allereerste lid wordt hoofdadmin.
+-- Bij registratie (auth.users) het account koppelen aan een bestaand lid, of een nieuw lid aanmaken.
+-- 1. Lid zonder account met hetzelfde e-mailadres: koppelen, gegevens blijven, geen goedkeuring nodig.
+-- 2. Lid zonder account met dezelfde voor- en achternaam: koppelen, maar een admin moet goedkeuren
+--    (tot dan blijven de persoonlijke gegevens onzichtbaar, zie mijn_lid()).
+-- 3. Anders: nieuw lid dat wacht op goedkeuring. Het allereerste lid ooit wordt hoofdadmin.
 create or replace function handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
   eerste boolean;
   v_functie text := coalesce(new.raw_user_meta_data->>'functie', 'speler');
+  v_voornaam text := nullif(trim(coalesce(new.raw_user_meta_data->>'voornaam', '')), '');
+  v_achternaam text := nullif(trim(coalesce(new.raw_user_meta_data->>'achternaam', '')), '');
+  v_id uuid;
 begin
   if v_functie not in ('speler', 'spelercoach', 'coach', 'verantwoordelijke', 'supporter') then
     v_functie := 'speler';
   end if;
+  select id into v_id from members
+   where user_id is null and lower(email) = lower(new.email)
+   order by aangemaakt_op limit 1;
+  if v_id is not null then
+    update members
+       set user_id = new.id,
+           status = case when status = 'inactief' then 'wacht_op_goedkeuring' else status end
+     where id = v_id;
+    return new;
+  end if;
+  if v_voornaam is not null and v_achternaam is not null then
+    select id into v_id from members
+     where user_id is null and lower(voornaam) = lower(v_voornaam) and lower(achternaam) = lower(v_achternaam)
+     order by aangemaakt_op limit 1;
+    if v_id is not null then
+      update members set user_id = new.id, status = 'wacht_op_goedkeuring' where id = v_id;
+      return new;
+    end if;
+  end if;
   select not exists (select 1 from members) into eerste;
-  insert into members (user_id, naam, voornaam, achternaam, email, functie, status, is_admin, is_hoofdadmin)
+  insert into members (user_id, naam, voornaam, achternaam, email, functie, status, is_admin, is_hoofdadmin, bron)
   values (
     new.id,
     coalesce(nullif(trim(new.raw_user_meta_data->>'naam'), ''), split_part(new.email, '@', 1)),
-    nullif(trim(coalesce(new.raw_user_meta_data->>'voornaam', '')), ''),
-    nullif(trim(coalesce(new.raw_user_meta_data->>'achternaam', '')), ''),
-    new.email,
+    v_voornaam, v_achternaam, new.email,
     case when eerste then 'verantwoordelijke' else v_functie end,
     case when eerste then 'actief' else 'wacht_op_goedkeuring' end,
-    eerste, eerste
+    eerste, eerste, 'registratie'
   );
   return new;
 end $$;
@@ -150,9 +187,45 @@ drop trigger if exists members_guard on members;
 create trigger members_guard before update on members
   for each row execute function members_guard();
 
+-- Eigen lidgegevens voor de app. Zolang het lid niet actief is, blijven de persoonlijke velden leeg:
+-- een registratie die op naam gekoppeld is, mag die gegevens pas zien na goedkeuring.
+create or replace function mijn_lid() returns members
+language plpgsql stable security definer set search_path = public as $$
+declare
+  r members;
+begin
+  select * into r from members where user_id = auth.uid();
+  if r.id is not null and r.status <> 'actief' then
+    r.telefoon := null; r.geboortedatum := null; r.adres := null; r.nationaliteit := null; r.nr := null;
+  end if;
+  return r;
+end $$;
+revoke all on function mijn_lid() from public, anon;
+grant execute on function mijn_lid() to authenticated;
+
+-- Gevoelige gegevens: admins en de persoon zelf; de hoofdadmin alleen door zichzelf.
+create or replace function members_gevoelig_guard() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then
+    return new;
+  end if;
+  if exists (select 1 from members where id = new.member_id and is_hoofdadmin)
+     and not is_hoofdadmin() then
+    raise exception 'de gegevens van de hoofdadmin kunnen alleen door de hoofdadmin zelf gewijzigd worden';
+  end if;
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists members_gevoelig_guard on members_gevoelig;
+create trigger members_gevoelig_guard before insert or update on members_gevoelig
+  for each row execute function members_gevoelig_guard();
+
 -- Beperkte weergave voor supporters: alleen naam en functie.
 create or replace view members_basis as
-  select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam, speelt from members;
+  select id, naam, functie, status, is_admin, is_hoofdadmin, voornaam, achternaam, speelt,
+         (user_id is not null) as heeft_account
+  from members;
 revoke all on members_basis from anon;
 grant select on members_basis to authenticated;
 
@@ -183,6 +256,9 @@ begin
 end $$;
 drop trigger if exists members_log on members;
 create trigger members_log after insert or update or delete on members
+  for each row execute function log_wijziging();
+drop trigger if exists members_gevoelig_log on members_gevoelig;
+create trigger members_gevoelig_log after insert or update or delete on members_gevoelig
   for each row execute function log_wijziging();
 
 -- ---------------------------------------------------------- aanwezigheden
@@ -340,7 +416,33 @@ end $$;
 revoke all on function admin_set_password(uuid, text) from public, anon;
 grant execute on function admin_set_password(uuid, text) to authenticated;
 
--- Lid en account verwijderen (bv. afgewezen registratie). Niet voor de hoofdadmin. Wordt gelogd.
+-- Account loskoppelen: het inlogaccount verdwijnt, de gegevens van het lid blijven staan.
+-- Registreert de persoon later opnieuw (zelfde e-mailadres of naam), dan wordt hij weer gekoppeld.
+create or replace function admin_ontkoppel_account(p_member_id uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  v_user uuid;
+  v_hoofd boolean;
+  v_naam text;
+begin
+  if not is_admin() then
+    raise exception 'alleen admins';
+  end if;
+  select user_id, is_hoofdadmin, naam into v_user, v_hoofd, v_naam from members where id = p_member_id;
+  if v_hoofd then
+    raise exception 'het account van de hoofdadmin kan niet verwijderd worden';
+  end if;
+  if v_user is null then
+    raise exception 'dit lid heeft geen account';
+  end if;
+  insert into audit_log (tabel, rij_id, actie, oud, door, door_user)
+  values ('members', p_member_id::text, 'ACCOUNT_VERWIJDERD', jsonb_build_object('naam', v_naam, 'user_id', v_user), my_member_id(), auth.uid());
+  delete from auth.users where id = v_user;  -- members.user_id wordt automatisch null
+end $$;
+revoke all on function admin_ontkoppel_account(uuid) from public, anon;
+grant execute on function admin_ontkoppel_account(uuid) to authenticated;
+
+-- Lid volledig verwijderen: gegevens én account (bv. een foute registratie). Niet voor de hoofdadmin. Wordt gelogd.
 create or replace function admin_verwijder_lid(p_member_id uuid) returns void
 language plpgsql security definer set search_path = public as $$
 declare
@@ -368,6 +470,7 @@ grant execute on function admin_verwijder_lid(uuid) to authenticated;
 -- ------------------------------------------------------- toegangsregels
 
 alter table members enable row level security;
+alter table members_gevoelig enable row level security;
 alter table attendance enable row level security;
 alter table lineups enable row level security;
 alter table lineup_players enable row level security;
@@ -377,11 +480,22 @@ alter table audit_log enable row level security;
 -- leden
 drop policy if exists "leden lezen" on members;
 create policy "leden lezen" on members for select to authenticated
-  using (user_id = auth.uid() or is_admin() or (is_actief() and not is_supporter()));
+  using ((user_id = auth.uid() and status = 'actief') or is_admin() or (is_actief() and not is_supporter()));
+drop policy if exists "leden toevoegen" on members;
+create policy "leden toevoegen" on members for insert to authenticated with check (is_admin());
 drop policy if exists "leden wijzigen" on members;
 create policy "leden wijzigen" on members for update to authenticated
   using (user_id = auth.uid() or is_admin())
   with check (user_id = auth.uid() or is_admin());
+
+-- gevoelige gegevens
+drop policy if exists "gevoelig lezen" on members_gevoelig;
+create policy "gevoelig lezen" on members_gevoelig for select to authenticated
+  using (is_admin() or member_id = my_member_id());
+drop policy if exists "gevoelig schrijven" on members_gevoelig;
+create policy "gevoelig schrijven" on members_gevoelig for all to authenticated
+  using (is_admin() or (is_actief() and member_id = my_member_id()))
+  with check (is_admin() or (is_actief() and member_id = my_member_id()));
 
 -- aanwezigheden
 drop policy if exists "aanwezigheid lezen" on attendance;
@@ -410,9 +524,10 @@ create policy "statistieken lezen" on match_stats for select to authenticated us
 drop policy if exists "statistieken beheren" on match_stats;
 create policy "statistieken beheren" on match_stats for all to authenticated using (is_staf()) with check (is_staf());
 
--- logboek: staf en admins lezen; schrijven gebeurt alleen via triggers
+-- logboek: admins lezen alles; staf alleen wedstrijdgebonden tabellen (ledengegevens staan er ook in)
 drop policy if exists "logboek lezen" on audit_log;
-create policy "logboek lezen" on audit_log for select to authenticated using (is_staf());
+create policy "logboek lezen" on audit_log for select to authenticated
+  using (is_admin() or (is_staf() and tabel in ('match_stats', 'lineups', 'lineup_players', 'attendance')));
 
 -- Synctabellen: alleen ingelogde leden lezen (de sync schrijft met de service-role key).
 drop policy if exists "publiek lezen" on teams;

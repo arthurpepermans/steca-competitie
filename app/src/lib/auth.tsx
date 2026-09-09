@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
+import { mijnLid } from "./api";
 import { GEGEVENS_VERPLICHT } from "./config";
 import type { Member } from "./types";
 
@@ -39,9 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLidKlaar(true);
       return;
     }
-    const { data, error } = await supabase.from("members").select("*").eq("user_id", session.user.id).maybeSingle();
-    setFout(error ? error.message : null);
-    setLid((data as Member | null) ?? null);
+    try {
+      setLid(await mijnLid());
+      setFout(null);
+    } catch (e) {
+      setFout(e instanceof Error ? e.message : String(e));
+      setLid(null);
+    }
     setLidKlaar(true);
   }, [session]);
 

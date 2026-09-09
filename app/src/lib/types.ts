@@ -73,6 +73,10 @@ export type Member = {
   achternaam: string | null;
   speelt: boolean; // afgeleid uit de functie: speler, spelercoach en verantwoordelijke tellen mee als speler
   functie: Functie;
+  nationaliteit: string | null;
+  nr: number | null;
+  ingeschreven: boolean | null;
+  bron: "import" | "registratie" | "admin";
   email: string;
   telefoon: string | null;
   geboortedatum: string | null;
@@ -84,7 +88,9 @@ export type Member = {
 };
 
 /** Beperkte weergave (view members_basis) voor supporters. */
-export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "speelt" | "functie" | "status" | "is_admin" | "is_hoofdadmin">;
+export type MemberBasis = Pick<Member, "id" | "naam" | "voornaam" | "achternaam" | "speelt" | "functie" | "status" | "is_admin" | "is_hoofdadmin"> & { heeft_account: boolean };
+
+export type MemberGevoelig = { member_id: string; rijksregisternummer: string | null };
 
 export type AanwezigheidStatus = "aanwezig" | "afwezig" | "onzeker";
 

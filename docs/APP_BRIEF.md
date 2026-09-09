@@ -11,7 +11,15 @@ seizoen opgeslagen zodat volgende seizoenen erbij kunnen.
 - **Registreren**: iedereen kan een account aanmaken via de registratiepagina. Een QR-code naar die
   pagina wordt meegeleverd om te delen in de kleedkamer of groepschat. Na registratie staat het
   account op "wacht op goedkeuring" en ziet de persoon alleen dat scherm.
-- **Goedkeuren**: een admin keurt goed, kent de functie toe en kan gegevens aanpassen.
+- **Spelerslijst als basis**: de leden staan in de database, ook zonder account (geïmporteerd uit de
+  spelerslijst of door een admin toegevoegd). Een account is een koppeling aan zo'n lid. Bij registratie
+  met hetzelfde e-mailadres als in de lijst wordt het account meteen gekoppeld en actief; met dezelfde
+  voor- en achternaam maar een ander e-mailadres wordt het gekoppeld maar moet een admin eerst goedkeuren
+  (tot dan blijven de persoonlijke gegevens onzichtbaar). Wordt een account verwijderd, dan blijven de
+  gegevens van het lid staan en wordt een latere registratie er opnieuw aan gekoppeld.
+- **Goedkeuren**: een admin keurt goed, kent de functie toe en kan gegevens aanpassen. Admins kunnen ook
+  zelf leden toevoegen zonder account.
+- **Rijksregisternummer** staat in een aparte tabel die alleen admins en de persoon zelf kunnen lezen.
 - **Wachtwoorden** kiest iedereen zelf bij registratie. Ze worden gehasht opgeslagen door Supabase
   Auth; niemand kan ze lezen, ook admins niet. Iedereen kan zijn eigen wachtwoord wijzigen. Een
   admin kan voor elk lid een nieuw wachtwoord instellen, ook voor andere admins, maar niet voor de
