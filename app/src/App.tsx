@@ -10,11 +10,13 @@ import { Ploegen, PloegDetail } from "./pages/Ploegen";
 import { Opstelling } from "./pages/Opstelling";
 import { Leden, LidDetail } from "./pages/Leden";
 import { Profiel } from "./pages/Profiel";
+import { Supporters } from "./pages/Supporters";
 
 function Poort() {
   const { klaar, session, lid, fout } = useAuth();
   const locatie = useLocation();
   if (!klaar) return <Laden tekst="Even geduld…" />;
+  if (locatie.pathname === "/supporters") return <Supporters />;
 
   if (!session) {
     return (
