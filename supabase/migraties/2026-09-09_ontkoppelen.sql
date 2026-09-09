@@ -1,9 +1,11 @@
 -- Migratie 2026-09-09: 'Account verwijderen' bij een lid faalde met
 -- 'de koppeling met het account kan niet gewijzigd worden'.
 -- Oorzaak: het verwijderen van de auth-gebruiker zet members.user_id op null (on delete set null),
--- en die update liep tegen de trigger members_guard aan. De admin-functie zet nu een vlag
--- voor de duur van de transactie en de trigger laat die update door.
--- Plakken in de Supabase SQL Editor en uitvoeren. Veilig om meerdere keren te draaien.
+-- en die update liep tegen de trigger members_guard aan.
+-- Oplossing: een admin mag een koppeling verwijderen (naar null), nooit leggen of verleggen;
+-- daarnaast zet admin_ontkoppel_account een vlag voor de duur van de transactie.
+-- Plakken in de Supabase SQL Editor en op Run klikken. Veilig om meerdere keren te draaien.
+-- Onderaan verschijnt een controle: beide regels moeten fix_aanwezig = true tonen.
 
 create or replace function members_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
@@ -37,7 +39,8 @@ begin
     if new.is_hoofdadmin <> old.is_hoofdadmin then
       raise exception 'de hoofdadmin-vlag kan niet gewijzigd worden';
     end if;
-    if new.user_id is distinct from old.user_id then
+    if new.user_id is distinct from old.user_id and new.user_id is not null then
+      -- een admin mag een koppeling wel verwijderen (account weg), maar nooit zelf leggen of verleggen
       raise exception 'de koppeling met het account kan niet gewijzigd worden';
     end if;
   end if;
@@ -69,3 +72,7 @@ begin
   perform set_config('steca.ontkoppelen', 'ja', true);
   delete from auth.users where id = v_user;  -- members.user_id wordt automatisch null
 end $$;
+
+-- Controle: beide regels moeten true tonen.
+select proname, prosrc like '%steca.ontkoppelen%' as fix_aanwezig
+from pg_proc where proname in ('members_guard', 'admin_ontkoppel_account') order by 1;

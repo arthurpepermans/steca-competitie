@@ -172,7 +172,8 @@ begin
     if new.is_hoofdadmin <> old.is_hoofdadmin then
       raise exception 'de hoofdadmin-vlag kan niet gewijzigd worden';
     end if;
-    if new.user_id is distinct from old.user_id then
+    if new.user_id is distinct from old.user_id and new.user_id is not null then
+      -- een admin mag een koppeling wel verwijderen (account weg), maar nooit zelf leggen of verleggen
       raise exception 'de koppeling met het account kan niet gewijzigd worden';
     end if;
   end if;
