@@ -145,7 +145,8 @@ language plpgsql security definer set search_path = public as $$
 declare
   ik members;
 begin
-  if auth.uid() is null then  -- service-role of SQL Editor: alles mag
+  if auth.uid() is null or current_setting('steca.ontkoppelen', true) = 'ja' then
+    -- service-role, SQL Editor, of admin_ontkoppel_account dat een account loskoppelt: alles mag
     new.updated_at := now();
     return new;
   end if;
@@ -411,6 +412,9 @@ begin
   end if;
   insert into audit_log (tabel, rij_id, actie, oud, door, door_user)
   values ('members', p_member_id::text, 'ACCOUNT_VERWIJDERD', jsonb_build_object('naam', v_naam, 'user_id', v_user), my_member_id(), auth.uid());
+  -- het verwijderen zet members.user_id op null (on delete set null); die update mag niet
+  -- tegen members_guard aanlopen, dus zetten we een vlag voor de duur van deze transactie
+  perform set_config('steca.ontkoppelen', 'ja', true);
   delete from auth.users where id = v_user;  -- members.user_id wordt automatisch null
 end $$;
 revoke all on function admin_ontkoppel_account(uuid) from public, anon;
