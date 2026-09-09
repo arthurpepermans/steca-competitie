@@ -10,6 +10,7 @@ import { Moon } from "@phosphor-icons/react/dist/csr/Moon";
 import { Sun } from "@phosphor-icons/react/dist/csr/Sun";
 import { useAuth } from "../lib/auth";
 import { NieuweVersie } from "./NieuweVersie";
+import { useNavViewport } from "../lib/useNavViewport";
 
 const TABS = [
   { to: "/", label: "Home", Icon: House },
@@ -23,6 +24,7 @@ const TABS = [
 export function Layout() {
   const { lid } = useAuth();
   const { pathname } = useLocation();
+  const navRef = useNavViewport(pathname);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   const [donker, setDonker] = useState(() => {
     try {
@@ -54,7 +56,7 @@ export function Layout() {
         </div>
       </header>
       <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><Outlet /></main>
-      <nav className="nav" aria-label="Hoofdnavigatie">
+      <nav ref={navRef} className="nav" aria-label="Hoofdnavigatie">
         {TABS.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => isActive ? "actief" : ""}>
             {({ isActive }) => <><Icon size={23} weight={isActive ? "fill" : "regular"} aria-hidden="true" /><span>{label}</span></>}
