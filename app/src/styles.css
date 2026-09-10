@@ -405,3 +405,10 @@ html,body,#root{touch-action:pan-x pan-y}
 .kantine-spel:hover { border-color:var(--tekst); }
 .kantine-spel:focus-visible { outline:3px solid var(--tekst); outline-offset:3px; }
 @media(max-width:600px) { .kantine-start { grid-template-columns:1fr; } }
+
+/* Wasmand onder de bank: tekening links, tekst en keuze rechts. */
+.wasmand-blok { display: flex; gap: 18px; align-items: flex-start; }
+.wasmand-tekening { width: 120px; flex-shrink: 0; }
+.wasmand-tekst { flex: 1; min-width: 0; }
+.wasmand-tekst h3 { margin-bottom: 6px; }
+@media (max-width: 480px) { .wasmand-blok { gap: 12px; } .wasmand-tekening { width: 92px; } }

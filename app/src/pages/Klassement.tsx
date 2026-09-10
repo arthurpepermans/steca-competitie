@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalStemmers } from "../lib/api";
+import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalStemmers, haalWasbeurten } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander } from "../lib/datum";
@@ -11,6 +11,7 @@ import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { StatsInvoer } from "../components/StatsInvoer";
 import { Boetepot } from "../components/Boetepot";
 import { JuniorDor } from "../components/Junior";
+import { WasmandTabel } from "../components/Wasmand";
 
 const KOLOMMEN: { veld: keyof Totalen; label: string }[] = [
   { veld: "goals", label: "Topschutter" },
@@ -24,7 +25,7 @@ const KOLOMMEN: { veld: keyof Totalen; label: string }[] = [
 export function Klassement() {
   const { lid } = useAuth();
   const r = rechten(lid);
-  const [tab, setTab] = useState<"klassement" | "stats" | "boetes" | "junior">("klassement");
+  const [tab, setTab] = useState<"klassement" | "stats" | "boetes" | "junior" | "wasmand">("klassement");
   const [reeks, setReeks] = useState<string | null>(null);
   const [sorteer, setSorteer] = useState<keyof Totalen>("goals");
   const [invoerMatch, setInvoerMatch] = useState<string>("");
@@ -35,6 +36,7 @@ export function Klassement() {
   const boetes = useAsync(haalBoetes);
   const stemPunten = useAsync(haalStemPunten);
   const stemmers = useAsync(haalStemmers);
+  const wasbeurten = useAsync(haalWasbeurten);
 
   if (klassement.laden || matches.laden || leden.laden || stats.laden || boetes.laden || stemPunten.laden) return <Laden />;
   const rijen = klassement.data ?? [];
@@ -56,6 +58,7 @@ export function Klassement() {
         <button className={tab === "stats" ? "actief" : ""} onClick={() => setTab("stats")}>Statistieken</button>
         <button className={tab === "boetes" ? "actief" : ""} onClick={() => setTab("boetes")}>Boetepot</button>
         <button className={tab === "junior" ? "actief" : ""} onClick={() => setTab("junior")}>Junior d'or</button>
+        <button className={tab === "wasmand" ? "actief" : ""} onClick={() => setTab("wasmand")}>Wasmand</button>
       </div>
 
       {tab === "klassement" && (
@@ -113,6 +116,13 @@ export function Klassement() {
 
       {tab === "boetes" && (
         <Boetepot fines={boetes.data ?? []} stats={stats.data ?? []} matches={eigenMatches} spelers={spelers} ledenNamen={ledenNamen} eigenLidId={lid?.id ?? null} isStaf={r.isStaf} onGewijzigd={boetes.herlaad} />
+      )}
+
+      {tab === "wasmand" && (
+        <>
+          <Fout tekst={wasbeurten.fout} />
+          <WasmandTabel matches={eigenMatches} beurten={wasbeurten.data ?? []} ledenNamen={ledenNamen} eigenLidId={lid?.id ?? null} />
+        </>
       )}
 
       {tab === "junior" && (
