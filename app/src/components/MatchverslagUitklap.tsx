@@ -23,7 +23,6 @@ export function MatchverslagUitklap({ match, verslag, stats, spelers, isStaf, on
   return (
     <div className="verslag-uitklap">
       <div className="verslag-uitklap-kop">
-        <span>Matchverslag</span>
         <button type="button" className="knop-rond" aria-expanded={open} aria-controls={id} aria-label={open ? "Matchverslag dichtklappen" : "Matchverslag openklappen"} onClick={() => setOpen(!open)}>
           {open ? <CaretUp size={20} weight="bold" aria-hidden="true" /> : <CaretDown size={20} weight="bold" aria-hidden="true" />}
         </button>
