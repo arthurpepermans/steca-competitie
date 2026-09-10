@@ -45,7 +45,7 @@ export function SpelerStatistieken({ memberId }: { memberId: string }) {
   return (
     <div className="kaart">
       <h3>Statistieken dit seizoen</h3>
-      <div className="stand-statistieken">
+      <div className="stand-statistieken speler-cijfers">
         {tegels.map(([n, label]) => <div key={label}><strong>{n}</strong><span>{label}</span></div>)}
       </div>
       <p>

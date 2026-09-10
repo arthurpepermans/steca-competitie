@@ -335,3 +335,6 @@ html,body,#root{touch-action:pan-x pan-y}
 .positie-slot { min-width:46px; display:grid; place-items:center; padding:8px; }
 .positie-slot[aria-pressed="true"] { background:var(--accent); color:var(--op-accent); border-color:var(--tekst); }
 .veld-slot { position:absolute; top:0; right:0; display:grid; place-items:center; padding:3px; border:1px solid #332e24; border-radius:3px; background:#e8bf53; color:#25291f; }
+
+/* Spelersstatistieken op het profiel: elke tegel met een streepje links, ook de eerste. */
+.speler-cijfers > div { border-left: 1px solid var(--rand); padding-left: 14px; }
