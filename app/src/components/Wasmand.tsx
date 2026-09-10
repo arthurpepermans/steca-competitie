@@ -6,30 +6,27 @@ import type { LaundryTurn, Match } from "../lib/types";
 
 type Speler = { id: string; naam: string };
 
-/** Eén truitje in de kleuren van de shirts op het veld: [x, y, draai, schaal, gespiegeld]. */
-function Truitje({ t }: { t: [number, number, number, number, boolean] }) {
-  const [x, y, r, s, flip] = t;
-  return (
-    <g transform={`translate(${x} ${y}) rotate(${r}) scale(${flip ? -s : s} ${s}) translate(-30 -31)`}>
-      <path d="M19 5 9 10 2 25 13 30 17 23 17 57 43 57 43 23 47 30 58 25 51 10 41 5 36 11 24 11Z" fill="#292929" stroke="#171717" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M18 25h24v17H18Z" fill="#f8f5e9" />
-      <path d="M21 6q9 13 18 0M3 24l10 5M47 29l10-5" fill="none" stroke="#f8f5e9" strokeWidth="2.5" />
-    </g>
-  );
-}
-
-// Een hoop truitjes kriskras door elkaar: de achterste steken boven de mand uit, twee hangen over de rand.
-const TRUITJES_ACHTER: [number, number, number, number, boolean][] = [
-  [38, 60, -52, .6, false], [112, 58, 50, .6, true], [57, 46, -18, .62, false], [93, 44, 24, .62, true],
-  [75, 32, 6, .64, false], [66, 62, 88, .56, false], [86, 64, -84, .56, true], [75, 55, 172, .6, false],
-];
-const TRUITJES_VOOR: [number, number, number, number, boolean][] = [[44, 66, -64, .56, false], [107, 68, 62, .56, true]];
-
-/** Wasmand vol voetbaltruitjes, in de kleuren van de shirts op het veld. */
+/** Wasmand vol verfrommelde truitjes, in de kleuren van de shirts op het veld. */
 export function WasmandTekening() {
+  const Z = "#292929", Z2 = "#1c1c1c", Z3 = "#3a3a3a", R = "#f8f5e9", L = "#171717", V = "#4d4d4d";
   return (
     <svg className="wasmand-tekening" viewBox="0 0 150 140" role="img" aria-label="Wasmand vol truitjes">
-      {TRUITJES_ACHTER.map((t, i) => <Truitje key={i} t={t} />)}
+      {/* hoop verfrommelde truitjes achter de rand */}
+      <path d="M18 70c4-14 14-22 24-24 6-12 22-18 34-12 8-10 26-8 32 4 12-2 22 8 22 20 6 2 8 8 6 12Z" fill={Z} stroke={L} strokeWidth="2.5" strokeLinejoin="round" />
+      <g fill="none" stroke={V} strokeWidth="1.6" strokeLinecap="round">
+        <path d="M30 60c6-6 12-8 20-6M46 48c8-4 16-2 20 4M78 38c6 4 8 10 6 16M100 46c6 2 10 8 10 14M56 62c8-2 14 2 18 8M88 60c-6 2-10 6-10 12" />
+      </g>
+      {/* witte stukken van de shirts */}
+      <path d="M52 44l16-8 10 10-14 12-9-4Z" fill={R} stroke={L} strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M60 47c3 3 6 5 10 5" fill="none" stroke="#d8d3c2" strokeWidth="1.4" />
+      <path d="M92 34c10-2 18 4 20 12l-14 6c-3-6-5-10-6-18Z" fill={R} stroke={L} strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M98 40c4 2 7 5 9 9" fill="none" stroke="#d8d3c2" strokeWidth="1.4" />
+      {/* kraagje dat uitsteekt */}
+      <path d="M66 28c4-6 14-6 18 0" fill="none" stroke={R} strokeWidth="3" strokeLinecap="round" />
+      <path d="M69 30c3 4 9 4 12 0" fill="none" stroke={L} strokeWidth="1.5" />
+      {/* donkerder verfrommeld stuk vooraan de hoop */}
+      <path d="M24 70c8-8 22-10 32-4 8-6 22-4 28 4 6-4 18-2 22 6l4 6H20Z" fill={Z2} stroke={L} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M40 70c6-3 12-3 18 0M76 68c6-2 12-1 16 3" fill="none" stroke={V} strokeWidth="1.6" strokeLinecap="round" />
       {/* rieten mand */}
       <path d="M16 70 27 134h96l11-64Z" fill="#c9a24f" stroke="#332e24" strokeWidth="3" strokeLinejoin="round" />
       <g stroke="#8a6a2e" strokeWidth="2" fill="none" opacity=".85">
@@ -38,7 +35,14 @@ export function WasmandTekening() {
       </g>
       <path d="M10 64h130v10H10Z" fill="#d9b565" stroke="#332e24" strokeWidth="3" strokeLinejoin="round" />
       <path d="M10 69c-8 0-8 12 0 12M140 69c8 0 8 12 0 12" fill="none" stroke="#332e24" strokeWidth="3" strokeLinecap="round" />
-      {TRUITJES_VOOR.map((t, i) => <Truitje key={i} t={t} />)}
+      {/* mouw die links over de rand hangt */}
+      <path d="M30 62c-4 8-10 18-8 30 4 3 10 3 14-1 2-10 2-20 4-28Z" fill={Z3} stroke={L} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M22 88c4 3 10 3 14-1" fill="none" stroke={R} strokeWidth="3" strokeLinecap="round" />
+      <path d="M28 70c-1 6-2 12-2 16" fill="none" stroke={V} strokeWidth="1.4" />
+      {/* stuk shirt met witte band dat rechts over de rand hangt */}
+      <path d="M104 62c8 2 16 6 20 12-2 10-6 18-10 24-6-2-12-6-16-12 4-8 6-16 6-24Z" fill={Z} stroke={L} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M102 76c6 2 12 6 16 10l-4 8c-5-3-9-6-14-10Z" fill={R} stroke={L} strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M108 68c2 4 2 8 0 12" fill="none" stroke={V} strokeWidth="1.4" />
     </svg>
   );
 }
@@ -93,7 +97,6 @@ export function WasmandKeuze({ match, beurt, spelers, beschikbaar, isStaf, fout:
               <option value="">Nog niet aangeduid</option>
               {keuzelijst.map((p) => <option key={p.id} value={p.id}>{p.naam}{aanwezigIds.size > 0 && !aanwezigIds.has(p.id) ? " (niet op aanwezig)" : ""}</option>)}
             </select>
-            <span className="klein zacht">De speler krijgt 100 minuten na de aftrap een melding. Zorg dat de mand bij de volgende match terug is.</span>
           </div>
         )}
       </div>
