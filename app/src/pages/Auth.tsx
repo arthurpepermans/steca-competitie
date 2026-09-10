@@ -51,6 +51,7 @@ export function Login() {
 }
 
 export function Registreer({ supporterAccount=false }: { supporterAccount?: boolean }) {
+  const navigate = useNavigate();
   const [voornaam, setVoornaam] = useState("");
   const [achternaam, setAchternaam] = useState("");
   const [email, setEmail] = useState("");
@@ -70,7 +71,7 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: wachtwoord,
-      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie, account_type: supporterAccount ? "supporter" : "club" } },
+      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie: supporterAccount ? "supporter" : functie, account_type: supporterAccount ? "supporter" : "club" } },
     });
     setBezig(false);
     if (error) return setFout(error.message);
@@ -88,17 +89,21 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
 
   return (
     <Kader titel={supporterAccount ? "Supporteraccount aanmaken" : "Account aanmaken"}>
+      <div className="tabs" role="group" aria-label="Soort account">
+        <button type="button" disabled={bezig} className={!supporterAccount ? "actief" : ""} aria-pressed={!supporterAccount} onClick={() => navigate("/registreer")}>Speler / clublid</button>
+        <button type="button" disabled={bezig} className={supporterAccount ? "actief" : ""} aria-pressed={supporterAccount} onClick={() => navigate("/supporter-account")}>Supporter</button>
+      </div>
       <form onSubmit={submit}>
         {fout && <div className="melding fout">{fout}</div>}
         <div className="veld"><label>Voornaam</label><input value={voornaam} onChange={(e) => setVoornaam(e.target.value)} required autoComplete="given-name" /></div>
         <div className="veld"><label>Achternaam</label><input value={achternaam} onChange={(e) => setAchternaam(e.target.value)} required autoComplete="family-name" /></div>
         <div className="veld"><label>E-mailadres</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></div>
-        <div className="veld">
-          <label>Ik ben</label>
-          <select disabled={supporterAccount} value={supporterAccount ? "supporter" : functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-            {supporterAccount && <option value="supporter">Supporter (pronostieken)</option>}{supporterAccount && <option value="supporter">Supporter (pronostieken)</option>}{FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+        {!supporterAccount && <div className="veld">
+          <label htmlFor="registratie-functie">Ik ben</label>
+          <select id="registratie-functie" value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
+            {FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
           </select>
-        </div>
+        </div>}
         <div className="veld"><label>Wachtwoord (minstens 8 tekens)</label><input type="password" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} required autoComplete="new-password" /></div>
         <div className="veld"><label>Wachtwoord herhalen</label><input type="password" value={herhaal} onChange={(e) => setHerhaal(e.target.value)} required autoComplete="new-password" /></div>
         <button className="knop breed" disabled={bezig}>Account aanmaken</button>

@@ -1147,3 +1147,72 @@ create policy "wasmand beheren" on laundry_turns for all to authenticated using 
 drop policy if exists "logboek lezen" on audit_log;
 create policy "logboek lezen" on audit_log for select to authenticated
   using (is_admin() or (is_staf() and tabel in ('match_stats', 'lineups', 'lineup_players', 'attendance', 'fines', 'laundry_turns')));
+
+-- Accounttype wijzigen zonder wedstrijdhistoriek of persoonlijke pronostieken te wissen.
+alter table public.supporter_profiles add column if not exists member_id uuid unique references public.members(id) on delete set null;
+create or replace function public.admin_supporters() returns table(id uuid,naam text,actief boolean,heeft_account boolean)
+language plpgsql stable security definer set search_path=public as $$
+begin
+ if not is_admin() then raise exception 'Alleen een beheerder mag supporters beheren.'; end if;
+ return query select s.user_id,s.naam,s.actief,true from supporter_profiles s
+ union all select m.id,m.naam,m.status='actief',m.user_id is not null from members m
+ where m.functie='supporter' and not exists(select 1 from supporter_profiles s where s.member_id=m.id or s.user_id=m.user_id)
+ order by 2;
+end $$;
+revoke all on function public.admin_supporters() from public,anon;
+grant execute on function public.admin_supporters() to authenticated;
+
+create or replace function public.admin_accountfunctie(p_id uuid,p_functie text) returns uuid
+language plpgsql security definer set search_path=public as $$
+declare s supporter_profiles; m members; u auth.users; doel uuid; vorige text; actor uuid; instelling text;
+begin
+ if not is_admin() then raise exception 'Alleen een beheerder mag functies wijzigen.'; end if;
+ if p_functie is null or p_functie not in ('speler','spelercoach','coach','verantwoordelijke','supporter') then raise exception 'Ongeldige functie.'; end if;
+ actor:=my_member_id();
+ perform pg_advisory_xact_lock(hashtextextended('steca-accountfunctie',0));
+ select * into s from supporter_profiles where user_id=p_id for update;
+ if s.user_id is not null then
+   if p_functie='supporter' then return s.user_id; end if;
+   select * into u from auth.users where id=s.user_id;
+   if u.id is null then raise exception 'Account niet gevonden.'; end if;
+   if exists(select 1 from members where user_id=u.id) then raise exception 'Dit account is al aan een clublid gekoppeld.'; end if;
+   if s.member_id is not null then
+     select * into m from members where id=s.member_id for update;
+     if m.user_id is not null or m.is_hoofdadmin then raise exception 'Historisch profiel is al gekoppeld.'; end if;
+   end if;
+   instelling:=current_setting('steca.ontkoppelen',true);
+   perform set_config('steca.ontkoppelen','ja',true);
+   if m.id is not null then
+     update members set user_id=u.id,functie=p_functie,status='actief',is_admin=false,email=u.email where id=m.id;
+     doel:=m.id;
+   else
+     insert into members(user_id,naam,voornaam,achternaam,email,functie,status,bron)
+     values(u.id,s.naam,coalesce(nullif(u.raw_user_meta_data->>'voornaam',''),split_part(s.naam,' ',1)),
+       coalesce(nullif(u.raw_user_meta_data->>'achternaam',''),nullif(trim(substr(s.naam,length(split_part(s.naam,' ',1))+1)),'')),u.email,p_functie,'actief','admin') returning id into doel;
+   end if;
+   perform set_config('steca.ontkoppelen',coalesce(instelling,''),true);
+   delete from supporter_profiles where user_id=u.id;
+   vorige:='supporter';
+ else
+   select * into m from members where id=p_id for update;
+   if m.id is null then raise exception 'Account of lid niet gevonden.'; end if;
+   if m.is_hoofdadmin and p_functie='supporter' then raise exception 'De hoofdadmin kan geen supporter worden.'; end if;
+   if m.is_hoofdadmin and m.id<>actor then raise exception 'Alleen de hoofdadmin mag zijn eigen functie wijzigen.'; end if;
+   vorige:=m.functie;doel:=m.id;
+   if p_functie='supporter' then
+     if m.user_id is not null then
+       insert into supporter_profiles(user_id,naam,actief,member_id) values(m.user_id,m.naam,m.status<>'inactief',m.id);
+       doel:=m.user_id;
+     end if;
+     update members set user_id=null,functie='supporter',status='inactief',is_admin=false where id=m.id;
+     delete from push_subscriptions where member_id=m.id;
+     update push_jobs set status='skipped',fout='Account omgezet naar supporter.',lease_until=null where member_id=m.id and status in ('pending','sending');
+   else
+     update members set functie=p_functie,status=case when functie='supporter' then 'actief' else status end where id=m.id;
+   end if;
+ end if;
+ insert into audit_log(tabel,rij_id,actie,oud,nieuw,door,door_user) values('accountfunctie',doel::text,'UPDATE',jsonb_build_object('functie',vorige),jsonb_build_object('functie',p_functie),actor,auth.uid());
+ return doel;
+end $$;
+revoke all on function public.admin_accountfunctie(uuid,text) from public,anon;
+grant execute on function public.admin_accountfunctie(uuid,text) to authenticated;
