@@ -16,6 +16,7 @@ export function Profiel() {
   const [fout, setFout] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [ww, setWw] = useState("");
+  const [bevestiging, setBevestiging] = useState("");
   const onboarding = !r.gegevensVolledig;
 
   if (!lid) return null;
@@ -38,10 +39,14 @@ export function Profiel() {
 
   async function wachtwoord(e: FormEvent) {
     e.preventDefault();
+    setFout(null);
+    setOk(null);
+    if (ww !== bevestiging) return setFout("De wachtwoorden komen niet overeen.");
     if (ww.length < 8) return setFout("Wachtwoord moet minstens 8 tekens hebben.");
     const { error } = await supabase.auth.updateUser({ password: ww });
     if (error) return setFout(error.message);
     setWw("");
+    setBevestiging("");
     setOk("Wachtwoord gewijzigd.");
   }
 
@@ -65,6 +70,7 @@ export function Profiel() {
             <h3>Wachtwoord wijzigen</h3>
             <form onSubmit={wachtwoord}>
               <div className="veld"><label>Nieuw wachtwoord (minstens 8 tekens)</label><input type="password" value={ww} onChange={(e) => setWw(e.target.value)} autoComplete="new-password" required /></div>
+              <div className="veld"><label htmlFor="bevestig-wachtwoord">Herhaal nieuw wachtwoord</label><input id="bevestig-wachtwoord" type="password" value={bevestiging} onChange={(e) => setBevestiging(e.target.value)} required autoComplete="new-password" /></div>
               <button className="knop licht">Wachtwoord wijzigen</button>
             </form>
           </div>
