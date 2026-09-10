@@ -86,7 +86,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
       <p className="aanwezig-bevestiging" role="status">{bezig ? "Bezig met opslaan…" : eigenStatus ? `Je staat als ${eigenStatus}.` : isSpeler ? "Je hebt nog niet geantwoord." : "Bekijk de aanwezigheid van de ploeg."}</p>
       <div className="rij klein zacht">
         <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")} · nog niets: {zonder.length}</span>
-        <button type="button" className="knop licht klein" onClick={() => setNamenOpen(!namenOpen)}>
+        <button type="button" className="tekst-knop" aria-expanded={namenOpen} onClick={() => setNamenOpen(!namenOpen)}>
           {namenOpen ? "Namen verbergen" : "Namen tonen"}
         </button>
       </div>

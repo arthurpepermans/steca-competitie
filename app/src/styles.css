@@ -378,3 +378,6 @@ html,body,#root{touch-action:pan-x pan-y}
 .meldingen-popup::backdrop { background: #171a17a6; }
 .meldingen-popup h2 { margin-top: 12px; }
 .meldingen-popup .knoppen { margin-top: 24px; }
+
+/* Knop die als tekstlink oogt (Namen tonen bij de aanwezigheden). */
+.tekst-knop { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0; border: none; background: none; color: var(--kleur); font: 600 12px/1.4 "Manrope", sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; white-space: nowrap; }
