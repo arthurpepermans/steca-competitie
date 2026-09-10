@@ -1,4 +1,5 @@
 import { InstallatieHulp } from "../components/InstallatieHulp";
+import { SpelerStatistieken } from "../components/SpelerStatistieken";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { wijzigLid } from "../lib/api";
@@ -56,6 +57,7 @@ export function Profiel() {
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
       </div>
+      {!onboarding && lid.speelt && <SpelerStatistieken memberId={lid.id} />}
       {!onboarding && (
         <>
           <div className="kaart">

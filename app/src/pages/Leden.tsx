@@ -9,6 +9,7 @@ import { FUNCTIES, FUNCTIE_LABEL, type Functie } from "../lib/config";
 import { fmtDatum } from "../lib/datum";
 import { foutTekst, useAsync } from "../lib/useAsync";
 import { Fout, Laden } from "../components/Layout";
+import { SpelerStatistieken } from "../components/SpelerStatistieken";
 import type { LidStatus, Member, MemberBasis } from "../lib/types";
 
 const STATUS_LABEL: Record<LidStatus, string> = { wacht_op_goedkeuring: "wacht op goedkeuring", actief: "actief", inactief: "inactief" };
@@ -183,6 +184,8 @@ export function LidDetail() {
           </>
         )}
       </div>
+
+      {m.speelt && <SpelerStatistieken memberId={m.id} />}
 
       {r.isAdmin && vol && (
         <div className="kaart">
