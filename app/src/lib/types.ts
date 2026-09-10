@@ -186,3 +186,12 @@ export type VoteCount = {
   match_key: string;
   stemmers: number;
 };
+
+/** Wie de wasmand na een match mee naar huis neemt (tabel laundry_turns). */
+export type LaundryTurn = {
+  match_key: string;
+  member_id: string;
+  opmerking: string | null;
+  ingevoerd_door: string | null;
+  updated_at: string;
+};

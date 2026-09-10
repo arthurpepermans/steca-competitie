@@ -1,8 +1,14 @@
-export type Soort = 'aanwezig72' | 'aanwezig48' | 'stemmen' | 'stemherinnering';
-export type Situatie = { aftrap: number; scoreAt: number | null; antwoord: boolean; aanwezig: boolean; gestemd: boolean; eersteVerzonden: number | null; deadline: number };
+export type Soort = 'aanwezig72' | 'aanwezig48' | 'stemmen' | 'stemherinnering' | 'wasmand';
+export type Situatie = { aftrap: number; scoreAt: number | null; antwoord: boolean; aanwezig: boolean; gestemd: boolean; eersteVerzonden: number | null; deadline: number; wasmand?: boolean };
 const UUR = 3600000;
 export function verschuldigd(s: Situatie, nu: number): Soort[] {
   if (!Number.isFinite(s.aftrap)) return [];
+  // De wasmand: één melding vanaf 100 minuten na de aftrap, tot een dag later.
+  const wasmand: Soort[] = s.wasmand && nu >= s.aftrap + 100 * 60000 && nu < s.aftrap + 24 * UUR ? ['wasmand'] : [];
+  return [...wasmand, ...stemEnAanwezig(s, nu)];
+}
+
+function stemEnAanwezig(s: Situatie, nu: number): Soort[] {
   if (!s.antwoord && nu >= s.aftrap - 72 * UUR && nu < s.aftrap) return [nu < s.aftrap - 48 * UUR ? 'aanwezig72' : 'aanwezig48'];
   if (s.scoreAt === null || !s.aanwezig || s.gestemd || nu >= s.deadline || nu < Math.max(s.aftrap + 80 * 60000, s.scoreAt)) return [];
   if (s.eersteVerzonden === null) return ['stemmen'];
@@ -10,6 +16,7 @@ export function verschuldigd(s: Situatie, nu: number): Soort[] {
 }
 export type Uitslag = { thuis_score: number | null; uit_score: number | null; steca_thuis: boolean };
 export function bericht(soort: Soort, tegenstander: string, uitslag?: Uitslag) {
+  if (soort === 'wasmand') return { title: 'KUISVROUW', body: 'De was is voor jou, vergeet de mand niet mee te pakken! Veel succes!' };
   if (soort === 'aanwezig72') return { title: 'Speel je mee?', body: `Nog 72 uur tot de match tegen ${tegenstander}, laat weten of je meedoet bok!` };
   if (soort === 'aanwezig48') return { title: 'Je aanwezigheid ontbreekt nog', body: `Nog 2 dagen tot de confrontatie met ${tegenstander}, laat weten of je erbij bent.` };
   if (uitslag && Number.isInteger(uitslag.thuis_score) && Number.isInteger(uitslag.uit_score)) {

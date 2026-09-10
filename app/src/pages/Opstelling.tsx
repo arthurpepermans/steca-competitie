@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { LockSimple } from "@phosphor-icons/react/dist/csr/LockSimple";
 import { LockSimpleOpen } from "@phosphor-icons/react/dist/csr/LockSimpleOpen";
-import { bewaarOpstellingAutomatisch, haalAanwezigheden, haalLedenBasis, haalMatches, haalOpstellingSpelers, haalOpstellingen } from "../lib/api";
+import { bewaarOpstellingAutomatisch, haalAanwezigheden, haalLedenBasis, haalMatches, haalOpstellingSpelers, haalOpstellingen, haalWasbeurten } from "../lib/api";
 import { aanwezigeSpelerIds, nietAanwezigeKeuzes } from "../lib/opstellingAanwezigheid";
 import { Aanwezigheid } from "../components/Aanwezigheid";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
@@ -10,6 +10,7 @@ import { BANK, FORMATIE_KEUZES, STANDAARD_FORMATIE, allePosities, basisPosities,
 import { foutTekst, useAsync } from "../lib/useAsync";
 import { Fout, Laden } from "../components/Layout";
 import { Veld } from "../components/Veld";
+import { WasmandKeuze } from "../components/Wasmand";
 import { maakOpslaanRij } from "../lib/opslaanRij";
 import type { Formatie, LineupPlayer } from "../lib/types";
 
@@ -22,6 +23,7 @@ export function Opstelling() {
   const lineups = useAsync(haalOpstellingen);
   const leden = useAsync(haalLedenBasis);
   const aanwezigheden = useAsync(haalAanwezigheden);
+  const wasbeurten = useAsync(haalWasbeurten);
   const [opslaanBezig, setOpslaanBezig] = useState(false);
   const [spelersLaden, setSpelersLaden] = useState(false);
   const [matchKey, setMatchKey] = useState<string | null>(null);
@@ -261,6 +263,9 @@ export function Opstelling() {
             {opslagFout && <><button type="button" className="knop" onClick={() => opslag.current?.opnieuw()}>Opnieuw proberen</button><button type="button" className="knop licht" onClick={async () => { try { sessionStorage.removeItem(`steca-concept-${lid?.id}-${gekozenKey}`); } catch { /* Optionele lokale reservekopie. */ } await lineups.herlaad(); setHerlaadNr(n => n + 1); }}>Nieuwste opstelling laden</button></>}
             <button type="button" className="knop licht" disabled={radDraait || opslaanBezig || onbewaard} onClick={async () => { await lineups.herlaad(); setBewerken(false); }}>Sluiten</button>          </div>
         </div>
+      )}
+      {match && (
+        <WasmandKeuze match={match} beurt={(wasbeurten.data ?? []).find((b) => b.match_key === match.match_key)} spelers={spelers} beschikbaar={beschikbaar} isStaf={r.isStaf} fout={wasbeurten.fout} onGewijzigd={wasbeurten.herlaad} />
       )}
       {match && r.isStaf && (
         <div className="kaart">

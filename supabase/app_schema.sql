@@ -931,7 +931,7 @@ create table if not exists public.push_subscriptions (
 create table if not exists public.push_jobs (
  id uuid primary key default gen_random_uuid(), match_key text not null references public.matches(match_key) on delete cascade,
  member_id uuid not null references public.members(id) on delete cascade,
- soort text not null check(soort in('aanwezig72','aanwezig48','stemmen','stemherinnering')),
+ soort text not null check(soort in('aanwezig72','aanwezig48','stemmen','stemherinnering','wasmand')),
  status text not null default 'pending' check(status in('pending','sending','sent','skipped')),
  sent_at timestamptz, lease_until timestamptz, attempts integer not null default 0,
  next_attempt timestamptz not null default now(), fout text, created_at timestamptz not null default now(),
@@ -950,13 +950,14 @@ language sql stable security definer set search_path=public as $$
  'aftrap',match_aftrap(m.datum,m.uur),'score_at',r.score_at,'deadline',((m.datum+8)::timestamp at time zone 'Europe/Brussels'),
  'thuis_score',r.thuis_score,'uit_score',r.uit_score,'steca_thuis',m.thuis_id=152,
  'antwoord',a.member_id is not null,'aanwezig',coalesce(a.status='aanwezig',false),'gestemd',v.voter_id is not null,
- 'eerste_verzonden',j.sent_at,'member_id',lid.id)), '[]'::jsonb)
+ 'eerste_verzonden',j.sent_at,'member_id',lid.id,'wasmand',w.member_id is not null)), '[]'::jsonb)
  from push_config c join members lid on lid.status='actief' and lid.user_id is not null
  cross join matches m left join match_reports r on r.match_key=m.match_key
  left join attendance a on a.match_key=m.match_key and a.member_id=lid.id
  left join match_votes v on v.match_key=m.match_key and v.voter_id=lid.id
  left join push_jobs j on j.match_key=m.match_key and j.member_id=lid.id and j.soort='stemmen' and j.status='sent'
- where c.enabled and exists(select 1 from push_subscriptions ps where ps.member_id=lid.id) and (lid.speelt or a.status='aanwezig') and (m.thuis_id=152 or m.uit_id=152) and m.datum between (now() at time zone 'Europe/Brussels')::date-7 and (now() at time zone 'Europe/Brussels')::date+4;
+ left join laundry_turns w on w.match_key=m.match_key and w.member_id=lid.id
+ where c.enabled and exists(select 1 from push_subscriptions ps where ps.member_id=lid.id) and (lid.speelt or a.status='aanwezig' or w.member_id is not null) and (m.thuis_id=152 or m.uit_id=152) and m.datum between (now() at time zone 'Europe/Brussels')::date-7 and (now() at time zone 'Europe/Brussels')::date+4;
 $$;
 revoke all on function public.push_planning() from public,anon,authenticated;
 grant execute on function public.push_planning() to service_role;
@@ -986,3 +987,40 @@ select cron.schedule('steca-club-push','* * * * *',$cron$
  ) from public.push_config where id=1 and enabled and vapid_public is not null;
 $cron$);
 
+
+-- --------------------------------------------------------------- wasmand
+-- Per match één speler die de wasmand mee naar huis neemt. Lezen: alle actieve leden.
+-- Aanduiden en wijzigen: coach, spelercoach, verantwoordelijke of admin. Elke wijziging komt in audit_log.
+
+create table if not exists laundry_turns (
+  match_key      text primary key references matches (match_key) on delete cascade,
+  member_id      uuid not null references members (id) on delete cascade,
+  opmerking      text,
+  ingevoerd_door uuid references members (id),
+  updated_at     timestamptz not null default now()
+);
+create index if not exists laundry_turns_member_idx on laundry_turns (member_id);
+
+create or replace function laundry_turns_stamp() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.ingevoerd_door := coalesce(my_member_id(), new.ingevoerd_door);
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists laundry_turns_stamp on laundry_turns;
+create trigger laundry_turns_stamp before insert or update on laundry_turns
+  for each row execute function laundry_turns_stamp();
+drop trigger if exists laundry_turns_log on laundry_turns;
+create trigger laundry_turns_log after insert or update or delete on laundry_turns
+  for each row execute function log_wijziging();
+
+alter table laundry_turns enable row level security;
+drop policy if exists "wasmand lezen" on laundry_turns;
+create policy "wasmand lezen" on laundry_turns for select to authenticated using (is_actief());
+drop policy if exists "wasmand beheren" on laundry_turns;
+create policy "wasmand beheren" on laundry_turns for all to authenticated using (is_staf()) with check (is_staf());
+
+drop policy if exists "logboek lezen" on audit_log;
+create policy "logboek lezen" on audit_log for select to authenticated
+  using (is_admin() or (is_staf() and tabel in ('match_stats', 'lineups', 'lineup_players', 'attendance', 'fines', 'laundry_turns')));

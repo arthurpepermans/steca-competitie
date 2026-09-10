@@ -13,8 +13,8 @@ function abonnement(s: any) {
   if (u.protocol !== 'https:' || u.port || u.username || u.password || !toegestaan.some(h => u.hostname === h || u.hostname.endsWith('.' + h)) || s.endpoint.length > 4096 || !/^[\w-]{80,100}$/.test(s?.keys?.p256dh ?? '') || !/^[\w-]{20,30}$/.test(s?.keys?.auth ?? '')) throw new Fout('Ongeldig pushabonnement.');
   return { endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth } };
 }
-type Planning = Uitslag & { match_key: string; member_id: string; tegenstander: string; aftrap: string | null; score_at: string | null; deadline: string; antwoord: boolean; aanwezig: boolean; gestemd: boolean; eerste_verzonden: string | null };
-function soorten(p: Planning) { return verschuldigd({ aftrap: p.aftrap ? Date.parse(p.aftrap) : NaN, scoreAt: p.score_at ? Date.parse(p.score_at) : null, deadline: Date.parse(p.deadline), antwoord:p.antwoord, aanwezig:p.aanwezig, gestemd:p.gestemd, eersteVerzonden:p.eerste_verzonden ? Date.parse(p.eerste_verzonden) : null }, Date.now()); }
+type Planning = Uitslag & { match_key: string; member_id: string; tegenstander: string; aftrap: string | null; score_at: string | null; deadline: string; antwoord: boolean; aanwezig: boolean; gestemd: boolean; eerste_verzonden: string | null; wasmand?: boolean };
+function soorten(p: Planning) { return verschuldigd({ aftrap: p.aftrap ? Date.parse(p.aftrap) : NaN, scoreAt: p.score_at ? Date.parse(p.score_at) : null, deadline: Date.parse(p.deadline), antwoord:p.antwoord, aanwezig:p.aanwezig, gestemd:p.gestemd, wasmand:Boolean(p.wasmand), eersteVerzonden:p.eerste_verzonden ? Date.parse(p.eerste_verzonden) : null }, Date.now()); }
 async function planning(): Promise<Planning[]> { return check(await db.rpc('push_planning')); }
 async function verzendRij(config: any) {
   if (!config.enabled || !config.vapid_private) return { verzonden:0 };
@@ -31,7 +31,7 @@ async function verzendRij(config: any) {
     for (const sub of subs) {
       try {
         const inhoud = bericht(j.soort,p.tegenstander,p);
-        const route = j.soort.startsWith('aanwezig') ? `/kalender?match=${encodeURIComponent(j.match_key)}` : `/match/${encodeURIComponent(j.match_key)}`;
+        const route = j.soort === 'wasmand' ? '/opstelling' : j.soort.startsWith('aanwezig') ? `/kalender?match=${encodeURIComponent(j.match_key)}` : `/match/${encodeURIComponent(j.match_key)}`;
         await webpush.sendNotification(abonnement(sub.subscription),JSON.stringify({...inhoud,url:`${CLUB_ORIGIN}/#${route}`,tag:j.id}),{vapidDetails:{subject:CLUB_ORIGIN,publicKey:config.vapid_public,privateKey:config.vapid_private},TTL:3600,timeout:10000,topic:j.id.replaceAll('-','')});
         gelukt = true;
       } catch(e) {
