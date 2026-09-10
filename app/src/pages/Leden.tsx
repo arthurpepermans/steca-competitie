@@ -1,3 +1,4 @@
+import {SupporterBeheer, veranderAccountfunctie} from '../components/SupporterBeheer';
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -52,8 +53,9 @@ export function Leden() {
       )}
       <div className="tabs">
         <button className={tab === "leden" ? "actief" : ""} onClick={() => setTab("leden")}>Clubleden</button>
-        <button className={tab === "supporters" ? "actief" : ""} onClick={() => setTab("supporters")}>Supportersclub</button>
+        <>{r.isAdmin && <button className={tab === "supporters" ? "actief" : ""} onClick={() => setTab("supporters")}>Supporters beheren</button>}</>
       </div>
+      {tab === "supporters" && r.isAdmin ? <SupporterBeheer /> : <>
       <div className="rij" style={{ gap: 8, marginBottom: 10 }}>
         <input placeholder="Zoeken…" value={zoek} onChange={(e) => setZoek(e.target.value)} style={{ flex: 1, padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }} />
         {tab === "leden" && (
@@ -93,6 +95,7 @@ export function Leden() {
       {tab === "leden"
         ? <p className="klein zacht">★ hoofdadmin · ☆ admin · {alle.filter((m) => m.status === "actief").length} actieve leden</p>
         : <p className="klein zacht">{supporters.filter((m) => m.status === "actief").length} supporters in de supportersclub. Wie via Verder als supporter kijkt zonder account, staat hier niet bij.</p>}
+      </>}
     </>
   );
 }
@@ -209,6 +212,7 @@ export function LidDetail() {
                   <button type="button" className="knop gevaar" onClick={() => afwijzen(vol)}>Afwijzen</button>
                 </div>
               )}
+              {!vol.is_hoofdadmin && <p><button type="button" className="knop licht" onClick={() => doe(async () => {await veranderAccountfunctie(vol.id, "supporter");navigate("/leden");}, "Omgezet naar supporter.")}>Omzetten naar supporter</button></p>}
               <LidFormulier lid={vol} onOpslaan={(velden) => doe(() => wijzigLid(vol.id, velden), "Gegevens opgeslagen.")} />
               <div className="knoppen" style={{ marginTop: 10 }}>
                 {vol.status === "actief" && <button type="button" className="knop licht" onClick={() => doe(() => wijzigLid(vol.id, { status: "inactief" }), "Lid gedeactiveerd.")}>Deactiveren</button>}
