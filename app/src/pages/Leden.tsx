@@ -24,7 +24,7 @@ export function Leden() {
   const [fout, setFout] = useState<string | null>(null);
   const leden = useAsync<Array<Member | MemberBasis>>(() => (r.zietGegevens ? haalLeden() : haalLedenBasis()), [r.zietGegevens]);
   if (leden.laden) return <Laden />;
-  const alle = leden.data ?? [];
+  const alle = (leden.data ?? []).filter(m => m.functie !== "supporter");
   const heeftAccount = (m: Member | MemberBasis) => ("heeft_account" in m ? m.heeft_account : m.user_id !== null);
   const wachtend = alle.filter((m) => m.status === "wacht_op_goedkeuring");
   const lijst = alle
@@ -52,7 +52,7 @@ export function Leden() {
         <input placeholder="Zoeken…" value={zoek} onChange={(e) => setZoek(e.target.value)} style={{ flex: 1, padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }} />
         <select value={functie} onChange={(e) => setFunctie(e.target.value)} style={{ padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }}>
           <option value="">Alle functies</option>
-          {FUNCTIES.map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+          {FUNCTIES.filter(f => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
         </select>
       </div>
       {r.isAdmin && (
@@ -105,7 +105,7 @@ function NieuwLidFormulier({ onOpslaan }: { onOpslaan: (velden: Partial<Member>)
       <div className="veld">
         <label>Functie</label>
         <select value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-          {FUNCTIES.map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+          {FUNCTIES.filter(f => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
         </select>
       </div>
       <button className="knop">Toevoegen</button>
@@ -254,7 +254,7 @@ export function LidFormulier({ lid, onOpslaan, eigen = false }: { lid: Member; o
         <div className="veld">
           <label>Functie</label>
           <select value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-            {FUNCTIES.map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+            {FUNCTIES.filter(f => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
           </select>
         </div>
       )}

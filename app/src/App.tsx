@@ -16,8 +16,10 @@ import { DriveBeheer } from "./pages/DriveBeheer";
 import { MatchVerslag } from './pages/MatchVerslag';
 import { Meldingen } from './pages/Meldingen';
 
+import { Kantine } from "./pages/Kantine";
+
 function Poort() {
-  const { klaar, session, lid, fout } = useAuth();
+  const { klaar, session, lid, supporter, fout } = useAuth();
   const locatie = useLocation();
   if (!klaar) return <Laden tekst="Even geduld…" />;
   if (locatie.pathname === "/supporters") return <Supporters />;
@@ -27,6 +29,7 @@ function Poort() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/registreer" element={<Registreer />} />
+        <Route path="/supporter-account" element={<Registreer supporterAccount />} />
         <Route path="/wachtwoord-vergeten" element={<WachtwoordVergeten />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -34,6 +37,7 @@ function Poort() {
   }
   if (locatie.pathname === "/nieuw-wachtwoord") return <NieuwWachtwoord />;
   if (fout) return <Geblokkeerd tekst={`Je gegevens konden niet geladen worden: ${fout}`} />;
+  if (supporter) return supporter.actief ? <Navigate to="/supporters?tab=Kantine" replace /> : <Geblokkeerd tekst="Dit supporteraccount is gedeactiveerd." />;
   if (!lid) return <Geblokkeerd tekst="Er is geen lid gekoppeld aan dit account. Vraag een beheerder om hulp." />;
   if (lid.status === "wacht_op_goedkeuring") return <WachtOpGoedkeuring />;
   if (lid.status === "inactief") return <Geblokkeerd tekst="Dit account is gedeactiveerd. Vraag een beheerder om het opnieuw te activeren." />;
@@ -51,6 +55,7 @@ function Poort() {
         <Route path="/klassement" element={<Klassement />} />
         <Route path="/ploegen" element={<Ploegen />} />
         <Route path="/ploegen/:id" element={<PloegDetail />} />
+        <Route path="/kantine" element={<Kantine />} />
         <Route path="/opstelling" element={<Opstelling />} />
         <Route path="/leden" element={<Leden />} />
         <Route path="/leden/:id" element={<LidDetail />} />
