@@ -136,7 +136,6 @@ export function WasmandTabel({ matches, beurten, ledenNamen, eigenLidId }: Tabel
           </tbody>
         </table>
       </div>
-      <p className="klein zacht">Elke speler is één keer per seizoen verantwoordelijk voor de wasmand. De coach of verantwoordelijke duidt de speler aan bij de opstelling.</p>
       {teller.size > 0 && (
         <p className="klein zacht">
           Al geweest: {[...teller.entries()].map(([id, n]) => `${ledenNamen.get(id) ?? "?"}${n > 1 ? ` (${n}×)` : ""}`).join(", ")}.
