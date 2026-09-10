@@ -14,7 +14,11 @@ export function useNavViewport(route: string) {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (viewport.scale !== 1 || viewport.height <= 0) return;
-        nav.style.setProperty("--nav-schermonderkant", `${viewport.offsetTop + viewport.height}px`);
+        // Tijdens het doorveren boven- of onderaan (iOS) geeft offsetTop tijdelijk een negatieve of te grote
+        // waarde; begrens de onderrand tot het scherm zodat de balk niet in het midden blijft hangen.
+        const boven = Math.max(0, viewport.offsetTop);
+        const onder = Math.min(boven + viewport.height, window.innerHeight);
+        nav.style.setProperty("--nav-schermonderkant", `${onder}px`);
         nav.dataset.viewport = "zichtbaar";
       });
     };
@@ -34,6 +38,9 @@ export function useNavViewport(route: string) {
     window.addEventListener("pageshow", herstel);
     document.addEventListener("focusout", herstel);
     document.addEventListener("visibilitychange", herstel);
+    // na het loslaatmoment van een veerbeweging komt niet altijd een scroll-event van de visual viewport
+    window.addEventListener("touchend", herstel, { passive: true });
+    window.addEventListener("scrollend", meet);
     herstel();
     return () => {
       cancelAnimationFrame(frame);
@@ -44,6 +51,8 @@ export function useNavViewport(route: string) {
       window.removeEventListener("pageshow", herstel);
       document.removeEventListener("focusout", herstel);
       document.removeEventListener("visibilitychange", herstel);
+      window.removeEventListener("touchend", herstel);
+      window.removeEventListener("scrollend", meet);
       delete nav.dataset.viewport;
       nav.style.removeProperty("--nav-schermonderkant");
     };
