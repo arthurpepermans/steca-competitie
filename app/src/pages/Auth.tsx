@@ -145,11 +145,14 @@ export function WachtwoordVergeten() {
 
 export function NieuwWachtwoord() {
   const [wachtwoord, setWachtwoord] = useState("");
+  const [bevestiging, setBevestiging] = useState("");
   const [fout, setFout] = useState<string | null>(null);
   const navigate = useNavigate();
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    setFout(null);
+    if (wachtwoord !== bevestiging) return setFout("De wachtwoorden komen niet overeen.");
     if (wachtwoord.length < 8) return setFout("Minstens 8 tekens.");
     const { error } = await supabase.auth.updateUser({ password: wachtwoord });
     if (error) return setFout(error.message);
@@ -161,6 +164,7 @@ export function NieuwWachtwoord() {
       <form onSubmit={submit}>
         {fout && <div className="melding fout">{fout}</div>}
         <div className="veld"><label>Nieuw wachtwoord</label><input type="password" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} required autoComplete="new-password" /></div>
+        <div className="veld"><label htmlFor="bevestig-wachtwoord">Herhaal nieuw wachtwoord</label><input id="bevestig-wachtwoord" type="password" value={bevestiging} onChange={(e) => setBevestiging(e.target.value)} required autoComplete="new-password" /></div>
         <button className="knop breed">Opslaan</button>
       </form>
     </Kader>
