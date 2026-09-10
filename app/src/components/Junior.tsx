@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { aftrapTijd } from '../lib/aftrap';
 import { stem, trekStemIn } from "../lib/api";
 import { fmtDatum, tegenstander } from "../lib/datum";
 import { PUNTEN, juniorVanDeMatch, kandidaten, magStemmen, matchRanglijst, seizoenRanglijst, stemDeadline, stemmingOpen, stemtOpZichzelf } from "../lib/stemmen";
@@ -20,6 +21,10 @@ type StemProps = {
 
 /** Stemming en ranglijst van één gespeelde match. */
 export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers, mijnStem, eigenLidId, onGewijzigd }: StemProps) {
+  const [,tik] = useState(0);
+  useEffect(() => { const timer=setInterval(()=>tik(n=>n+1),30000); return ()=>clearInterval(timer); },[]);
+  const aftrap = aftrapTijd(match);
+  const teVroeg = aftrap !== null && Date.now()<aftrap+80*60000;
   const namen = new Map(spelers.map((p) => [p.id, p.naam]));
   const lijst = matchRanglijst(punten, match.match_key);
   const winnaars = juniorVanDeMatch(punten, match.match_key);
@@ -68,7 +73,7 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
         <strong>Junior van de match</strong>
         <span className="klein zacht">
           {aantalStemmers === 0 ? "nog geen stemmen" : `${aantalStemmers} ${aantalStemmers === 1 ? "stem" : "stemmen"}`}
-          {deadline ? (open ? `, stemmen tot ${fmtDatum(deadline)}` : ", stemming gesloten") : ""}
+          {teVroeg ? ', stemmen vanaf 80 minuten na aftrap' : deadline ? (open ? `, stemmen tot ${fmtDatum(deadline)}` : ", stemming gesloten") : ""}
         </span>
       </div>
       {lijst.length > 0 && (

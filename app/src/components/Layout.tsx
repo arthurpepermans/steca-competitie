@@ -12,6 +12,8 @@ import { useAuth } from "../lib/auth";
 import { NieuweVersie } from "./NieuweVersie";
 import { useNavViewport } from "../lib/useNavViewport";
 
+import { MeldingenPopup } from './MeldingenPopup';
+
 const TABS = [
   { to: "/", label: "Home", Icon: House },
   { to: "/kalender", label: "Kalender", Icon: CalendarDots },
@@ -56,6 +58,7 @@ export function Layout() {
         </div>
       </header>
       <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><Outlet /></main>
+      <MeldingenPopup />
       <nav ref={navRef} className="nav" aria-label="Hoofdnavigatie">
         {TABS.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => isActive ? "actief" : ""}>

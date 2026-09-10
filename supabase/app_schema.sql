@@ -862,3 +862,127 @@ begin
 end $$;
 revoke all on function public.bewaar_opstelling_auto(text, text, jsonb, text[], timestamptz) from public, anon;
 grant execute on function public.bewaar_opstelling_auto(text, text, jsonb, text[], timestamptz) to authenticated;
+
+-- Matchverslag en clubmeldingen. Geen testgegevens of testacties in productie.
+create table if not exists public.match_reports (
+ match_key text primary key references public.matches(match_key) on delete cascade,
+ thuis_score integer not null check(thuis_score between 0 and 99),
+ uit_score integer not null check(uit_score between 0 and 99),
+ momenten jsonb not null default '[]' check(jsonb_typeof(momenten)='array'),
+ score_at timestamptz not null default now(),
+ updated_at timestamptz not null default now(),
+ ingevoerd_door uuid references public.members(id)
+);
+alter table public.match_reports enable row level security;
+revoke all on public.match_reports from anon, authenticated;
+grant select on public.match_reports to authenticated;
+grant all on public.match_reports to service_role;
+drop policy if exists "actieve leden lezen verslagen" on public.match_reports;
+create policy "actieve leden lezen verslagen" on public.match_reports for select to authenticated using (is_actief());
+
+create or replace function public.bewaar_matchverslag(p_match_key text, p_thuis integer, p_uit integer, p_momenten jsonb, p_versie timestamptz)
+returns void language plpgsql security definer set search_path=public as $$
+declare v_versie timestamptz; m jsonb;
+begin
+ if not is_actief() or not is_staf() then raise exception 'Alleen bevoegde staf mag het matchverslag invullen.'; end if;
+ if not exists(select 1 from matches where match_key=p_match_key and (thuis_id=152 or uit_id=152)) then raise exception 'Geen eigen wedstrijd.'; end if;
+ if p_momenten is null or jsonb_typeof(p_momenten)<>'array' or jsonb_array_length(p_momenten)>150 then raise exception 'Ongeldige tijdlijn.'; end if;
+ for m in select value from jsonb_array_elements(p_momenten) loop
+  if coalesce(m->>'soort','') not in ('goal','geel','rood') or coalesce(m->>'kant','') not in ('thuis','uit')
+    or length(coalesce(m->>'speler',''))>100 or length(coalesce(m->>'assist',''))>100
+    or (m->>'minuut' is not null and ((m->>'minuut') !~ '^[0-9]{1,3}$' or (m->>'minuut')::integer>130)) then raise exception 'Ongeldig wedstrijdmoment.'; end if;
+ end loop;
+ perform pg_advisory_xact_lock(hashtextextended('verslag:'||p_match_key,0));
+ select updated_at into v_versie from match_reports where match_key=p_match_key for update;
+ if v_versie is distinct from p_versie then raise exception 'Iemand heeft dit verslag aangepast. Herlaad het verslag voordat je verdergaat.'; end if;
+ insert into match_reports(match_key,thuis_score,uit_score,momenten,ingevoerd_door)
+ values(p_match_key,p_thuis,p_uit,p_momenten,my_member_id())
+ on conflict(match_key) do update set thuis_score=excluded.thuis_score,uit_score=excluded.uit_score,momenten=excluded.momenten,ingevoerd_door=excluded.ingevoerd_door,updated_at=clock_timestamp();
+end $$;
+revoke all on function public.bewaar_matchverslag(text,integer,integer,jsonb,timestamptz) from public,anon;
+grant execute on function public.bewaar_matchverslag(text,integer,integer,jsonb,timestamptz) to authenticated;
+
+create or replace function public.match_aftrap(p_datum date,p_uur text) returns timestamptz
+language sql stable set search_path=public as $$
+ select case when p_datum is not null and p_uur ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$' then (p_datum + p_uur::time) at time zone 'Europe/Brussels' else null end;
+$$;
+create or replace function stem_geldig(p_match_key text,p_eerste uuid,p_tweede uuid,p_derde uuid) returns boolean
+language sql stable security definer set search_path=public as $$
+ select is_actief()
+ and exists(select 1 from matches m where m.match_key=p_match_key and (m.status='gespeeld' or exists(select 1 from match_reports r where r.match_key=m.match_key))
+   and match_aftrap(m.datum,m.uur)+interval '80 minutes'<=now() and (now() at time zone 'Europe/Brussels')::date<=m.datum+7)
+ and exists(select 1 from attendance where match_key=p_match_key and member_id=my_member_id() and status='aanwezig')
+ and (select count(*) from attendance where match_key=p_match_key and status='aanwezig' and member_id in(p_eerste,p_tweede,p_derde))=3
+ and my_member_id() not in(p_eerste,p_tweede,p_derde) and p_eerste<>p_tweede and p_eerste<>p_derde and p_tweede<>p_derde;
+$$;
+revoke all on function stem_geldig(text,uuid,uuid,uuid) from public,anon;
+grant execute on function stem_geldig(text,uuid,uuid,uuid) to authenticated;
+
+create table if not exists public.push_config (
+ id integer primary key check(id=1), enabled boolean not null default false,
+ vapid_public text, vapid_private text,
+ cron_secret text not null default encode(gen_random_bytes(32),'hex')
+);
+insert into public.push_config(id) values(1) on conflict do nothing;
+create table if not exists public.push_subscriptions (
+ endpoint text primary key, member_id uuid not null references public.members(id) on delete cascade,
+ subscription jsonb not null, created_at timestamptz not null default now()
+);
+create table if not exists public.push_jobs (
+ id uuid primary key default gen_random_uuid(), match_key text not null references public.matches(match_key) on delete cascade,
+ member_id uuid not null references public.members(id) on delete cascade,
+ soort text not null check(soort in('aanwezig72','aanwezig48','stemmen','stemherinnering')),
+ status text not null default 'pending' check(status in('pending','sending','sent','skipped')),
+ sent_at timestamptz, lease_until timestamptz, attempts integer not null default 0,
+ next_attempt timestamptz not null default now(), fout text, created_at timestamptz not null default now(),
+ unique(match_key,member_id,soort)
+);
+alter table public.push_config enable row level security;
+alter table public.push_subscriptions enable row level security;
+alter table public.push_jobs enable row level security;
+revoke all on public.push_config,public.push_subscriptions,public.push_jobs from public,anon,authenticated;
+grant all on public.push_config,public.push_subscriptions,public.push_jobs to service_role;
+
+-- Alleen service_role krijgt planninggegevens; geen contactgegevens of abonnementen in de client.
+create or replace function public.push_planning() returns jsonb
+language sql stable security definer set search_path=public as $$
+ select coalesce(jsonb_agg(jsonb_build_object('match_key',m.match_key,'tegenstander',case when m.thuis_id=152 then m.uit else m.thuis end,
+ 'aftrap',match_aftrap(m.datum,m.uur),'score_at',r.score_at,'deadline',((m.datum+8)::timestamp at time zone 'Europe/Brussels'),
+ 'thuis_score',r.thuis_score,'uit_score',r.uit_score,'steca_thuis',m.thuis_id=152,
+ 'antwoord',a.member_id is not null,'aanwezig',coalesce(a.status='aanwezig',false),'gestemd',v.voter_id is not null,
+ 'eerste_verzonden',j.sent_at,'member_id',lid.id)), '[]'::jsonb)
+ from push_config c join members lid on lid.status='actief' and lid.user_id is not null
+ cross join matches m left join match_reports r on r.match_key=m.match_key
+ left join attendance a on a.match_key=m.match_key and a.member_id=lid.id
+ left join match_votes v on v.match_key=m.match_key and v.voter_id=lid.id
+ left join push_jobs j on j.match_key=m.match_key and j.member_id=lid.id and j.soort='stemmen' and j.status='sent'
+ where c.enabled and exists(select 1 from push_subscriptions ps where ps.member_id=lid.id) and (lid.speelt or a.status='aanwezig') and (m.thuis_id=152 or m.uit_id=152) and m.datum between (now() at time zone 'Europe/Brussels')::date-7 and (now() at time zone 'Europe/Brussels')::date+4;
+$$;
+revoke all on function public.push_planning() from public,anon,authenticated;
+grant execute on function public.push_planning() to service_role;
+
+-- Eén verzender per job, inclusief herstart na een afgebroken Edge Function.
+create or replace function public.claim_push_job(p_id uuid) returns boolean
+language plpgsql security definer set search_path=public as $$
+declare v_id uuid;
+begin
+ update push_jobs j set status='sending',lease_until=now()+interval '2 minutes',attempts=attempts+1
+ where j.id=p_id and ((j.status='pending' and j.next_attempt<=now()) or (j.status='sending' and j.lease_until<now()))
+ and exists(select 1 from push_config c join members m on m.id=j.member_id where c.enabled and m.status='actief' and m.user_id is not null)
+ returning j.id into v_id;
+ return v_id is not null;
+end $$;
+revoke all on function public.claim_push_job(uuid) from public,anon,authenticated;
+grant execute on function public.claim_push_job(uuid) to service_role;
+
+-- Geheime planneraanroep blijft in de database.
+create extension if not exists pg_cron;
+create extension if not exists pg_net with schema extensions;
+select cron.schedule('steca-club-push','* * * * *',$cron$
+ select net.http_post(
+  url := 'https://odgrmhcmkvbdadjhphiz.supabase.co/functions/v1/match-push',
+  headers := jsonb_build_object('Content-Type','application/json','Authorization','Bearer '||cron_secret),
+  body := '{"action":"run"}'::jsonb, timeout_milliseconds := 55000
+ ) from public.push_config where id=1 and enabled and vapid_public is not null;
+$cron$);
+

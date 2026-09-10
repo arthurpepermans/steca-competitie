@@ -1,4 +1,5 @@
 import { naarDate, vandaagIso } from "./datum";
+import { aftrapTijd } from './aftrap';
 import type { Attendance, Match, VotePoints } from "./types";
 
 /** Punten voor de eerste, tweede en derde plaats op een stembrief. */
@@ -57,7 +58,8 @@ export function stemDeadline(match: Match): string | null {
 /** Open zodra de match gespeeld is, tot en met 7 dagen na de matchdatum. */
 export function stemmingOpen(match: Match, vandaag: string = vandaagIso()): boolean {
   const deadline = stemDeadline(match);
-  return match.status === "gespeeld" && deadline !== null && vandaag <= deadline;
+  const aftrap = aftrapTijd(match);
+  return match.status === "gespeeld" && deadline !== null && vandaag <= deadline && aftrap !== null && Date.now() >= aftrap + 80 * 60000;
 }
 
 /** Stemmen mag wie op de match als aanwezig stond, zolang de stemming open is. */
