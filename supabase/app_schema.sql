@@ -56,6 +56,19 @@ drop trigger if exists members_naam on members;
 create trigger members_naam before insert or update on members
   for each row execute function members_naam();
 
+-- Supporters staan apart van members en krijgen geen clubrol.
+create table if not exists public.supporter_profiles (
+ user_id uuid primary key references auth.users(id) on delete cascade,
+ naam text not null check(length(naam) between 1 and 100),
+ actief boolean not null default true, created_at timestamptz not null default now()
+);
+alter table public.supporter_profiles enable row level security;
+revoke all on public.supporter_profiles from anon,authenticated;
+grant select on public.supporter_profiles to authenticated;
+grant all on public.supporter_profiles to service_role;
+drop policy if exists eigen_supporter on public.supporter_profiles;
+create policy eigen_supporter on public.supporter_profiles for select to authenticated using(user_id=auth.uid());
+
 -- Bij registratie (auth.users) het account koppelen aan een bestaand lid, of een nieuw lid aanmaken.
 -- 1. Lid zonder account met hetzelfde e-mailadres: koppelen, gegevens blijven, geen goedkeuring nodig.
 -- 2. Lid zonder account met dezelfde voor- en achternaam: koppelen, maar een admin moet goedkeuren
@@ -70,6 +83,10 @@ declare
   v_achternaam text := nullif(trim(coalesce(new.raw_user_meta_data->>'achternaam', '')), '');
   v_id uuid;
 begin
+  if new.raw_user_meta_data->>'account_type'='supporter' then
+    insert into supporter_profiles(user_id,naam) values(new.id,left(coalesce(nullif(trim(new.raw_user_meta_data->>'naam'),''),'Supporter'),100));
+    return new;
+  end if;
   if v_functie not in ('speler', 'spelercoach', 'coach', 'verantwoordelijke', 'supporter') then
     v_functie := 'speler';
   end if;
@@ -743,7 +760,7 @@ revoke all on public.teams, public.matches, public.standings, public.standings_s
 create or replace function public.geen_nieuwe_supporterregistratie() returns trigger
 language plpgsql set search_path = public as $$
 begin
-  if new.raw_user_meta_data->>'functie' = 'supporter' then
+  if new.raw_user_meta_data->>'functie' = 'supporter' and coalesce(new.raw_user_meta_data->>'account_type','') <> 'supporter' then
     raise exception 'Supporters hebben geen account nodig. Kies Verder als supporter.';
   end if;
   return new;
@@ -986,3 +1003,109 @@ select cron.schedule('steca-club-push','* * * * *',$cron$
  ) from public.push_config where id=1 and enabled and vapid_public is not null;
 $cron$);
 
+-- De Kantine: persoonlijke ploegen zijn strikt gescheiden van officiële lineups.
+create table if not exists public.dream_xi (
+ user_id uuid primary key references auth.users(id) on delete cascade,
+ formatie text not null check (formatie in ('4-3-3','4-4-2','3-4-3')),
+ keuze jsonb not null default '{}', slotjes text[] not null default '{}',
+ updated_at timestamptz not null default now()
+);
+alter table public.dream_xi enable row level security;
+revoke all on public.dream_xi from anon, authenticated;
+grant select on public.dream_xi to authenticated;
+grant all on public.dream_xi to service_role;
+drop policy if exists dream_prive on public.dream_xi;
+create policy dream_prive on public.dream_xi for select to authenticated using ((is_actief() or exists(select 1 from supporter_profiles where user_id=auth.uid() and actief)) and user_id=auth.uid());
+
+create or replace function public.kantine_spelers() returns table(id uuid,naam text)
+language sql stable security definer set search_path=public as $$
+ select id,naam from members where status='actief' and speelt order by naam;
+$$;
+revoke all on function public.kantine_spelers() from public;
+grant execute on function public.kantine_spelers() to anon,authenticated;
+
+create or replace function public.bewaar_dream_xi(p_formatie text,p_keuze jsonb,p_slotjes text[],p_versie timestamptz)
+returns timestamptz language plpgsql security definer set search_path=public as $$
+declare pos text[]; v timestamptz; nieuw timestamptz; k record;
+begin
+ if not (coalesce(is_actief(),false) or exists(select 1 from supporter_profiles where user_id=auth.uid() and actief)) then raise exception 'Log in met een actief clubaccount.'; end if;
+ pos:=case p_formatie when '4-3-3' then array['GK','LB','CB1','CB2','RB','CM1','CM2','CM3','LW','ST','RW']
+ when '4-4-2' then array['GK','LB','CB1','CB2','RB','LM','CM1','CM2','RM','ST1','ST2']
+ when '3-4-3' then array['GK','CB1','CB2','CB3','LM','CM1','CM2','RM','LW','ST','RW'] end;
+ if pos is null or p_keuze is null or jsonb_typeof(p_keuze)<>'object' then raise exception 'Ongeldige persoonlijke opstelling.'; end if;
+ pos:=pos||array['BANK1','BANK2','BANK3','BANK4'];
+ for k in select * from jsonb_each_text(p_keuze) loop
+  if not(k.key=any(pos)) or (k.value is not null and not exists(select 1 from members where id::text=k.value and status='actief' and speelt)) then raise exception 'Ongeldige speler of positie.'; end if;
+ end loop;
+ if (select count(*)<>count(distinct value) from jsonb_each_text(p_keuze) where value is not null) then raise exception 'Een speler mag maar eenmaal voorkomen.'; end if;
+ if p_slotjes is null or not(p_slotjes<@pos) or exists(select 1 from unnest(p_slotjes) p where p_keuze->>p is null) then raise exception 'Ongeldig slotje.'; end if;
+ perform pg_advisory_xact_lock(hashtextextended('dream:'||auth.uid()::text,0));
+ select updated_at into v from dream_xi where user_id=auth.uid();
+ if v is distinct from p_versie then raise exception 'Je Dream XI is elders gewijzigd. Herlaad eerst.'; end if;
+ nieuw:=clock_timestamp();
+ insert into dream_xi values(auth.uid(),p_formatie,p_keuze,p_slotjes,nieuw)
+ on conflict(user_id) do update set formatie=excluded.formatie,keuze=excluded.keuze,slotjes=excluded.slotjes,updated_at=excluded.updated_at;
+ return nieuw;
+end $$;
+revoke all on function public.bewaar_dream_xi(text,jsonb,text[],timestamptz) from public,anon;
+grant execute on function public.bewaar_dream_xi(text,jsonb,text[],timestamptz) to authenticated;
+
+create table if not exists public.pronostieken (
+ match_key text references public.matches(match_key) on delete cascade,
+ user_id uuid references auth.users(id) on delete cascade,
+ thuis integer not null check(thuis between 0 and 99), uit integer not null check(uit between 0 and 99),
+ updated_at timestamptz not null default now(), primary key(match_key,user_id)
+);
+alter table public.pronostieken enable row level security;
+revoke all on public.pronostieken from anon,authenticated;
+grant select on public.pronostieken to authenticated;
+grant all on public.pronostieken to service_role;
+drop policy if exists eigen_pronostiek on public.pronostieken;
+create policy eigen_pronostiek on public.pronostieken for select to authenticated using((is_actief() or exists(select 1 from supporter_profiles where user_id=auth.uid() and actief)) and user_id=auth.uid());
+
+create or replace function public.bewaar_pronostiek(p_match text,p_thuis integer,p_uit integer)
+returns void language plpgsql security definer set search_path=public as $$
+declare m matches%rowtype;
+begin
+ if not (coalesce(is_actief(),false) or exists(select 1 from supporter_profiles where user_id=auth.uid() and actief)) then raise exception 'Log in met een actief clubaccount.'; end if;
+ select * into m from matches where match_key=p_match for share;
+ if m.match_key is null or not coalesce(m.thuis_id=152 or m.uit_id=152,false) then raise exception 'Alleen matchen van Steca Juniors.'; end if;
+ if match_aftrap(m.datum,m.uur) is null or match_aftrap(m.datum,m.uur)<=clock_timestamp() or m.status<>'gepland'
+ or m.thuis_score is not null or m.uit_score is not null or exists(select 1 from match_reports where match_key=p_match) then raise exception 'Pronostieken zijn gesloten voor deze match.'; end if;
+ if p_thuis is null or p_uit is null or p_thuis not between 0 and 99 or p_uit not between 0 and 99 then raise exception 'Vul twee volledige scores van 0 tot 99 in.'; end if;
+ insert into pronostieken values(p_match,auth.uid(),p_thuis,p_uit,clock_timestamp())
+ on conflict(match_key,user_id) do update set thuis=excluded.thuis,uit=excluded.uit,updated_at=excluded.updated_at;
+end $$;
+revoke all on function public.bewaar_pronostiek(text,integer,integer) from public,anon;
+grant execute on function public.bewaar_pronostiek(text,integer,integer) to authenticated;
+
+create or replace function public.pronostiek_punten(p_thuis integer,p_uit integer,r_thuis integer,r_uit integer)
+returns integer language sql immutable as $$
+ select case when r_thuis is null or r_uit is null or p_thuis is null or p_uit is null then 0
+ when p_thuis=r_thuis and p_uit=r_uit then 10
+ when p_thuis-p_uit=r_thuis-r_uit then 5
+ when sign(p_thuis-p_uit)=sign(r_thuis-r_uit) then 3 else 0 end;
+$$;
+
+-- Alleen totalen en namen zijn openbaar; persoonlijke voorspellingen blijven privé.
+-- Herberekent bij correcties. Een tijdens de match ingevulde score telt pas vanaf aftrap +80 min.
+create or replace function public.kantine_klassement(p_seizoen text)
+returns table(user_id uuid,naam text,punten bigint,exact bigint,verschil bigint,winnaar bigint,gespeeld bigint)
+language sql stable security definer set search_path=public as $$
+ with scores as (
+ select p.user_id,pronostiek_punten(p.thuis,p.uit,coalesce(r.thuis_score,m.thuis_score),coalesce(r.uit_score,m.uit_score)) pt
+ from pronostieken p join matches m using(match_key) left join match_reports r using(match_key)
+ where m.seizoen=p_seizoen and (m.thuis_id=152 or m.uit_id=152)
+ and match_aftrap(m.datum,m.uur)+interval '80 minutes'<=now()
+ and (r.match_key is not null or m.status='gespeeld')
+ and coalesce(r.thuis_score,m.thuis_score) is not null and coalesce(r.uit_score,m.uit_score) is not null
+ ), deelnemers as (
+ select coalesce(m.user_id,m.id) as user_id,m.naam from members m where m.status='actief' and m.functie<>'supporter'
+ union all select sp.user_id,sp.naam from supporter_profiles sp where sp.actief
+ )
+ select d.user_id,d.naam,coalesce(sum(s.pt),0)::bigint,count(*) filter(where pt=10),count(*) filter(where pt=5),count(*) filter(where pt=3),count(s.pt)
+ from deelnemers d left join scores s on s.user_id=d.user_id
+ group by d.user_id,d.naam order by 3 desc,d.naam;
+$$;
+revoke all on function public.kantine_klassement(text) from public;
+grant execute on function public.kantine_klassement(text) to anon,authenticated;

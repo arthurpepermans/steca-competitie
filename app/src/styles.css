@@ -394,3 +394,14 @@ html,body,#root{touch-action:pan-x pan-y}
 /* Datumveld op iOS: zelfde breedte en uitlijning als de andere velden (Safari centreert en rekt het standaard uit). */
 .veld input[type="date"] { display: block; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; text-align: left; font: inherit; color: inherit; line-height: 1.3; }
 .veld input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 1.3em; }
+/* De Kantine blijft visueel onderdeel van de bestaande clubapp. */
+.kantine-prive{border:2px solid #c69d29;background:#ead58a;color:#292929}.kantine-prive p{margin:8px 0}.kantine-acties{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:16px 0}.dream-keuzes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.dream-keuzes select{min-width:0;flex:1}.dream-keuzes .rij{display:flex;gap:6px}.prono-invoer{display:flex;align-items:center;justify-content:center;gap:15px;margin:16px 0}.prono-invoer label{flex:1;text-align:center;font-size:.85rem}.prono-invoer input{display:block;width:80px;max-width:100%;margin:8px auto;font-size:1.5rem;text-align:center}.tabel-scroll{overflow-x:auto}@media(max-width:500px){.dream-keuzes{grid-template-columns:1fr}}
+
+.kantine-start { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.kantine-spel { display:flex; flex-direction:column; align-items:flex-start; gap:15px; width:100%; text-align:left; color:var(--tekst); font:inherit; cursor:pointer; }
+.kantine-spel-nr { font:700 58px/1 "Barlow Condensed",sans-serif; }
+.kantine-spel>strong { font:700 28px/1.15 "Barlow Condensed",sans-serif; }
+.kantine-spel>.knop { margin-top:auto; pointer-events:none; }
+.kantine-spel:hover { border-color:var(--tekst); }
+.kantine-spel:focus-visible { outline:3px solid var(--tekst); outline-offset:3px; }
+@media(max-width:600px) { .kantine-start { grid-template-columns:1fr; } }

@@ -14,7 +14,8 @@ function Kader({ titel, children }: { titel: string; children: React.ReactNode }
         {children}
       </div>
       <InstallatieHulp />
-      <Link className="knop licht breed" to="/supporters">Verder als supporter</Link>
+      <Link className="knop licht breed" to="/supporters">Doorgaan zonder account</Link>
+      <p className="zacht klein">Bekijk de kalender en volg de ploeg.</p>
     </div>
   );
 }
@@ -49,7 +50,7 @@ export function Login() {
   );
 }
 
-export function Registreer() {
+export function Registreer({ supporterAccount=false }: { supporterAccount?: boolean }) {
   const [voornaam, setVoornaam] = useState("");
   const [achternaam, setAchternaam] = useState("");
   const [email, setEmail] = useState("");
@@ -69,7 +70,7 @@ export function Registreer() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: wachtwoord,
-      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie } },
+      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie, account_type: supporterAccount ? "supporter" : "club" } },
     });
     setBezig(false);
     if (error) return setFout(error.message);
@@ -86,7 +87,7 @@ export function Registreer() {
   }
 
   return (
-    <Kader titel="Account aanmaken">
+    <Kader titel={supporterAccount ? "Supporteraccount aanmaken" : "Account aanmaken"}>
       <form onSubmit={submit}>
         {fout && <div className="melding fout">{fout}</div>}
         <div className="veld"><label>Voornaam</label><input value={voornaam} onChange={(e) => setVoornaam(e.target.value)} required autoComplete="given-name" /></div>
@@ -94,15 +95,15 @@ export function Registreer() {
         <div className="veld"><label>E-mailadres</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></div>
         <div className="veld">
           <label>Ik ben</label>
-          <select value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-            {FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+          <select disabled={supporterAccount} value={supporterAccount ? "supporter" : functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
+            {supporterAccount && <option value="supporter">Supporter (pronostieken)</option>}{supporterAccount && <option value="supporter">Supporter (pronostieken)</option>}{FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
           </select>
         </div>
         <div className="veld"><label>Wachtwoord (minstens 8 tekens)</label><input type="password" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} required autoComplete="new-password" /></div>
         <div className="veld"><label>Wachtwoord herhalen</label><input type="password" value={herhaal} onChange={(e) => setHerhaal(e.target.value)} required autoComplete="new-password" /></div>
         <button className="knop breed" disabled={bezig}>Account aanmaken</button>
       </form>
-      <p className="zacht" style={{ marginTop: 10 }}>Na het aanmaken moet een beheerder je account goedkeuren voor je alles kunt zien.</p>
+      <p className="zacht" style={{ marginTop: 10 }}>{supporterAccount ? "Je naam verschijnt in het prono-klassement. Je account geeft geen toegang tot interne clubgegevens." : "Na het aanmaken moet een beheerder je account goedkeuren voor je alles kunt zien."}</p>
       <p className="midden" style={{ marginTop: 8 }}><Link to="/login">Ik heb al een account</Link></p>
     </Kader>
   );

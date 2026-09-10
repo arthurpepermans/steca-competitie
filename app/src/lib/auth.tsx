@@ -5,7 +5,9 @@ import { mijnLid } from "./api";
 import { GEGEVENS_VERPLICHT } from "./config";
 import type { Member } from "./types";
 
+export type SupporterProfiel = { user_id: string; naam: string; actief: boolean };
 type AuthState = {
+  supporter?: SupporterProfiel | null;
   klaar: boolean;
   session: Session | null;
   lid: Member | null;
@@ -17,6 +19,7 @@ export const AuthContext = createContext<AuthState>({ klaar: false, session: nul
 const Ctx = AuthContext;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [supporter, setSupporter] = useState<SupporterProfiel | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [sessieKlaar, setSessieKlaar] = useState(false);
   const [lid, setLid] = useState<Member | null>(null);
@@ -38,11 +41,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const herlaad = useCallback(async () => {
     if (!session) {
       setLid(null);
+      setSupporter(null);
       setLidKlaar(true);
       return;
     }
     try {
-      setLid(await mijnLid());
+      const gevonden = await mijnLid();
+      setLid(gevonden);
+      if (!gevonden) {
+        const {data,error} = await supabase.from('supporter_profiles').select('user_id,naam,actief').maybeSingle();
+        if(error)throw error;
+        setSupporter(data);
+      } else setSupporter(null);
       setFout(null);
     } catch (e) {
       setFout(e instanceof Error ? e.message : String(e));
@@ -55,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (sessieKlaar) void herlaad();
   }, [sessieKlaar, herlaad]);
 
-  return <Ctx.Provider value={{ klaar: sessieKlaar && lidKlaar, session, lid, fout, herlaad }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ klaar: sessieKlaar && lidKlaar, session, lid, supporter, fout, herlaad }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth(): AuthState {

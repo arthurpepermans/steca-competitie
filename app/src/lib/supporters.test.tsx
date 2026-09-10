@@ -51,11 +51,11 @@ describe("openbare supporterstoegang", () => {
     expect(await haalOpenbareOpstellingen()).toEqual([]);
     expect(rpc).toHaveBeenLastCalledWith("openbare_opstellingen");
   });
-  it("biedt openbare toegang in plaats van registratie als supporter", () => {
+  it("houdt clubregistratie apart van openbare toegang", () => {
     const html = renderToStaticMarkup(<MemoryRouter><Registreer /></MemoryRouter>);
     expect(html).not.toContain('value="supporter"');
     expect(html).toContain('value="speler"');
-    expect(html).toContain("Verder als supporter");
+    expect(html).toContain("Doorgaan zonder account");
   });
   it("gebruikt uitsluitend de openbare databasefunctie", async () => {
     rpc.mockResolvedValueOnce({ data: toestand.data, error: null });

@@ -4,7 +4,7 @@ import { House } from "@phosphor-icons/react/dist/csr/House";
 import { CalendarDots } from "@phosphor-icons/react/dist/csr/CalendarDots";
 import { Trophy } from "@phosphor-icons/react/dist/csr/Trophy";
 import { SoccerBall } from "@phosphor-icons/react/dist/csr/SoccerBall";
-import { Shield } from "@phosphor-icons/react/dist/csr/Shield";
+import { BeerStein } from "@phosphor-icons/react/dist/csr/BeerStein";
 import { UsersThree } from "@phosphor-icons/react/dist/csr/UsersThree";
 import { Moon } from "@phosphor-icons/react/dist/csr/Moon";
 import { Sun } from "@phosphor-icons/react/dist/csr/Sun";
@@ -19,7 +19,7 @@ const TABS = [
   { to: "/kalender", label: "Kalender", Icon: CalendarDots },
   { to: "/klassement", label: "Klassement", Icon: Trophy },
   { to: "/opstelling", label: "Opstelling", Icon: SoccerBall },
-  { to: "/ploegen", label: "Ploegen", Icon: Shield },
+  { to: "/kantine", label: "Kantine", Icon: BeerStein },
   { to: "/leden", label: "Leden", Icon: UsersThree },
 ];
 
