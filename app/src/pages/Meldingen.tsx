@@ -22,7 +22,6 @@ export function Meldingen() {
     {melding && <p className="melding ok" role="status">{melding}</p>}
     <section className="kaart">
       <h2>Blijf mee met de ploeg</h2>
-      <p>Een herinnering 72 en 48 uur voor de match als je aanwezigheid nog ontbreekt. Na de uitslag een seintje om te stemmen op de Junior van de match, en drie uur later een herinnering als je nog niet gestemd hebt.</p>
       {!pushOndersteund() && <><p>Open de app vanaf je beginscherm om meldingen te kunnen ontvangen.</p><InstallatieHulp open /></>}
       {'Notification' in window && Notification.permission === 'denied' && <p className="melding waarschuwing">Meldingen zijn geblokkeerd. Zet ze opnieuw aan in de meldingsinstellingen van je toestel of browser en probeer daarna opnieuw.</p>}
       <div className="knoppen">
