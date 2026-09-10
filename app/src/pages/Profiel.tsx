@@ -52,6 +52,7 @@ export function Profiel() {
       {fout && <div className="melding fout">{fout}</div>}
       {ok && <div className="melding ok">{ok}</div>}
       <InstallatieHulp />
+      {!onboarding && <p><Link className="knop licht" to="/meldingen">Meldingen beheren</Link></p>}
       {r.isAdmin && <p><Link className="knop licht" to="/drive">Google Drive beheren</Link></p>}
       <div className="kaart">
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { haalVerslagen, metVerslag } from "../lib/matchverslag";
 import { haalAanwezigheden, haalLedenBasis, haalMatches, haalMijnStemmen, haalStemPunten, haalStemmers, haalTeams } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
@@ -12,11 +14,14 @@ import { Sfeerbeelden } from "../components/Sfeerbeelden";
 import { JuniorStemming } from "../components/Junior";
 
 export function Kalender() {
+  const [params, setParams] = useSearchParams();
+  const gekozenMatch = params.get('match');
   const { lid } = useAuth();
   const r = rechten(lid);
   const [tab, setTab] = useState<"eigen" | "reeks">("eigen");
   const [toonGespeeld, setToonGespeeld] = useState(true);
   const matches = useAsync(haalMatches);
+  const verslagen = useAsync(haalVerslagen);
   const teams = useAsync(haalTeams);
   const leden = useAsync(haalLedenBasis);
   const aanw = useAsync(haalAanwezigheden);
@@ -28,8 +33,8 @@ export function Kalender() {
   if (matches.laden || teams.laden || leden.laden) return <Laden />;
   const reeks = teams.data?.find((t) => t.ploegid === EIGEN_PLOEGID)?.reeks ?? "";
   const spelers = (leden.data ?? []).filter(isSpelerLid).map((m) => ({ id: m.id, naam: m.naam }));
-  const alle = sorteerOpDatum(matches.data ?? []);
-  const lijst = alle.filter((m) => (tab === "eigen" ? isEigen(m) : m.reeks === reeks)).filter((m) => toonGespeeld || m.status === "gepland");
+  const alle = sorteerOpDatum((matches.data ?? []).map(m => metVerslag(m, verslagen.data?.find(v => v.match_key === m.match_key))));
+  const lijst = alle.filter((m) => (tab === "eigen" ? isEigen(m) : m.reeks === reeks)).filter((m) => gekozenMatch ? m.match_key === gekozenMatch : toonGespeeld || m.status === "gepland");
 
   const perDatum = new Map<string, typeof lijst>();
   for (const m of lijst) {
@@ -39,7 +44,8 @@ export function Kalender() {
 
   return (
     <>
-      <Fout tekst={matches.fout ?? teams.fout ?? leden.fout} />
+      <Fout tekst={matches.fout ?? teams.fout ?? leden.fout ?? verslagen.fout} />
+      {gekozenMatch && <p><button className="knop licht klein" onClick={() => setParams({})}>Alle matchen tonen</button></p>}
       <div className="tabs">
         <button className={tab === "eigen" ? "actief" : ""} onClick={() => setTab("eigen")}>Steca Juniors</button>
         <button className={tab === "reeks" ? "actief" : ""} onClick={() => setTab("reeks")}>Hele reeks</button>

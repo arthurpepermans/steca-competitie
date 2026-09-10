@@ -5,3 +5,7 @@ verify_jwt = false
 [functions.drive-media]
 # POST valideert lidmaatschap; GET vereist een ondertekende tijdelijke beeldlink.
 verify_jwt = false
+
+[functions.match-push]
+# Eigen controle van gebruikers-JWT en geheim crontoken.
+verify_jwt = false

@@ -338,3 +338,43 @@ html,body,#root{touch-action:pan-x pan-y}
 
 /* Spelersstatistieken op het profiel: elke tegel met een streepje links, ook de eerste. */
 .speler-cijfers > div { border-left: 1px solid var(--rand); padding-left: 14px; }
+
+.matchverslag { border: 2px solid var(--tekst); background: var(--kaart); padding: 16px; margin-bottom: 20px; }
+.verslag-kop { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font: 12px/1.5 monospace; letter-spacing: .06em; border-bottom: 1px solid var(--tekst); padding-bottom: 14px; }
+.verslag-scorebord { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 12px; padding: 26px 0; text-align: center; }
+.verslag-scorebord > div { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+.verslag-scorebord img, .verslag-schild { width: 54px; height: 64px; object-fit: contain; }
+.verslag-schild { display: grid; place-items: center; font: 26px 'Graduate',serif; border: 2px solid var(--tekst); border-radius: 4px 4px 24px 24px; background: var(--vlak); }
+.verslag-scorebord strong { font: 600 clamp(18px,3vw,27px)/1.1 'Barlow Condensed',sans-serif; overflow-wrap: anywhere; }
+.verslag-uitslag b { font: 700 clamp(38px,8vw,64px)/1 'Barlow Condensed',sans-serif; white-space: nowrap; padding: 8px 12px; background: var(--accent); color: var(--op-accent); }
+.verslag-uitslag small { font: 10px monospace; letter-spacing: .12em; }
+.verslag-terrein { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .8rem; padding: 12px 0; border-block: 1px solid var(--rand); }
+.verslag-titel { font: 700 28px/1.2 'Barlow Condensed',sans-serif; margin: 24px 0 8px; }
+.match-tijdlijn { list-style: none; padding: 8px 0 0; position: relative; margin: 0; }
+.match-tijdlijn::before { content: ''; position: absolute; width: 1px; background: var(--tekst); opacity: .3; left: 50%; top: 0; bottom: 36px; }
+.moment { display: grid; grid-template-columns: 1fr 64px 1fr; align-items: center; min-height: 100px; gap: 8px; position: relative; }
+.moment:nth-child(odd) { background: color-mix(in srgb,var(--tekst) 3%,transparent); }
+.moment-speler { text-align: right; padding: 14px 4px; grid-column: 1; grid-row: 1; overflow-wrap: anywhere; }
+.moment.uit .moment-speler { grid-column: 3; text-align: left; }
+.moment-speler strong { font: 600 21px/1.15 'Barlow Condensed',sans-serif; display: block; }
+.moment-speler small { display: block; font-size: 11px; margin-top: 4px; }
+.moment-minuut { grid-column: 2; grid-row: 1; display: flex; align-items: center; flex-direction: column; justify-content: center; gap: 4px; background: var(--kaart); border: 1px solid var(--rand); padding: 9px 4px; font: 700 20px/1 'Barlow Condensed',sans-serif; }
+.moment-kaart { display: block; width: 14px; height: 21px; border: 1px solid var(--tekst); background: #e7bf48; }
+.moment-kaart.rood { background: #b7503c; }
+.moment-aftrap { position: relative; text-align: center; padding: 24px 0; font: 12px monospace; }
+.verslag-totalen { padding: 8px 0 18px; }
+.verslag-totaal { display: flex; justify-content: space-between; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--rand); }
+.verslag-totaal span { font-size: .8rem; }
+.verslag-invoer { margin-top: 20px; }
+.verslag-invoer fieldset { border: 1px solid var(--rand); padding: 12px; min-width: 0; }
+.verslag-invoer label { display: block; font-size: .8rem; margin-bottom: 10px; }
+.verslag-invoer input, .verslag-invoer select { display: block; width: 100%; margin-top: 4px; }
+.verslag-scoreinvoer, .verslag-momentinvoer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.verslag-momentinvoer { margin: 16px 0; }
+.positie-keuze { display: flex; gap: 8px; align-items: center; }
+.positie-keuze select { flex: 1; min-width: 0; }
+.nav[data-viewport="zichtbaar"] { top: var(--nav-schermonderkant); bottom: auto; transform: translateY(-100%); }
+.meldingen-popup { width: min(440px, calc(100% - 32px)); max-height: 85dvh; overflow: auto; padding: 26px; border: 2px solid var(--tekst); color: var(--tekst); background: var(--kaart); box-shadow: 7px 7px 0 #0003; }
+.meldingen-popup::backdrop { background: #171a17a6; }
+.meldingen-popup h2 { margin-top: 12px; }
+.meldingen-popup .knoppen { margin-top: 24px; }
