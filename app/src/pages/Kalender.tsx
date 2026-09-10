@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { haalVerslagen, metVerslag } from "../lib/matchverslag";
-import { haalAanwezigheden, haalLedenBasis, haalMatches, haalMijnStemmen, haalStemPunten, haalStemmers, haalTeams } from "../lib/api";
+import { haalAanwezigheden, haalLedenBasis, haalMatches, haalMijnStemmen, haalStats, haalStemPunten, haalStemmers, haalTeams } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum } from "../lib/datum";
@@ -10,6 +10,7 @@ import { Aanwezigheid } from "../components/Aanwezigheid";
 import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MatchKaart } from "../components/MatchKaart";
+import { MatchverslagUitklap } from "../components/MatchverslagUitklap";
 import { Sfeerbeelden } from "../components/Sfeerbeelden";
 import { JuniorStemming } from "../components/Junior";
 
@@ -25,6 +26,7 @@ export function Kalender() {
   const teams = useAsync(haalTeams);
   const leden = useAsync(haalLedenBasis);
   const aanw = useAsync(haalAanwezigheden);
+  const stats = useAsync(haalStats);
   const stemPunten = useAsync(haalStemPunten);
   const stemmers = useAsync(haalStemmers);
   const mijnStemmen = useAsync(haalMijnStemmen);
@@ -57,7 +59,9 @@ export function Kalender() {
         <section key={datum}>
           {tab === "reeks" && <h3 style={{ marginTop: 12 }}>{fmtDatum(datum === "onbekend" ? null : datum)}</h3>}
           {ms.map((m) => (
-            <MatchKaart key={m.match_key} match={m} toonDatum={tab === "eigen"}>
+            <MatchKaart key={m.match_key} match={m} toonDatum={tab === "eigen"} verslagKnop={isEigen(m) && lid ? (
+              <MatchverslagUitklap match={m} verslag={verslagen.data?.find((v) => v.match_key === m.match_key)} stats={stats.data ?? []} spelers={spelers} isStaf={r.isStaf} onGewijzigd={async () => { await Promise.all([verslagen.herlaad(), matches.herlaad(), stats.herlaad()]); }} />
+            ) : undefined}>
               {isEigen(m) && (
                 <Aanwezigheid
                   match={m}

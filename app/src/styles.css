@@ -381,3 +381,12 @@ html,body,#root{touch-action:pan-x pan-y}
 
 /* Knop die als tekstlink oogt (Namen tonen bij de aanwezigheden). */
 .tekst-knop { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0; border: none; background: none; color: var(--kleur); font: 600 12px/1.4 "Manrope", sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; white-space: nowrap; }
+
+/* Matchverslag uitklappen in de kalenderkaart: ronde knop met pijltje. */
+.verslag-uitklap { margin-top: 10px; }
+.verslag-uitklap-kop { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; }
+.knop-rond { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--tekst); background: var(--kaart); color: var(--tekst); display: inline-grid; place-items: center; padding: 0; flex-shrink: 0; }
+.knop-rond[aria-expanded="true"] { background: var(--tekst); color: var(--kaart); }
+.verslag-uitklap-inhoud { margin-top: 10px; padding-top: 4px; border-top: 1px solid var(--rand); }
+.verslag-uitklap-inhoud .verslag-titel { margin-top: 12px; font-size: 22px; }
+.verslag-uitklap-inhoud .verslag-invoer { margin-top: 12px; }

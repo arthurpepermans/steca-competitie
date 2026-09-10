@@ -41,11 +41,7 @@ export function MatchVerslag() {
         <div>{match.uit_id === 152 ? <img src={import.meta.env.BASE_URL + 'logo-retro.png'} alt="" /> : <span className="verslag-schild">{match.uit.slice(0,2).toUpperCase()}</span>}<strong>{match.uit}</strong></div>
       </div>
       <div className="verslag-terrein"><span>{match.terrein ?? 'Terrein volgt'}</span><MapsKnop terrein={match.terrein} /></div>
-      <h2 className="verslag-titel">DE MATCH IN BEELD</h2>
-      {verslag?.momenten.length ? <ol className="match-tijdlijn">{verslag.momenten.map((m, i) => <li key={i} className={`moment ${m.kant}`}>
-        <div className="moment-speler"><strong>{m.speler || (m.kant === 'thuis' ? match.thuis : match.uit)}</strong>{m.assist && <small>Assist · {m.assist}</small>}<small>{m.soort === 'goal' ? 'Doelpunt' : m.soort === 'geel' ? 'Gele kaart' : 'Rode kaart'}</small></div>
-        <span className="moment-minuut">{m.soort === 'goal' ? <SoccerBall size={22} weight="duotone" /> : <i className={`moment-kaart ${m.soort}`} />}</span>
-      </li>)}</ol> : <div className="verslag-totalen">{totalen.length ? <><p className="klein zacht">Geregistreerde goals, assists en kaarten.</p>{totalen.map(s => <div className="verslag-totaal" key={s.member_id}><strong>{s.naam}</strong><span>{[s.goals && `${s.goals} goals`, s.assists && `${s.assists} assists`, s.geel && `${s.geel} geel`, s.rood && `${s.rood} rood`].filter(Boolean).join(' · ')}</span></div>)}</> : <p>Nog geen goals, assists of kaarten ingevuld.</p>}</div>}
+      <VerslagTijdlijn match={match} verslag={verslag} totalen={totalen} />
       <Sfeerbeelden matchKey={key} />
     </article>
     {rechten(lid).isStaf && <div className="kaart"><button className="knop licht" aria-expanded={bewerk} onClick={() => setBewerk(!bewerk)}>{bewerk ? 'Invoer sluiten' : 'Uitslag en matchverslag invullen'}</button>{bewerk && <VerslagInvoer key={verslag?.updated_at ?? key} match={origineel} verslag={verslag} namen={spelers.map(p => p.naam)} klaar={async () => { await info.herlaad(); setBewerk(false); }} />}</div>}
@@ -53,7 +49,7 @@ export function MatchVerslag() {
   </>;
 }
 
-function VerslagInvoer({ match, verslag, namen, klaar }: { match: Match; verslag?: Verslag; namen: string[]; klaar: () => Promise<void> }) {
+export function VerslagInvoer({ match, verslag, namen, klaar }: { match: Match; verslag?: Verslag; namen: string[]; klaar: () => Promise<void> }) {
   const [thuis, setThuis] = useState(verslag?.thuis_score ?? match.thuis_score ?? 0);
   const [uit, setUit] = useState(verslag?.uit_score ?? match.uit_score ?? 0);
   const [momenten, setMomenten] = useState<Moment[]>(verslag?.momenten ?? []);
@@ -74,3 +70,13 @@ function VerslagInvoer({ match, verslag, namen, klaar }: { match: Match; verslag
     <div className="knoppen"><button type="button" className="knop licht" onClick={() => setMomenten(ms => [...ms, { minuut: null, soort: 'goal', kant: match.thuis_id === 152 ? 'thuis' : 'uit', speler: '', assist: '' }])}>Moment toevoegen</button><button className="knop" disabled={bezig}>{bezig ? 'Opslaan…' : 'Matchverslag opslaan'}</button></div></fieldset></form>;
 }
 
+/** Tijdlijn van de match (goals en kaarten), of de totalen uit de statistieken als er geen verslag is. */
+export function VerslagTijdlijn({ match, verslag, totalen }: { match: Match; verslag?: Verslag; totalen: ReturnType<typeof samenvatting> }) {
+  return <>
+      <h2 className="verslag-titel">DE MATCH IN BEELD</h2>
+      {verslag?.momenten.length ? <ol className="match-tijdlijn">{verslag.momenten.map((m, i) => <li key={i} className={`moment ${m.kant}`}>
+        <div className="moment-speler"><strong>{m.speler || (m.kant === 'thuis' ? match.thuis : match.uit)}</strong>{m.assist && <small>Assist · {m.assist}</small>}<small>{m.soort === 'goal' ? 'Doelpunt' : m.soort === 'geel' ? 'Gele kaart' : 'Rode kaart'}</small></div>
+        <span className="moment-minuut">{m.soort === 'goal' ? <SoccerBall size={22} weight="duotone" /> : <i className={`moment-kaart ${m.soort}`} />}</span>
+      </li>)}</ol> : <div className="verslag-totalen">{totalen.length ? <><p className="klein zacht">Geregistreerde goals, assists en kaarten.</p>{totalen.map(s => <div className="verslag-totaal" key={s.member_id}><strong>{s.naam}</strong><span>{[s.goals && `${s.goals} goals`, s.assists && `${s.assists} assists`, s.geel && `${s.geel} geel`, s.rood && `${s.rood} rood`].filter(Boolean).join(' · ')}</span></div>)}</> : <p>Nog geen goals, assists of kaarten ingevuld.</p>}</div>}
+  </>;
+}
