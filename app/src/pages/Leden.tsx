@@ -20,16 +20,18 @@ export function Leden() {
   const navigate = useNavigate();
   const [zoek, setZoek] = useState("");
   const [functie, setFunctie] = useState<string>("");
+  const [tab, setTab] = useState<"leden" | "supporters">("leden");
   const [toevoegen, setToevoegen] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
   const leden = useAsync<Array<Member | MemberBasis>>(() => (r.zietGegevens ? haalLeden() : haalLedenBasis()), [r.zietGegevens]);
   if (leden.laden) return <Laden />;
   const alle = (leden.data ?? []).filter(m => m.functie !== "supporter");
+  const supporters = (leden.data ?? []).filter(m => m.functie === "supporter");
   const heeftAccount = (m: Member | MemberBasis) => ("heeft_account" in m ? m.heeft_account : m.user_id !== null);
-  const wachtend = alle.filter((m) => m.status === "wacht_op_goedkeuring");
-  const lijst = alle
+  const wachtend = (leden.data ?? []).filter((m) => m.status === "wacht_op_goedkeuring");
+  const lijst = (tab === "supporters" ? supporters : alle)
     .filter((m) => m.status !== "wacht_op_goedkeuring" || r.isAdmin)
-    .filter((m) => !functie || m.functie === functie)
+    .filter((m) => tab === "supporters" || !functie || m.functie === functie)
     .filter((m) => m.naam.toLowerCase().includes(zoek.toLowerCase()));
 
   async function nieuwLid(velden: Partial<Member>) {
@@ -48,14 +50,20 @@ export function Leden() {
       {r.isAdmin && wachtend.length > 0 && (
         <div className="melding info">{wachtend.length} account(s) wachten op goedkeuring: {wachtend.map((m) => m.naam).join(", ")}.</div>
       )}
+      <div className="tabs">
+        <button className={tab === "leden" ? "actief" : ""} onClick={() => setTab("leden")}>Clubleden</button>
+        <button className={tab === "supporters" ? "actief" : ""} onClick={() => setTab("supporters")}>Supportersclub</button>
+      </div>
       <div className="rij" style={{ gap: 8, marginBottom: 10 }}>
         <input placeholder="Zoeken…" value={zoek} onChange={(e) => setZoek(e.target.value)} style={{ flex: 1, padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }} />
-        <select value={functie} onChange={(e) => setFunctie(e.target.value)} style={{ padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }}>
-          <option value="">Alle functies</option>
-          {FUNCTIES.filter(f => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
-        </select>
+        {tab === "leden" && (
+          <select value={functie} onChange={(e) => setFunctie(e.target.value)} style={{ padding: 9, border: "1px solid var(--rand)", borderRadius: 8 }}>
+            <option value="">Alle functies</option>
+            {FUNCTIES.filter(f => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+          </select>
+        )}
       </div>
-      {r.isAdmin && (
+      {r.isAdmin && tab === "leden" && (
         <div style={{ marginBottom: 10 }}>
           <button type="button" className="knop licht klein" onClick={() => setToevoegen(!toevoegen)}>{toevoegen ? "Sluiten" : "+ Lid toevoegen zonder account"}</button>
           {toevoegen && (
@@ -80,9 +88,11 @@ export function Leden() {
             </Link>
           </li>
         ))}
-        {lijst.length === 0 && <li className="zacht">Geen leden gevonden.</li>}
+        {lijst.length === 0 && <li className="zacht">{tab === "supporters" ? "Nog geen supporters met een account." : "Geen leden gevonden."}</li>}
       </ul>
-      <p className="klein zacht">★ hoofdadmin · ☆ admin · {alle.filter((m) => m.status === "actief").length} actieve leden</p>
+      {tab === "leden"
+        ? <p className="klein zacht">★ hoofdadmin · ☆ admin · {alle.filter((m) => m.status === "actief").length} actieve leden</p>
+        : <p className="klein zacht">{supporters.filter((m) => m.status === "actief").length} supporters in de supportersclub. Wie via Verder als supporter kijkt zonder account, staat hier niet bij.</p>}
     </>
   );
 }
