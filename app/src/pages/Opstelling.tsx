@@ -208,7 +208,7 @@ export function Opstelling() {
               <span className="zacht">Formatie {lineup.formatie}{lineup.gemaakt_door ? ` · door ${namen.get(lineup.gemaakt_door) ?? (leden.data ?? []).find((m) => m.id === lineup.gemaakt_door)?.naam ?? "staf"}` : ""}</span>
               {r.isStaf && <button type="button" className="knop klein" disabled={spelersLaden || Boolean(fout)} onClick={() => setBewerken(true)}>Bewerken</button>}
             </div>
-            <Veld formatie={lineup.formatie} namen={veldNamen} slotjes={spelersVanLineup.filter(p => p.vergrendeld).map(p => p.positie)} />
+            <Veld memberIds={Object.fromEntries(spelersVanLineup.map(p=>[p.positie,p.member_id]))} formatie={lineup.formatie} namen={veldNamen} slotjes={spelersVanLineup.filter(p => p.vergrendeld).map(p => p.positie)} />
             {r.isStaf && !spelersLaden && spelersVanLineup.some((p) => !aanwezig.has(p.member_id)) && <p className="melding waarschuwing">Deze opstelling bevat spelers die niet op aanwezig staan. Controleer de aanwezigheden en pas de opstelling aan.</p>}
           </>
         ) : (
@@ -227,7 +227,7 @@ export function Opstelling() {
 
       {match && bewerken && r.isStaf && (
         <div className="kaart">
-          <Veld formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} slotjes={slotjes} compact />
+          <Veld memberIds={keuze} formatie={formatie} namen={Object.fromEntries(Object.entries(keuze).map(([p, id]) => [p, id ? namen.get(id) : undefined]))} slotjes={slotjes} compact />
           <div className="veld">
             <label htmlFor="opstelling-formatie">Formatie</label>
             <select id="opstelling-formatie" disabled={radDraait || opslaanBezig} value={formatie} onChange={(e) => wisselFormatie(e.target.value as Formatie)}>

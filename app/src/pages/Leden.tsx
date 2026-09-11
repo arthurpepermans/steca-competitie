@@ -1,3 +1,4 @@
+import { SpelerBadges } from "../components/SpelerBadges";
 import {SupporterBeheer, veranderAccountfunctie} from '../components/SupporterBeheer';
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -198,6 +199,7 @@ export function LidDetail() {
         )}
       </div>
 
+      {m.functie !== "supporter" && <SpelerBadges memberId={m.id} />}
       {m.speelt && <SpelerStatistieken memberId={m.id} />}
 
       {r.isAdmin && vol && (
