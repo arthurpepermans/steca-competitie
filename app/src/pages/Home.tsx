@@ -54,7 +54,6 @@ export function Home({ openbaar }: { openbaar?: import("../lib/supporters").Supp
               <Aftelling match={volgende} />
               <div className="match-terrein"><MapPin size={20} /><span>{volgende.terrein ?? "Terrein nog niet bekend"}</span><MapsKnop terrein={volgende.terrein} /></div>
             </div>
-            {!openbaar && <div className="ticket-scheur" aria-hidden="true" />}
             {!openbaar && <div className="match-aanwezigheid">
               <div className="sectie-kop"><h3>{r.isSpeler ? "Ben je erbij?" : "Wie is erbij?"}</h3>{r.isSpeler && <span className="zacht">Laat je ploeg iets weten.</span>}</div>
               {aanw.laden ? <Laden tekst="Aanwezigheden laden…" /> : <><Fout tekst={aanw.fout} /><Aanwezigheid match={volgende} spelers={spelers} aanwezigheden={aanw.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanw.herlaad} /></>}
