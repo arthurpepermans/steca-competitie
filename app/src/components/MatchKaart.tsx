@@ -42,6 +42,7 @@ export function MatchKaart({ match, children, toonDatum = true, verslagKnop }: {
       </div>
       {match.opmerking && <div className="klein zacht" style={{ marginTop: 4 }}>{match.opmerking}</div>}
       {verslagKnop ?? (lid && isEigen(match) && <p><Link className="knop licht klein" to={`/match/${encodeURIComponent(match.match_key)}`}>Matchverslag bekijken</Link></p>)}
+      {children && <div className="ticket-scheur" aria-hidden="true" />}
       {children}
     </div>
   );

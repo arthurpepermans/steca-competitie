@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalStemmers, haalWasbeurten } from "../lib/api";
+import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haalStandGeschiedenis, haalStemPunten, haalStemmers, haalWasbeurten } from "../lib/api";
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander } from "../lib/datum";
 import { sorteerOp, totalen, type Totalen } from "../lib/stats";
+import { standBeweging } from "../lib/stand";
 import { useAsync } from "../lib/useAsync";
 import { Klassementstabel } from "../components/Klassementstabel";
 import { Fout, Laden } from "../components/Layout";
@@ -30,6 +31,7 @@ export function Klassement() {
   const [sorteer, setSorteer] = useState<keyof Totalen>("goals");
   const [invoerMatch, setInvoerMatch] = useState<string>("");
   const klassement = useAsync(haalKlassement);
+  const geschiedenis = useAsync(() => haalStandGeschiedenis().catch(() => []));
   const matches = useAsync(haalMatches);
   const leden = useAsync(haalLedenBasis);
   const stats = useAsync(haalStats);
@@ -68,8 +70,8 @@ export function Klassement() {
               {reeksen.map((x) => <option key={x} value={x}>{x}</option>)}
             </select>
           </div>
-          <Klassementstabel rijen={rijen.filter((s) => s.reeks === gekozen)} />
-          <p className="klein zacht">Rangschikking volgens reglement: punten, gewonnen wedstrijden, doelsaldo.</p>
+          <Klassementstabel rijen={rijen.filter((s) => s.reeks === gekozen)} beweging={standBeweging(rijen.filter((s) => s.reeks === gekozen), geschiedenis.data ?? [])} />
+          <p className="klein zacht">Rangschikking volgens reglement: punten, gewonnen wedstrijden, doelsaldo. Pijltjes: gestegen of gezakt sinds de vorige stand.</p>
           <LaatstBijgewerkt />
         </>
       )}

@@ -205,3 +205,15 @@ export type TickerMessage = {
   created_at: string;
   updated_at: string;
 };
+
+/** Vorige toestand van een rij uit de stand (tabel standings_history), voor de pijltjes. */
+export type StandingHistory = {
+  seizoen: string;
+  reeks: string;
+  ploegid: number;
+  bron: "kavvv" | "berekend";
+  positie: number;
+  punten: number;
+  gespeeld: number;
+  vastgelegd_op: string;
+};

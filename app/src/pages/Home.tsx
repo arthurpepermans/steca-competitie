@@ -15,6 +15,10 @@ import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
 import { MapsKnop } from "../components/MatchKaart";
 import { InstallatieHulp } from "../components/InstallatieHulp";
+import { Aftelling } from "../components/Aftelling";
+import { StandPijl } from "../components/Klassementstabel";
+import { standBeweging } from "../lib/stand";
+import { haalStandGeschiedenis } from "../lib/api";
 
 export function Home({ openbaar }: { openbaar?: import("../lib/supporters").SupportersData }) {
   const { lid } = useAuth();
@@ -23,10 +27,12 @@ export function Home({ openbaar }: { openbaar?: import("../lib/supporters").Supp
   const klassement = useAsync(() => openbaar ? Promise.resolve(openbaar.klassement) : haalKlassement(), [openbaar]);
   const leden = useAsync(() => openbaar ? Promise.resolve([]) : haalLedenBasis(), [openbaar]);
   const aanw = useAsync(() => openbaar ? Promise.resolve([]) : haalAanwezigheden(), [openbaar]);
+  const geschiedenis = useAsync(() => haalStandGeschiedenis().catch(() => []), []);
   if (matches.laden || klassement.laden || leden.laden) return <Laden />;
   const volgende = volgendeMatch(matches.data ?? []);
   const laatste = laatsteUitslag(matches.data ?? []);
   const eigen = klassement.data?.find((s) => s.ploegid === EIGEN_PLOEGID);
+  const beweging = eigen ? standBeweging([eigen], geschiedenis.data ?? []).get(EIGEN_PLOEGID) : undefined;
   const spelers = (leden.data ?? []).filter(isSpelerLid).map((m) => ({ id: m.id, naam: m.naam }));
   const daarna = sorteerOpDatum((matches.data ?? []).filter((m) => isEigen(m) && m.status === "gepland" && m.match_key !== volgende?.match_key && (m.datum ?? "") >= (volgende?.datum ?? "9999"))).slice(0, 2);
   return (
@@ -45,8 +51,10 @@ export function Home({ openbaar }: { openbaar?: import("../lib/supporters").Supp
                 <img className="affiche-logo" src={import.meta.env.BASE_URL + "logo-retro.png"} alt="Clublogo Steca Juniors" width="150" height="174" />
               </div>
               <div className="match-moment"><CalendarBlank size={22} /><span>{fmtDatum(volgende.datum)}</span><strong>{volgende.uur ?? "uur volgt"}</strong></div>
+              <Aftelling match={volgende} />
               <div className="match-terrein"><MapPin size={20} /><span>{volgende.terrein ?? "Terrein nog niet bekend"}</span><MapsKnop terrein={volgende.terrein} /></div>
             </div>
+            {!openbaar && <div className="ticket-scheur" aria-hidden="true" />}
             {!openbaar && <div className="match-aanwezigheid">
               <div className="sectie-kop"><h3>{r.isSpeler ? "Ben je erbij?" : "Wie is erbij?"}</h3>{r.isSpeler && <span className="zacht">Laat je ploeg iets weten.</span>}</div>
               {aanw.laden ? <Laden tekst="Aanwezigheden laden…" /> : <><Fout tekst={aanw.fout} /><Aanwezigheid match={volgende} spelers={spelers} aanwezigheden={aanw.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanw.herlaad} /></>}
@@ -59,7 +67,7 @@ export function Home({ openbaar }: { openbaar?: import("../lib/supporters").Supp
             <div className="sectie-kop"><h2>02 / De rangschikking</h2><Trophy size={23} /></div>
             {eigen ? <>
               <p className="zacht">{eigen.reeks}</p>
-              <div className="stand-cijfer">{eigen.gespeeld > 0 ? <><strong>{eigen.positie}</strong><span>e plaats</span></> : <strong className="seizoen-start">Nieuw seizoen.</strong>}</div>
+              <div className="stand-cijfer">{eigen.gespeeld > 0 ? <><strong>{eigen.positie}</strong><span>e plaats</span><StandPijl beweging={beweging} /></> : <strong className="seizoen-start">Nieuw seizoen.</strong>}</div>
               <div className="stand-statistieken"><div><strong>{eigen.punten}</strong><span>punten</span></div><div><strong>{eigen.gespeeld}</strong><span>gespeeld</span></div><div><strong>{eigen.doelpunten_voor}</strong><span>goals</span></div></div>
               {eigen.label && <span className="badge waarschuwing">{eigen.label}</span>}
             </> : <p className="zacht">Het klassement is nog niet beschikbaar.</p>}

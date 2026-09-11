@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import type {
   Aanwezigheid24u, AanwezigheidStatus, Attendance, AuditEntry, Formatie, Lineup, LineupPlayer,
-  Fine, LaundryTurn, Match, MatchStat, TickerMessage, MatchVote, Member, MemberBasis, Standing, SyncStatus, Team, VoteCount, VotePoints,
+  Fine, LaundryTurn, Match, MatchStat, TickerMessage, MatchVote, Member, MemberBasis, Standing, StandingHistory, SyncStatus, Team, VoteCount, VotePoints,
 } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -200,4 +200,10 @@ export async function wijzigLichtkrantBericht(id: string, velden: Partial<Pick<T
 
 export async function verwijderLichtkrantBericht(id: string): Promise<void> {
   check(await supabase.from("ticker_messages").delete().eq("id", id));
+}
+
+// ---------------------------------------------------------------- standgeschiedenis (pijltjes)
+
+export async function haalStandGeschiedenis(): Promise<StandingHistory[]> {
+  return check(await supabase.from("standings_history").select("*").order("vastgelegd_op", { ascending: false }).limit(2000));
 }

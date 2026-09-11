@@ -417,3 +417,33 @@ html,body,#root{touch-action:pan-x pan-y}
 .lichtkrant { position: relative; height: 27px; background: var(--accent); color: var(--op-accent); overflow: hidden; border-bottom: 1px solid var(--tekst); font: 700 12px/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; padding: 7px 0; }
 .lichtkrant span { position: absolute; left: 0; top: 7px; display: inline-block; white-space: nowrap; transform: translate3d(100vw, 0, 0); will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .lichtkrant span { transform: none; padding-left: 12px; } }
+
+/* Ticketrand: perforatielijn met inkepingen aan de randen van de kaart. */
+.kaart { --kaart-rand: 22px; }
+@media (max-width: 600px) { .kaart { --kaart-rand: 16px; } }
+.kaart:has(> .ticket-scheur), .match-blok { overflow: hidden; }
+.ticket-scheur { position: relative; height: 0; border-top: 2px dashed var(--rand); margin: 14px 0 12px; }
+.kaart .ticket-scheur { margin-left: calc(var(--kaart-rand) * -1); margin-right: calc(var(--kaart-rand) * -1); }
+.ticket-scheur::before, .ticket-scheur::after { content: ""; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--achtergrond); border: 1px solid var(--rand); box-sizing: border-box; }
+.ticket-scheur::before { left: -12px; } .ticket-scheur::after { right: -12px; }
+.match-blok .match-aanwezigheid { border-top: none; padding-top: 4px; }
+
+/* Pijltjes in de rangschikking. */
+.stand-positie { white-space: nowrap; }
+.stand-pijl { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; margin-left: 4px; font: 700 11px/1 "Manrope", sans-serif; vertical-align: middle; animation: stand-pijl .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.stand-pijl.op { color: var(--ok); } .stand-pijl.neer { color: var(--fout); } .stand-pijl.gelijk { color: var(--tekst-zacht); }
+.stand-cijfer .stand-pijl { margin-left: 6px; }
+@keyframes stand-pijl { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Aftelling naar de aftrap als klapbord. */
+.aftel { display: flex; align-items: center; gap: 6px; padding: 4px 0 14px; }
+.aftel-vak { background: var(--tekst); color: var(--achtergrond); min-width: 56px; padding: 7px 8px 5px; text-align: center; position: relative; overflow: hidden; border-radius: 4px; }
+.aftel-vak::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0,0,0,.55); }
+.aftel-vak b { display: block; font: 800 26px/1 "Barlow Condensed", sans-serif; color: var(--accent); letter-spacing: .04em; }
+.aftel-vak b.klap { animation: klap .45s cubic-bezier(.16, 1, .3, 1); }
+.aftel-vak small { display: block; font: 700 9px/1 "Manrope", sans-serif; letter-spacing: .18em; text-transform: uppercase; margin-top: 5px; color: var(--achtergrond); opacity: .8; }
+.aftel-sep { font: 800 22px/1 "Barlow Condensed", sans-serif; color: var(--kleur); animation: knipper 1s steps(1) infinite; }
+.aftel.bezig .aftel-vak { min-width: 96px; }
+@keyframes klap { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
+@keyframes knipper { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .aftel-sep, .aftel-vak b.klap, .stand-pijl { animation: none; } }
