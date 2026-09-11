@@ -42,10 +42,9 @@ export function Lichtkrant() {
   if (wasbeurt && namen.get(wasbeurt.member_id)) items.push(`Wasmand: ${namen.get(wasbeurt.member_id)}`);
 
   if (items.length === 0) return null;
-  // De band moet altijd breder zijn dan het scherm, anders springt de tekst bij elke herhaling;
-  // daarom staat de reeks drie keer na elkaar in elke helft van de band.
-  const reeks = items.map((t) => `★ ${t}`).join("    ");
-  const tekst = Array(3).fill(reeks).join("    ");
+  // Elke helft van de band begint met een schermbrede lege ruimte: de tekst komt van rechts binnen,
+  // loopt volledig voorbij en komt na de lege ruimte opnieuw. De twee helften maken de herhaling naadloos.
+  const tekst = items.map((t) => `★ ${t}`).join("    ");
   return (
     <div className="lichtkrant" role="marquee" aria-label="Clubnieuws">
       <div className="lichtkrant-band">
