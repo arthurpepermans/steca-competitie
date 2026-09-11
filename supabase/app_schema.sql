@@ -852,7 +852,7 @@ create or replace function public.openbare_opstellingen() returns jsonb
 language sql stable security definer set search_path = public as $$
   select coalesce(jsonb_agg(jsonb_build_object(
     'match_key', l.match_key, 'formatie', l.formatie,
-    'spelers', coalesce((select jsonb_agg(jsonb_build_object('positie', p.positie, 'naam', m.naam) order by p.positie)
+    'spelers', coalesce((select jsonb_agg(jsonb_build_object('positie', p.positie, 'naam', m.naam, 'member_id', m.id) order by p.positie)
       from public.lineup_players p join public.members m on m.id=p.member_id
       where p.lineup_id=l.id), '[]'::jsonb)
   ) order by l.match_key), '[]'::jsonb)
@@ -1252,3 +1252,103 @@ drop policy if exists "lichtkrant lezen" on ticker_messages;
 create policy "lichtkrant lezen" on ticker_messages for select to authenticated using (is_actief());
 drop policy if exists "lichtkrant beheren" on ticker_messages;
 create policy "lichtkrant beheren" on ticker_messages for all to authenticated using (is_admin()) with check (is_admin());
+
+-- Automatische badges: alleen afgesloten Steca-matchen. Historische seizoenen
+-- blijven uit hun bewaarde wedstrijdcijfers beschikbaar, ook na 1 juli.
+create or replace function public.bereken_badges()
+returns table(id uuid,badge_id text,member_id uuid,seizoen text,match_key text,aangemaakt_op timestamptz)
+language sql stable security definer set search_path=public as $$
+with m as materialized (
+ select x.*, row_number() over(order by datum,coalesce(uur,''),match_key) as nr
+ from matches x
+ where (thuis_id=152 or uit_id=152) and status='gespeeld'
+ and thuis_score is not null and uit_score is not null and datum is not null
+ and ((datum + coalesce(nullif(uur,'')::time,'15:00'::time)) at time zone 'Europe/Brussels') + interval '80 minutes' <= now()
+), leden as materialized (
+ select id from members where functie<>'supporter'
+), cijfers as materialized (
+ select s.*,m.seizoen,m.datum,m.nr,
+ case when s.gespeeld and (case when m.thuis_id=152 then m.uit_score else m.thuis_score end)=0 then 1 else 0 end as cs
+ from match_stats s join m using(match_key) join leden on leden.id=s.member_id
+), stemmen as (
+ select v.match_key,k.member_id,k.punten
+ from match_votes v join m using(match_key)
+ cross join lateral (values(v.eerste,3),(v.tweede,2),(v.derde,1)) k(member_id,punten)
+ where v.voter_id not in(v.eerste,v.tweede,v.derde)
+), punten as materialized (
+ select s.match_key,s.member_id,sum(s.punten) as aantal
+ from stemmen s join leden on leden.id=s.member_id group by s.match_key,s.member_id
+), winnaars as materialized (
+ select p.* from punten p where aantal>0 and aantal=(select max(q.aantal) from punten q where q.match_key=p.match_key)
+), metingen as (
+ select c.member_id,c.seizoen,c.datum,k.soort,k.aantal::bigint
+ from cijfers c cross join lateral (values
+ ('goals',c.goals),('assists',c.assists),('cs',c.cs),('kaarten',c.geel+c.rood),('rood',c.rood),('gespeeld',c.gespeeld::int)) k(soort,aantal)
+ union all select a.member_id,m.seizoen,m.datum,'aanwezig',1 from attendance a join m using(match_key) join leden on leden.id=a.member_id where a.status='aanwezig'
+ union all select w.member_id,m.seizoen,m.datum,'winnaar',1 from winnaars w join m using(match_key)
+ union all select p.member_id,m.seizoen,m.datum,'punten',p.aantal from punten p join m using(match_key)
+ union all select l.member_id,m.seizoen,m.datum,'was',1 from laundry_turns l join m using(match_key) join leden on leden.id=l.member_id
+), totalen as materialized (
+ select member_id,seizoen,soort,sum(aantal) as aantal,max(datum) as datum from metingen group by member_id,seizoen,soort
+ union all select member_id,null,soort,sum(aantal),max(datum) from metingen group by member_id,soort
+), titels(badge_id,soort,jaarlijks) as (values
+ ('gouden_stier','goals',true),('het_kanon','goals',false),('assistenkoning','assists',true),('maestro','assists',false),
+ ('de_muur','cs',true),('betonblok','cs',false),('beenhouwer','kaarten',true),('rosse_furie','rood',true),
+ ('fundering','aanwezig',true),('vaste_waarde','gespeeld',true),('clubmeubilair','gespeeld',false),
+ ('star_boy','winnaar',true),('goat','punten',false),('kuisvrouw','was',true),('junior_dor','punten',true)
+), drempels(badge_id,soort,aantal) as (values
+ ('eentje_is_geentje','goals',1),('dubbele_cijfers','goals',10),('goalgetter','goals',25),('sluipschutter','goals',50),('67','goals',67),('triple_digits','goals',100),
+ ('wingman','assists',1),('facteur','assists',10),('de_architect','assists',25),('kdb_der_juniors','assists',50),
+ ('muur_van_dendermonde','cs',1),('veilige_handen','cs',5),('opgewarmd_door_georgie','cs',10),('golden_glove','cs',25),
+ ('official_junior','gespeeld',1),('toogplekker','gespeeld',10),('sterkhouder','gespeeld',25),('georgies_favoriet','gespeeld',50),('steca_legend','gespeeld',100),('laat_je_ploeg','rood',1)
+), speelreeks as (
+ select member_id,datum,nr-row_number() over(partition by member_id order by nr) as groep from cijfers where gespeeld
+), aanwezigreeks as (
+ select a.member_id,m.datum,m.nr-row_number() over(partition by a.member_id order by m.nr) as groep
+ from attendance a join m using(match_key) join leden on leden.id=a.member_id where a.status='aanwezig'
+), kaartenreeks as (
+ select member_id,datum,(geel+rood)>0 as kaart,lag((geel+rood)>0) over(partition by member_id order by nr) as vorige
+ from cijfers where gespeeld
+), resultaat as (
+ select b.badge_id,t.member_id,t.seizoen,null::text as match_key,t.datum
+ from titels b join totalen t on t.soort=b.soort and (t.seizoen is not null)=b.jaarlijks
+ where t.aantal>0 and t.aantal=(select max(q.aantal) from totalen q where q.soort=t.soort and q.seizoen is not distinct from t.seizoen)
+ union all select d.badge_id,t.member_id,null,null,t.datum from drempels d join totalen t on t.soort=d.soort and t.seizoen is null and t.aantal>=d.aantal
+ union all select 'hattrick',member_id,null,match_key,datum from cijfers where gespeeld and goals>=3
+ union all select 'junior_van_de_match',w.member_id,null,w.match_key,m.datum from winnaars w join m using(match_key)
+ union all select 'vijf_op_een_rij',member_id,null,null,max(datum) from speelreeks group by member_id,groep having count(*)>=5
+ union all select 'rots_in_de_branding',member_id,null,null,max(datum) from aanwezigreeks group by member_id,groep having count(*)>=10
+ union all select 'getikte_zot',member_id,null,null,datum from kaartenreeks where kaart and vorige
+), uniek as (
+ select badge_id,member_id,seizoen,match_key,min(datum) as datum from resultaat group by badge_id,member_id,seizoen,match_key
+)
+select md5(concat_ws('|',badge_id,member_id,seizoen,match_key))::uuid,badge_id,member_id,seizoen,match_key,
+ (datum::timestamp at time zone 'Europe/Brussels') from uniek;
+$$;
+revoke all on function public.bereken_badges() from public;
+grant execute on function public.bereken_badges() to anon,authenticated;
+
+create table if not exists public.badge_voorkeuren (
+ member_id uuid primary key references public.members(id) on delete cascade,
+ badges text[] not null default '{}'
+);
+alter table public.badge_voorkeuren enable row level security;
+revoke all on public.badge_voorkeuren from public,anon,authenticated;
+grant select on public.badge_voorkeuren to anon,authenticated;
+drop policy if exists badgevoorkeur_lezen on public.badge_voorkeuren;
+create policy badgevoorkeur_lezen on public.badge_voorkeuren for select using(true);
+create or replace view public.badges_met_volgorde with (security_invoker=true) as
+ select b.*,array_position(v.badges,b.badge_id) as volgorde,true as automatisch from public.bereken_badges() b left join public.badge_voorkeuren v on v.member_id=b.member_id;
+grant select on public.badges_met_volgorde to anon,authenticated;
+create or replace function public.bewaar_badgevolgorde(p_badges text[]) returns void
+language plpgsql security definer set search_path=public as $$
+declare lid uuid:=my_member_id();
+begin
+ if lid is null or not is_actief() then raise exception 'Log in met je actieve clubaccount.'; end if;
+ if p_badges is null or cardinality(p_badges)>40 or array_position(p_badges,null) is not null then raise exception 'Ongeldige badgevolgorde.'; end if;
+ if (select count(distinct b) from unnest(p_badges) b)<>cardinality(p_badges) then raise exception 'Een badge mag maar een keer in de volgorde staan.'; end if;
+ if exists(select 1 from unnest(p_badges) b where not exists(select 1 from badges_met_volgorde t where t.member_id=lid and t.badge_id=b)) then raise exception 'Je kunt alleen je eigen badges rangschikken.'; end if;
+ insert into badge_voorkeuren(member_id,badges) values(lid,p_badges) on conflict(member_id) do update set badges=excluded.badges;
+end $$;
+revoke all on function public.bewaar_badgevolgorde(text[]) from public,anon;
+grant execute on function public.bewaar_badgevolgorde(text[]) to authenticated;

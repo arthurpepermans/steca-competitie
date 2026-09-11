@@ -23,7 +23,7 @@ export function OpenbareOpstelling({ matches }: { matches: Match[] }) {
     <Fout tekst={info.fout} />
     {info.fout && <button className="knop licht" onClick={() => void info.herlaad()}>Opnieuw proberen</button>}
     {!info.laden && !info.fout && (opstelling
-      ? <Veld formatie={opstelling.formatie} namen={Object.fromEntries(opstelling.spelers.map(p => [p.positie, p.naam]))} />
+      ? <Veld memberIds={Object.fromEntries(opstelling.spelers.map(p=>[p.positie,p.member_id]))} formatie={opstelling.formatie} namen={Object.fromEntries(opstelling.spelers.map(p => [p.positie, p.naam]))} />
       : <p>Er is nog geen opstelling voor deze wedstrijd opgeslagen.</p>)}
   </>;
 }

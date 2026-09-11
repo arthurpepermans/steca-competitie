@@ -21,8 +21,8 @@ export async function haalSupportersData(): Promise<SupportersData> {
   return data as SupportersData;
 }
 
-// Opstellingen voor bezoekers bevatten alleen de formatie en de namen per positie.
-export type OpenbareOpstelling = { match_key: string; formatie: import("./types").Formatie; spelers: { positie: string; naam: string }[] };
+// Opstellingen voor bezoekers bevatten alleen de formatie, spelersnamen en badgekoppelingen per positie.
+export type OpenbareOpstelling = { match_key: string; formatie: import("./types").Formatie; spelers: { positie: string; naam: string; member_id?: string }[] };
 export async function haalOpenbareOpstellingen(): Promise<OpenbareOpstelling[]> {
   const { data, error } = await supabase.rpc("openbare_opstellingen");
   if (error) throw new Error("De opstellingen konden niet geladen worden.");

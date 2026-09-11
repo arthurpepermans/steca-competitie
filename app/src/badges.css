@@ -1,0 +1,39 @@
+.badge-icoon { display:block; width:100px; height:100px; flex:none; }
+.badge-icoon .wasmand-tekening { width:100%; height:100%; }
+.badge-test-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.badge-test-kaart { background:var(--kaart,var(--achtergrond)); color:var(--tekst); border:1px solid var(--rand,#aaa); padding:18px 12px; display:flex; align-items:center; flex-direction:column; gap:8px; text-align:center; cursor:pointer; border-radius:8px; }
+.badge-test-kaart:hover,.badge-test-kaart:focus-visible { border-color:#c39a29; outline:2px solid #c39a29; }
+.badge-test-kaart strong { font-size:1.05rem; }
+.badge-test-kaart span { font-size:.85rem; line-height:1.5; }
+.badge-test-kaart small { margin-top:auto; padding-top:4px; opacity:.7; }
+.badge-profiel-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; }
+.badge-profiel { text-align:center; padding:8px; border:1px solid var(--rand,#aaa); border-radius:8px; }
+.badge-profiel summary { list-style:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.badge-profiel summary::-webkit-details-marker { display:none; }
+.badge-profiel summary:focus-visible { outline:3px solid #c39a29; }
+.badge-profiel p,.badge-profiel a { font-size:.85rem; }
+.badge-profiel small { display:block; }
+.badge-dialoog-achtergrond { position:fixed; inset:0; z-index:300; background:#0009; padding:20px; display:grid; place-items:center; }
+.badge-dialoog { width:min(100%,520px); max-height:calc(100dvh - 40px); overflow:auto; background:var(--kaart,#f5eedb); color:var(--tekst,#292929); border:1px solid var(--rand,#aaa); border-radius:12px; padding:22px; overscroll-behavior:contain; }
+.badge-dialoog>.badge-icoon { margin:8px auto; }
+.badge-dialoog>h2 { text-align:center; }
+.badge-dialoog label { display:block; margin:14px 0; }
+.badge-dialoog select { width:100%; }
+.badge-toewijzingen { list-style:none; padding:0; }
+.badge-toewijzingen li { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-top:1px solid var(--rand,#aaa); }
+.badge-toewijzingen small,.badge-toewijzingen a { display:block; font-size:.85rem; }
+.speler-naamblok { position:relative; width:100%; display:flex; justify-content:center; }
+.speler-naamblok>.truitje-badges { position:absolute; bottom:calc(100% + 2px); left:0; z-index:4; }
+.truitje-badges-knop { display:flex; align-items:center; justify-content:flex-start; gap:1px; background:transparent; border:0; padding:0; cursor:pointer; min-width:24px; min-height:24px; align-items:flex-end; }
+.truitje-badges .badge-icoon { width:16px !important; height:16px !important; margin:0 !important; filter:none !important; }
+.truitje-badges-knop b { font:700 9px/15px Arial,sans-serif; color:#f5eedb; background:#292929; border-radius:20px; padding:0 3px; }
+.truitje-badge-detail { position:absolute; top:26px; left:0; width:160px; max-height:210px; overflow:auto; padding:8px; background:#f5eedb; color:#292929; border:1px solid #292929; border-radius:5px; box-shadow:0 4px 12px #0004; font-size:12px; }
+.truitje-badge-detail>div { display:flex; align-items:center; text-align:left; gap:5px; margin:6px 0; }
+.veldspeler:has(.truitje-badge-detail),.bankspeler:has(.truitje-badge-detail) { z-index:20; }
+@media(max-width:420px) { .badge-test-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .badge-dialoog-achtergrond { padding:10px; } .badge-dialoog { padding:16px; max-height:calc(100dvh - 20px); } }
+.badge-dialoog::backdrop { background:#0009; }
+
+.badge-profiel-kaart { min-width:0; }
+.badge-volgorde-knoppen { display:flex; justify-content:center; gap:8px; margin-top:6px; }
+.badge-volgorde-knoppen button { min-width:36px; min-height:32px; border:1px solid var(--rand); border-radius:4px; background:var(--kaart); font-size:18px; }
+.badge-volgorde-knoppen button:disabled { opacity:.3; cursor:default; }
