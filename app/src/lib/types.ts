@@ -195,3 +195,13 @@ export type LaundryTurn = {
   ingevoerd_door: string | null;
   updated_at: string;
 };
+
+/** Eigen boodschap van een admin in de lichtkrant (tabel ticker_messages). */
+export type TickerMessage = {
+  id: string;
+  tekst: string;
+  actief: boolean;
+  ingevoerd_door: string | null;
+  created_at: string;
+  updated_at: string;
+};

@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import type {
   Aanwezigheid24u, AanwezigheidStatus, Attendance, AuditEntry, Formatie, Lineup, LineupPlayer,
-  Fine, LaundryTurn, Match, MatchStat, MatchVote, Member, MemberBasis, Standing, SyncStatus, Team, VoteCount, VotePoints,
+  Fine, LaundryTurn, Match, MatchStat, TickerMessage, MatchVote, Member, MemberBasis, Standing, SyncStatus, Team, VoteCount, VotePoints,
 } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -182,4 +182,22 @@ export async function zetWasbeurt(matchKey: string, memberId: string | null): Pr
   } else {
     check(await supabase.from("laundry_turns").upsert({ match_key: matchKey, member_id: memberId }, { onConflict: "match_key" }));
   }
+}
+
+// ---------------------------------------------------------------- lichtkrant
+
+export async function haalLichtkrantBerichten(): Promise<TickerMessage[]> {
+  return check(await supabase.from("ticker_messages").select("*").order("created_at", { ascending: true }));
+}
+
+export async function voegLichtkrantBerichtToe(tekst: string): Promise<void> {
+  check(await supabase.from("ticker_messages").insert({ tekst }));
+}
+
+export async function wijzigLichtkrantBericht(id: string, velden: Partial<Pick<TickerMessage, "tekst" | "actief">>): Promise<void> {
+  check(await supabase.from("ticker_messages").update(velden).eq("id", id));
+}
+
+export async function verwijderLichtkrantBericht(id: string): Promise<void> {
+  check(await supabase.from("ticker_messages").delete().eq("id", id));
 }

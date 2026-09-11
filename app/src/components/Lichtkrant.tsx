@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import { haalBoetes, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalWasbeurten } from "../lib/api";
+import { useEffect, useRef, useState } from "react";
+import { haalBoetes, haalLedenBasis, haalLichtkrantBerichten, haalMatches, haalStats, haalStemPunten, haalWasbeurten } from "../lib/api";
+import { LICHTKRANT_HERLADEN } from "./LichtkrantBeheer";
 import { useAuth } from "../lib/auth";
 import { boeteItems, boeteTotalen, fmtEuro, potTotaal } from "../lib/boetes";
 import { fmtDatum, isEigen, isThuis, laatsteUitslag, sorteerOpDatum, tegenstander, volgendeMatch } from "../lib/datum";
@@ -79,19 +80,26 @@ function Band({ tekst }: { tekst: string }) {
 /** Lichtkrant onder de kop: laatste uitslag, volgende match, Junior van de match, boetepot en wasmand. */
 export function Lichtkrant() {
   const { lid } = useAuth();
+  const [versie, setVersie] = useState(0);
+  useEffect(() => {
+    const herlaad = () => setVersie((v) => v + 1);
+    window.addEventListener(LICHTKRANT_HERLADEN, herlaad);
+    return () => window.removeEventListener(LICHTKRANT_HERLADEN, herlaad);
+  }, []);
   const data = useAsync(async () => {
     if (!lid) return null;
-    const [matches, punten, boetes, leden, stats, wasbeurten] = await Promise.all([
-      haalMatches(), haalStemPunten(), haalBoetes().catch(() => []), haalLedenBasis(), haalStats(), haalWasbeurten().catch(() => []),
+    const [matches, punten, boetes, leden, stats, wasbeurten, berichten] = await Promise.all([
+      haalMatches(), haalStemPunten(), haalBoetes().catch(() => []), haalLedenBasis(), haalStats(), haalWasbeurten().catch(() => []), haalLichtkrantBerichten().catch(() => []),
     ]);
-    return { matches, punten, boetes, leden, stats, wasbeurten };
-  }, [lid?.id]);
+    return { matches, punten, boetes, leden, stats, wasbeurten, berichten };
+  }, [lid?.id, versie]);
 
   if (!lid || data.laden || data.fout || !data.data) return null;
-  const { matches, punten, boetes, leden, stats, wasbeurten } = data.data;
+  const { matches, punten, boetes, leden, stats, wasbeurten, berichten } = data.data;
   const namen = new Map(leden.map((m) => [m.id, m.naam]));
   const eigen = sorteerOpDatum(matches.filter(isEigen));
-  const items: string[] = [];
+  // eigen boodschappen van de admins eerst, daarna de automatische berichten
+  const items: string[] = berichten.filter((b) => b.actief).map((b) => b.tekst.trim()).filter(Boolean);
 
   const laatste = laatsteUitslag(eigen);
   if (laatste) items.push(`Laatste uitslag: ${laatste.thuis} ${laatste.thuis_score} - ${laatste.uit_score} ${laatste.uit}`);
