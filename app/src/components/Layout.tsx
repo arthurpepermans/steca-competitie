@@ -10,6 +10,7 @@ import { Moon } from "@phosphor-icons/react/dist/csr/Moon";
 import { Sun } from "@phosphor-icons/react/dist/csr/Sun";
 import { useAuth } from "../lib/auth";
 import { NieuweVersie } from "./NieuweVersie";
+import { Lichtkrant } from "./Lichtkrant";
 import { useNavViewport } from "../lib/useNavViewport";
 
 import { MeldingenPopup } from './MeldingenPopup';
@@ -57,6 +58,7 @@ export function Layout() {
           </Link>
         </div>
       </header>
+      <Lichtkrant />
       <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><Outlet /></main>
       <MeldingenPopup />
       <nav ref={navRef} className="nav" aria-label="Hoofdnavigatie">
