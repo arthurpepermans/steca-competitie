@@ -7,30 +7,45 @@ import { juniorVanDeMatch } from "../lib/stemmen";
 import { useAsync } from "../lib/useAsync";
 
 /** Beweging per frame in plaats van een CSS-animatie: iOS Safari tekent bij een CSS-animatie de tekst
- *  van een brede band soms pas als ze al in beeld staat. Hier verschuiven we de tekst zelf, elk frame. */
+ *  van een brede band soms pas als ze al in beeld staat. Hier verschuiven we een handvol kleine kopieën
+ *  van de tekst zelf, elk frame, zodat de band doorlopend gevuld is zonder lege stukken. */
+const KOPIEEN = 6;
+const TUSSENRUIMTE = 56;
+
 function useLichtkrant(tekst: string) {
   const band = useRef<HTMLDivElement>(null);
-  const span = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    const b = band.current, s = span.current;
-    if (!b || !s) return;
+    const b = band.current;
+    if (!b) return;
+    const kopieen = Array.from(b.querySelectorAll<HTMLSpanElement>("span"));
+    if (kopieen.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      s.style.transform = "none";
+      kopieen.forEach((k, i) => { k.style.transform = "none"; k.style.visibility = i === 0 ? "visible" : "hidden"; });
       return;
     }
     const SNELHEID = 0.05; // pixels per milliseconde
-    let x = b.clientWidth * 0.5; // eerste keer al halverwege, daarna telkens van de rechterrand
+    let basis = b.clientWidth * 0.3; // de eerste kopie start een eind in beeld, de volgende erachter
     let vorige = performance.now();
     let frame = 0;
     let vast = false;
-    s.style.transform = `translate3d(${x}px,0,0)`;
+    const teken = () => {
+      const breedte = kopieen[0].offsetWidth;
+      const periode = breedte + TUSSENRUIMTE;
+      const totaal = KOPIEEN * periode;
+      kopieen.forEach((k, i) => {
+        let x = basis + i * periode;
+        while (x < -breedte) x += totaal;
+        while (x > totaal - breedte) x -= totaal;
+        k.style.transform = `translate3d(${x}px,0,0)`;
+      });
+    };
+    teken();
     const stap = (nu: number) => {
       const dt = Math.min(64, nu - vorige);
       vorige = nu;
       if (!vast && !document.hidden) {
-        x -= dt * SNELHEID;
-        if (x < -s.offsetWidth) x = b.clientWidth;
-        s.style.transform = `translate3d(${x}px,0,0)`;
+        basis -= dt * SNELHEID;
+        teken();
       }
       frame = requestAnimationFrame(stap);
     };
@@ -49,14 +64,14 @@ function useLichtkrant(tekst: string) {
       b.removeEventListener("pointerleave", laatLos);
     };
   }, [tekst]);
-  return { band, span };
+  return band;
 }
 
 function Band({ tekst }: { tekst: string }) {
-  const { band, span } = useLichtkrant(tekst);
+  const band = useLichtkrant(tekst);
   return (
     <div className="lichtkrant" ref={band} role="marquee" aria-label="Clubnieuws">
-      <span ref={span}>{tekst}</span>
+      {Array.from({ length: KOPIEEN }, (_, i) => <span key={i} aria-hidden={i > 0 || undefined}>{tekst}</span>)}
     </div>
   );
 }

@@ -414,6 +414,6 @@ html,body,#root{touch-action:pan-x pan-y}
 @media (max-width: 480px) { .wasmand-blok { gap: 12px; } .wasmand-tekening { width: 92px; } }
 
 /* Lichtkrant onder de kop: gouden band met doorlopend clubnieuws. */
-.lichtkrant { background: var(--accent); color: var(--op-accent); overflow: hidden; border-bottom: 1px solid var(--tekst); font: 700 12px/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; padding: 7px 0; }
-.lichtkrant span { display: inline-block; white-space: nowrap; padding-right: 24px; transform: translate3d(100vw, 0, 0); will-change: transform; }
+.lichtkrant { position: relative; height: 27px; background: var(--accent); color: var(--op-accent); overflow: hidden; border-bottom: 1px solid var(--tekst); font: 700 12px/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; padding: 7px 0; }
+.lichtkrant span { position: absolute; left: 0; top: 7px; display: inline-block; white-space: nowrap; transform: translate3d(100vw, 0, 0); will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .lichtkrant span { transform: none; padding-left: 12px; } }
