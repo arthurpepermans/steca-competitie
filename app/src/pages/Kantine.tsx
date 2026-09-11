@@ -11,6 +11,8 @@ import { fmtDatum, isEigen, sorteerOpDatum } from '../lib/datum';
 import { huidigSeizoen } from '../lib/seizoen';
 import type { Match } from '../lib/types';
 import { Veld } from '../components/Veld';
+import { LockSimple } from '@phosphor-icons/react/dist/csr/LockSimple';
+import { LockSimpleOpen } from '@phosphor-icons/react/dist/csr/LockSimpleOpen';
 import { Fout, Laden } from '../components/Layout';
 
 export function Kantine({ openbaar=false }: { openbaar?: boolean }) {
@@ -52,7 +54,7 @@ function DreamXI({ openbaar }: { openbaar: boolean }) {
  <button className="knop licht" onClick={()=>{if(window.confirm('Je persoonlijke Dream XI leegmaken?'))wijzig({...dream,keuze:{},slotjes:[]});}}>Leegmaken</button></div>
  <Veld formatie={dream.formatie} namen={namen} slotjes={dream.slotjes}/>
  <h2>Kies jouw spelers</h2><p className="zacht">Alle actieve spelers zijn beschikbaar, ongeacht hun aanwezigheid. Gebruik het slotje om iemand vast te zetten voor het rad.</p>
- <div className="dream-keuzes">{allePosities(dream.formatie).map(p=><div className="veld" key={p}><label htmlFor={'dream-'+p}>{positieLabel(p)}</label><div className="rij"><select id={'dream-'+p} value={dream.keuze[p]??''} onChange={e=>{const keuze={...dream.keuze};for(const q of Object.keys(keuze))if(e.target.value&&keuze[q]===e.target.value)keuze[q]=null;keuze[p]=e.target.value||null;wijzig({...dream,keuze,slotjes:dream.slotjes.filter(q=>keuze[q])});}}><option value="">Kies een speler</option>{spelers.data?.map(s=><option key={s.id} value={s.id}>{s.naam}{Object.entries(dream.keuze).some(([q,id])=>q!==p&&id===s.id)?' (verplaatsen)':''}</option>)}</select><button className="knop licht klein" disabled={!dream.keuze[p]} aria-label={`${positieLabel(p)} ${dream.slotjes.includes(p)?'ontgrendelen':'vergrendelen'}`} aria-pressed={dream.slotjes.includes(p)} onClick={()=>wijzig({...dream,slotjes:dream.slotjes.includes(p)?dream.slotjes.filter(q=>q!==p):[...dream.slotjes,p]})}>{dream.slotjes.includes(p)?'🔒':'🔓'}</button></div></div>)}</div></>}
+ <div className="dream-keuzes">{allePosities(dream.formatie).map(p=><div className="veld" key={p}><label htmlFor={'dream-'+p}>{positieLabel(p)}</label><div className="positie-keuze"><select id={'dream-'+p} value={dream.keuze[p]??''} onChange={e=>{const keuze={...dream.keuze};for(const q of Object.keys(keuze))if(e.target.value&&keuze[q]===e.target.value)keuze[q]=null;keuze[p]=e.target.value||null;wijzig({...dream,keuze,slotjes:dream.slotjes.filter(q=>keuze[q])});}}><option value="">Kies een speler</option>{spelers.data?.map(s=><option key={s.id} value={s.id}>{s.naam}{Object.entries(dream.keuze).some(([q,id])=>q!==p&&id===s.id)?' (verplaatsen)':''}</option>)}</select><button type="button" className="knop licht positie-slot" disabled={!dream.keuze[p]} title={dream.slotjes.includes(p)?'Ontgrendelen':'Vastzetten voor het rad'} aria-label={`${positieLabel(p)} ${dream.slotjes.includes(p)?'ontgrendelen':'vergrendelen'}`} aria-pressed={dream.slotjes.includes(p)} onClick={()=>wijzig({...dream,slotjes:dream.slotjes.includes(p)?dream.slotjes.filter(q=>q!==p):[...dream.slotjes,p]})}>{dream.slotjes.includes(p)?<LockSimple size={22} weight="fill" />:<LockSimpleOpen size={22} />}</button></div></div>)}</div></>}
  <p><Link to={openbaar?'/supporters?tab=Opstelling':'/opstelling'} className="knop licht">Naar de officiële opstelling</Link></p></>;
 }
 function Pronostieken({ openbaar,klassement }: {openbaar:boolean;klassement:boolean}) {
