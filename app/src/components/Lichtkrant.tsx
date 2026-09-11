@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { haalBoetes, haalLedenBasis, haalMatches, haalStats, haalStemPunten, haalWasbeurten } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { boeteItems, boeteTotalen, fmtEuro, potTotaal } from "../lib/boetes";
@@ -5,8 +6,62 @@ import { fmtDatum, isEigen, isThuis, laatsteUitslag, sorteerOpDatum, tegenstande
 import { juniorVanDeMatch } from "../lib/stemmen";
 import { useAsync } from "../lib/useAsync";
 
-/** Lichtkrant onder de kop: laatste uitslag, volgende match, Junior van de match, boetepot en wasmand.
- *  De tekst loopt traag door; wie 'verminder beweging' aan heeft, ziet hem stilstaan. */
+/** Beweging per frame in plaats van een CSS-animatie: iOS Safari tekent bij een CSS-animatie de tekst
+ *  van een brede band soms pas als ze al in beeld staat. Hier verschuiven we de tekst zelf, elk frame. */
+function useLichtkrant(tekst: string) {
+  const band = useRef<HTMLDivElement>(null);
+  const span = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const b = band.current, s = span.current;
+    if (!b || !s) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      s.style.transform = "none";
+      return;
+    }
+    const SNELHEID = 0.05; // pixels per milliseconde
+    let x = b.clientWidth * 0.5; // eerste keer al halverwege, daarna telkens van de rechterrand
+    let vorige = performance.now();
+    let frame = 0;
+    let vast = false;
+    s.style.transform = `translate3d(${x}px,0,0)`;
+    const stap = (nu: number) => {
+      const dt = Math.min(64, nu - vorige);
+      vorige = nu;
+      if (!vast && !document.hidden) {
+        x -= dt * SNELHEID;
+        if (x < -s.offsetWidth) x = b.clientWidth;
+        s.style.transform = `translate3d(${x}px,0,0)`;
+      }
+      frame = requestAnimationFrame(stap);
+    };
+    frame = requestAnimationFrame(stap);
+    const houdVast = () => { vast = true; };
+    const laatLos = () => { vast = false; };
+    b.addEventListener("pointerdown", houdVast);
+    b.addEventListener("pointerup", laatLos);
+    b.addEventListener("pointercancel", laatLos);
+    b.addEventListener("pointerleave", laatLos);
+    return () => {
+      cancelAnimationFrame(frame);
+      b.removeEventListener("pointerdown", houdVast);
+      b.removeEventListener("pointerup", laatLos);
+      b.removeEventListener("pointercancel", laatLos);
+      b.removeEventListener("pointerleave", laatLos);
+    };
+  }, [tekst]);
+  return { band, span };
+}
+
+function Band({ tekst }: { tekst: string }) {
+  const { band, span } = useLichtkrant(tekst);
+  return (
+    <div className="lichtkrant" ref={band} role="marquee" aria-label="Clubnieuws">
+      <span ref={span}>{tekst}</span>
+    </div>
+  );
+}
+
+/** Lichtkrant onder de kop: laatste uitslag, volgende match, Junior van de match, boetepot en wasmand. */
 export function Lichtkrant() {
   const { lid } = useAuth();
   const data = useAsync(async () => {
@@ -42,15 +97,5 @@ export function Lichtkrant() {
   if (wasbeurt && namen.get(wasbeurt.member_id)) items.push(`Wasmand: ${namen.get(wasbeurt.member_id)}`);
 
   if (items.length === 0) return null;
-  // Elke helft van de band begint met een schermbrede lege ruimte: de tekst komt van rechts binnen,
-  // loopt volledig voorbij en komt na de lege ruimte opnieuw. De twee helften maken de herhaling naadloos.
-  const tekst = items.map((t) => `★ ${t}`).join("    ");
-  return (
-    <div className="lichtkrant" role="marquee" aria-label="Clubnieuws">
-      <div className="lichtkrant-band">
-        <span>{tekst}</span>
-        <span aria-hidden="true">{tekst}</span>
-      </div>
-    </div>
-  );
+  return <Band tekst={items.map((t) => `★ ${t}`).join("    ")} />;
 }
