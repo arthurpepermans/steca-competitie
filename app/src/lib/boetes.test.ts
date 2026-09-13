@@ -20,9 +20,9 @@ describe("boetes", () => {
   });
 
   it("telt kaarten uit de statistieken mee: geel 5 euro, rood een bak bier", () => {
-    const items = boeteItems([], [stat("a", 2, 0), stat("b", 0, 1)], [match("m1", "2026-09-05")]);
+    const items = boeteItems([], [stat("a", 1, 0), stat("b", 0, 1)], [match("m1", "2026-09-05")]);
     const tot = boeteTotalen(items);
-    expect(tot.map((t) => [t.member_id, t.cent, t.bakBier, t.aantal])).toEqual([["a", 1000, 0, 2], ["b", 0, 1, 1]]);
+    expect(tot.map((t) => [t.member_id, t.cent, t.bakBier, t.aantal])).toEqual([["a", 500, 0, 1], ["b", 0, 1, 1]]);
     expect(items.every((i) => i.uitStats && i.datum === "2026-09-05")).toBe(true);
   });
 
@@ -39,4 +39,13 @@ describe("boetes", () => {
     expect(fmtEuro(1250)).toBe("€ 12,50");
     expect(fmtEuro(200)).toBe("€ 2,00");
   });
+});
+
+it.each([0,1])('rekent voor twee geel uitsluitend één bak bier, ook met rood=%s', rood => {
+ const items = boeteItems([], [stat('a',2,rood)], [match('m1','2026-09-12')]);
+ expect(items).toHaveLength(1);
+ expect(potTotaal(boeteTotalen(items))).toEqual({cent:0,bakBier:1,aantal:1});
+});
+it('houdt één geel plus rechtstreeks rood apart',()=>{
+ expect(potTotaal(boeteTotalen(boeteItems([], [stat('a',1,1)], [])))).toEqual({cent:500,bakBier:1,aantal:2});
 });

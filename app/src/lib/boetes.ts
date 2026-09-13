@@ -24,6 +24,7 @@ export const BOETE_SOORTEN: BoeteSoort[] = [
   { code: "wasmand", label: "Wasmand laten liggen bij je wasbeurt", cent: 1000 },
   { code: "kleedkamer", label: "Kleedkamer niet gekuist als laatste", cent: 1000 },
   { code: "geel", label: "Gele kaart", cent: 500, automatisch: true },
+  { code: "tweemaal_geel", label: "Twee gele kaarten in dezelfde match", cent: 0, bakBier: 1, automatisch: true },
   { code: "rood", label: "Rode kaart", cent: 0, bakBier: 1, automatisch: true },
   { code: "andere", label: "Andere (bedrag zelf invullen)", cent: 0, vrijBedrag: true },
 ];
@@ -83,6 +84,10 @@ export function boeteItems(fines: Fine[], stats: MatchStat[], matches: Match[]):
   }));
   for (const s of stats) {
     const datum = perMatch.get(s.match_key)?.datum ?? "";
+    if (s.geel >= 2) {
+      items.push({ id: null, member_id: s.member_id, datum, match_key: s.match_key, soort: "rood", label: "Twee keer geel: rode kaart", aantal: 1, cent: 0, bakBier: 1, opmerking: null, uitStats: true });
+      continue;
+    }
     if (s.geel > 0) {
       items.push({ id: null, member_id: s.member_id, datum, match_key: s.match_key, soort: "geel", label: soortLabel("geel"), aantal: s.geel, cent: GEEL_CENT * s.geel, bakBier: 0, opmerking: null, uitStats: true });
     }
