@@ -3,7 +3,7 @@ import { haalBoetes, haalKlassement, haalLedenBasis, haalMatches, haalStats, haa
 import { isSpelerLid, rechten, useAuth } from "../lib/auth";
 import { EIGEN_PLOEGID } from "../lib/config";
 import { fmtDatum, isEigen, sorteerOpDatum, tegenstander } from "../lib/datum";
-import { sorteerOp, totalen, type Totalen } from "../lib/stats";
+import { statistiekKolommen, sorteerOp, totalen, type Totalen } from "../lib/stats";
 import { standBeweging } from "../lib/stand";
 import { useAsync } from "../lib/useAsync";
 import { Klassementstabel } from "../components/Klassementstabel";
@@ -49,6 +49,7 @@ export function Klassement() {
   const spelers = (leden.data ?? []).filter(isSpelerLid).map((m) => ({ id: m.id, naam: m.naam }));
   const eigenMatches = sorteerOpDatum((matches.data ?? []).filter(isEigen));
   const gespeeld = eigenMatches.filter((m) => m.status === "gespeeld");
+  const kolommen = statistiekKolommen(sorteer);
   const tot = sorteerOp(totalen(stats.data ?? [], eigenMatches), sorteer);
   const invoer = gespeeld.find((m) => m.match_key === invoerMatch);
 
@@ -85,14 +86,13 @@ export function Klassement() {
           </div>
           <div className="tabel-wrap">
             <table className="tabel">
-              <thead><tr><th>#</th><th>Speler</th><th className="num">Gesp</th><th className="num">Goals</th><th className="num">Ass.</th><th className="num">Geel</th><th className="num">Rood</th><th className="num">CS</th></tr></thead>
+              <thead><tr><th>#</th><th>Speler</th>{kolommen.map(k=><th key={k.veld} className="num" aria-sort={k.veld===sorteer ? "descending" : undefined}>{k.label}</th>)}</tr></thead>
               <tbody>
                 {tot.map((t, i) => (
                   <tr key={t.member_id} className={t.member_id === lid?.id ? "eigen" : ""}>
                     <td>{i + 1}</td>
                     <td style={{ whiteSpace: "normal" }}>{ledenNamen.get(t.member_id) ?? "?"}</td>
-                    <td className="num">{t.gespeeld}</td><td className="num">{t.goals}</td><td className="num">{t.assists}</td>
-                    <td className="num">{t.geel}</td><td className="num">{t.rood}</td><td className="num">{t.cleanSheets}</td>
+                    {kolommen.map(k=><td key={k.veld} className="num">{k.veld===sorteer ? <strong>{t[k.veld]}</strong> : t[k.veld]}</td>)}
                   </tr>
                 ))}
                 {tot.length === 0 && <tr><td colSpan={8} className="zacht">Nog geen statistieken ingevoerd.</td></tr>}

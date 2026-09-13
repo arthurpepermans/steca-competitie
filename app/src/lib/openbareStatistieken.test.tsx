@@ -13,7 +13,7 @@ const match: Match = { match_key: "match", seizoen: "2026-2027", reeks: "Test", 
 it("toont spelersnaam en wedstrijdcijfers zonder invoerfunctie", () => {
   const html = renderToStaticMarkup(<OpenbareStatistieken matches={[match]} />);
   expect(html).toContain("Testspeler Een");
-  expect(html).toContain("<td>1</td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td>");
+  expect(html).toContain("<td><strong>2</strong></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>");
   expect(html).not.toContain("Invoeren per match");
 });
 it("telt kaartboetes mee maar biedt bezoekers geen bewerk- of verwijderknoppen", () => {
