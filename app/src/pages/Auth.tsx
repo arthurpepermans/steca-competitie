@@ -14,6 +14,7 @@ function Kader({ titel, children }: { titel: string; children: React.ReactNode }
         {children}
       </div>
       <InstallatieHulp />
+      <Link className="knop licht breed" to="/vrouwen">Naar Steca Vrouwen</Link>
       <Link className="knop licht breed" to="/supporters">Doorgaan zonder account</Link>
       <p className="zacht klein">Bekijk de kalender en volg de ploeg.</p>
     </div>

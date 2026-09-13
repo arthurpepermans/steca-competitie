@@ -61,6 +61,7 @@ export function Layout() {
           </Link>
         </div>
       </header>
+      <div style={{textAlign:"right",padding:"6px 20px",fontSize:12}}><Link to="/vrouwen">Wissel naar Steca Vrouwen ↗</Link></div>
       <Lichtkrant />
       <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><SupporterAanwezigheidProvider><Outlet /></SupporterAanwezigheidProvider></main>
       <MeldingenPopup />

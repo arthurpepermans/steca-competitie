@@ -8,7 +8,9 @@ name: deploy-app
 on:
   push:
     branches: [main]
-    paths: ["app/**", ".github/workflows/deploy-app.yml"]
+    paths: ["app/**", ".github/workflows/deploy-app.yml", "scripts/sync_vrouwen.py"]
+  schedule:
+    - cron: '15 5,11,17,21 * * *'
   workflow_dispatch:
 
 permissions:
@@ -47,6 +49,16 @@ jobs:
         run: |
           echo "Basispad: $BASE_PATH (site: ${{ steps.pages.outputs.base_url }})"
           npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Openbare vrouwencompetitie bijwerken
+        working-directory: .
+        run: |
+          pip install beautifulsoup4 requests truststore tzdata
+          python -m unittest discover -s scripts -p "test_*.py"
+          python scripts/sync_vrouwen.py
+          cp app/public/vrouwen-data.json app/dist/vrouwen-data.json
       - uses: actions/upload-pages-artifact@v3
         with:
           path: app/dist
