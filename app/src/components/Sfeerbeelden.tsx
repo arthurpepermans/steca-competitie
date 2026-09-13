@@ -12,7 +12,7 @@ export function Sfeerbeelden({ matchKey }: { matchKey: string }) {
 }
 
 function Album({ matchKey }: { matchKey: string }) {
-  const { lid, session } = useAuth();
+  const { lid, supporter, session } = useAuth();
   const [beelden, setBeelden] = useState<Sfeerbeeld[]>([]);
   const [meer, setMeer] = useState(false);
   const [laden, setLaden] = useState(true);
@@ -72,7 +72,7 @@ function Album({ matchKey }: { matchKey: string }) {
   return <div className="sfeer-album" aria-busy={bezig || laden}>
     <p>Foto’s en video’s van deze match. Alleen zichtbaar voor leden.</p>
     <div className="knoppen">
-      <button type="button" className="knop" disabled={bezig || lid?.status !== "actief"} onClick={() => invoer.current?.click()}>Foto’s / video’s toevoegen</button>
+      <button type="button" className="knop" disabled={bezig || !(lid?.status === "actief" || supporter?.actief)} onClick={() => invoer.current?.click()}>Foto’s / video’s toevoegen</button>
       <button type="button" className="knop licht klein" disabled={bezig || laden} onClick={() => { setFout(""); void laad(); }}>Vernieuwen</button>
     </div>
     <input ref={invoer} type="file" multiple accept={Object.keys(MEDIA_TYPES).join(",")} hidden onChange={(e) => void upload(Array.from(e.target.files ?? []))} />
