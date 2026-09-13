@@ -9,7 +9,7 @@ import { useAsync } from "../lib/useAsync";
 import { Klassementstabel } from "../components/Klassementstabel";
 import { Fout, Laden } from "../components/Layout";
 import { LaatstBijgewerkt } from "../components/LaatstBijgewerkt";
-import { StatsInvoer } from "../components/StatsInvoer";
+import { Link } from "react-router-dom";
 import { Boetepot } from "../components/Boetepot";
 import { JuniorDor } from "../components/Junior";
 import { WasmandTabel } from "../components/Wasmand";
@@ -101,7 +101,7 @@ export function Klassement() {
           </div>
           {r.isStaf && (
             <div className="kaart">
-              <h3>Invoeren per match</h3>
+              <h3>Invoeren per match</h3><p className="klein zacht">Vul goals, assists en kaarten in het matchverslag in. Basis en bank tellen automatisch als gespeeld.</p>
               <div className="veld">
                 <select value={invoerMatch} onChange={(e) => setInvoerMatch(e.target.value)}>
                   <option value="">Kies een gespeelde match…</option>
@@ -110,7 +110,7 @@ export function Klassement() {
                   ))}
                 </select>
               </div>
-              {invoer && <StatsInvoer match={invoer} spelers={spelers} stats={stats.data ?? []} ledenNamen={ledenNamen} onOpgeslagen={stats.herlaad} />}
+              {invoer && <Link className="knop" to={`/match/${encodeURIComponent(invoer.match_key)}?invullen=1`}>Matchverslag invullen</Link>}
             </div>
           )}
         </>

@@ -393,6 +393,8 @@ create table if not exists match_stats (
   updated_at     timestamptz not null default now(),
   primary key (match_key, member_id)
 );
+alter table public.match_stats add column if not exists clean_sheet boolean;
+
 create or replace function match_stats_stamp() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
@@ -780,7 +782,7 @@ language sql stable security definer set search_path = public as $$
  select id, naam from members where speelt or exists (select 1 from match_stats where member_id = members.id) or exists (select 1 from fines where member_id = members.id)
  ) p), '[]'::jsonb),
  'stats', coalesce((select jsonb_agg(to_jsonb(s)) from (
- select s.match_key, s.member_id, s.gespeeld, s.goals, s.assists, s.geel, s.rood from match_stats s
+ select s.match_key, s.member_id, s.gespeeld, s.goals, s.assists, s.geel, s.rood, s.clean_sheet from match_stats s
  join matches m on m.match_key = s.match_key where m.thuis_id = 152 or m.uit_id = 152
  ) s), '[]'::jsonb),
  'boetes', coalesce((select jsonb_agg(to_jsonb(f) order by datum desc) from (
@@ -1260,7 +1262,10 @@ returns table(id uuid,badge_id text,member_id uuid,seizoen text,match_key text,a
 language sql stable security definer set search_path=public as $$
 with m as materialized (
  select x.*, row_number() over(order by datum,coalesce(uur,''),match_key) as nr
- from matches x
+ from (select t.match_key,t.seizoen,t.datum,t.uur,t.thuis_id,t.uit_id,
+ case when r.match_key is not null then 'gespeeld' else t.status end as status,
+ coalesce(r.thuis_score,t.thuis_score) thuis_score,coalesce(r.uit_score,t.uit_score) uit_score
+ from matches t left join match_reports r using(match_key)) x
  where (thuis_id=152 or uit_id=152) and status='gespeeld'
  and thuis_score is not null and uit_score is not null and datum is not null
  and ((datum + coalesce(nullif(uur,'')::time,'15:00'::time)) at time zone 'Europe/Brussels') + interval '80 minutes' <= now()
@@ -1389,3 +1394,134 @@ begin
 end $$;
 revoke all on function public.claim_competition_sync(uuid) from public, anon, authenticated;
 grant execute on function public.claim_competition_sync(uuid) to service_role;
+
+-- Statistieken uit verslag en officiële opstelling.
+alter table public.match_stats add column if not exists uit_verslag boolean not null default false;
+alter table public.match_stats add column if not exists uit_opstelling boolean not null default false;
+alter table public.match_stats add column if not exists clean_sheet boolean;
+
+-- Bewaar een stabiele spelerskoppeling; oude verslagen kunnen nog enkel namen bevatten.
+create or replace function public.verslag_lid(p_id text,p_naam text) returns uuid
+language sql stable security definer set search_path=public as $$
+ select case when nullif(p_id,'') is not null then
+   (select id from members where id::text=p_id and functie<>'supporter')
+ else (select (array_agg(id))[1] from members where functie<>'supporter'
+   and lower(btrim(naam))=lower(btrim(p_naam)) having count(*)=1) end
+$$;
+revoke all on function public.verslag_lid(text,text) from public,anon,authenticated;
+
+create or replace function public.koppel_verslag_spelers() returns trigger
+language plpgsql security definer set search_path=public as $$
+declare moment jsonb; lijst jsonb:='[]'; kant text; speler uuid; assist uuid;
+begin
+ select case when thuis_id=152 then 'thuis' else 'uit' end into kant from matches where match_key=new.match_key;
+ for moment in select value from jsonb_array_elements(new.momenten) loop
+  if moment->>'kant'=kant then
+   speler:=verslag_lid(moment->>'speler_id',moment->>'speler');
+   assist:=case when moment->>'soort'='goal' then verslag_lid(moment->>'assist_id',moment->>'assist') else null end;
+   if nullif(btrim(moment->>'speler'),'') is not null and speler is null then
+    raise exception 'Kies voor % een speler uit de ledenlijst.',moment->>'speler';
+   end if;
+   if moment->>'soort'='goal' and nullif(btrim(moment->>'assist'),'') is not null and assist is null then
+    raise exception 'Kies voor de assist van % een speler uit de ledenlijst.',moment->>'assist';
+   end if;
+   moment:=moment || jsonb_build_object('speler_id',speler,'assist_id',assist);
+  else
+   moment:=moment - 'speler_id' - 'assist_id';
+  end if;
+  lijst:=lijst || jsonb_build_array(moment);
+ end loop;
+ new.momenten:=lijst;
+ return new;
+end $$;
+drop trigger if exists koppel_verslag_spelers on public.match_reports;
+create trigger koppel_verslag_spelers before insert or update of momenten on public.match_reports
+for each row execute function public.koppel_verslag_spelers();
+revoke all on function public.koppel_verslag_spelers() from public,anon,authenticated;
+
+create or replace function public.synchroniseer_matchstatistieken(p_match text) returns void
+language plpgsql security definer set search_path=public as $$
+declare wedstrijd public.matches; verslag public.match_reports; opstelling uuid; klaar boolean; eigenkant text; tegen integer;
+begin
+ select * into wedstrijd from matches where match_key=p_match for update;
+ if not found or (wedstrijd.thuis_id<>152 and wedstrijd.uit_id<>152) then return; end if;
+ select * into verslag from match_reports where match_key=p_match;
+ select id into opstelling from lineups where match_key=p_match;
+ klaar:=verslag.match_key is not null or wedstrijd.status='gespeeld';
+ eigenkant:=case when wedstrijd.thuis_id=152 then 'thuis' else 'uit' end;
+ tegen:=case when eigenkant='thuis' then coalesce(verslag.uit_score,wedstrijd.uit_score) else coalesce(verslag.thuis_score,wedstrijd.thuis_score) end;
+ -- Bestaande onbekende of dubbele namen nooit aan een willekeurige speler toekennen.
+ -- Nieuwe invoer wordt reeds door koppel_verslag_spelers gecontroleerd.
+ with momenten as (
+  select value as m from jsonb_array_elements(coalesce(verslag.momenten,'[]')) where value->>'kant'=eigenkant
+ ), punten as (
+  select verslag_lid(m->>'speler_id',m->>'speler') as lid,
+   (m->>'soort'='goal')::int as goals,0 as assists,(m->>'soort'='geel')::int as geel,(m->>'soort'='rood')::int as rood from momenten
+  union all
+  select verslag_lid(m->>'assist_id',m->>'assist'),0,1,0,0 from momenten where m->>'soort'='goal'
+ ), totalen as (
+  select lid,sum(goals)::int goals,sum(assists)::int assists,sum(geel)::int geel,sum(rood)::int rood from punten where lid is not null group by lid
+ ), personen as (
+  select member_id as lid from match_stats where match_key=p_match
+  union select member_id from lineup_players where lineup_id=opstelling and klaar
+  union select lid from totalen
+ ), berekend as (
+  select p.lid,
+   case when opstelling is not null then klaar and exists(select 1 from lineup_players l where l.lineup_id=opstelling and l.member_id=p.lid)
+     when coalesce(s.uit_opstelling,false) then false else coalesce(s.gespeeld,false) end as gespeeld,
+   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then coalesce(t.goals,0) else coalesce(s.goals,0) end as goals,
+   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then coalesce(t.assists,0) else coalesce(s.assists,0) end as assists,
+   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then least(coalesce(t.geel,0),2) else coalesce(s.geel,0) end as geel,
+   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then least(coalesce(t.rood,0),1) else coalesce(s.rood,0) end as rood
+  from personen p left join match_stats s on s.match_key=p_match and s.member_id=p.lid left join totalen t on t.lid=p.lid
+ )
+ insert into match_stats(match_key,member_id,gespeeld,goals,assists,geel,rood,uit_verslag,uit_opstelling,clean_sheet)
+ select p_match,lid,gespeeld,goals,assists,geel,rood,verslag.match_key is not null,opstelling is not null,
+   gespeeld and klaar and coalesce(tegen=0,false) from berekend
+ on conflict(match_key,member_id) do update set gespeeld=excluded.gespeeld,goals=excluded.goals,assists=excluded.assists,
+ geel=excluded.geel,rood=excluded.rood,uit_verslag=excluded.uit_verslag,uit_opstelling=excluded.uit_opstelling,clean_sheet=excluded.clean_sheet
+ where (match_stats.gespeeld,match_stats.goals,match_stats.assists,match_stats.geel,match_stats.rood,match_stats.uit_verslag,match_stats.uit_opstelling,match_stats.clean_sheet)
+ is distinct from (excluded.gespeeld,excluded.goals,excluded.assists,excluded.geel,excluded.rood,excluded.uit_verslag,excluded.uit_opstelling,excluded.clean_sheet);
+end $$;
+revoke all on function public.synchroniseer_matchstatistieken(text) from public,anon,authenticated;
+grant execute on function public.synchroniseer_matchstatistieken(text) to service_role;
+
+create or replace function public.werk_matchstatistieken_bij() returns trigger
+language plpgsql security definer set search_path=public as $$
+declare sleutel text;
+begin
+ if tg_table_name='lineup_players' then
+  select match_key into sleutel from lineups where id=case when tg_op='DELETE' then old.lineup_id else new.lineup_id end;
+ else
+  sleutel:=case when tg_op='DELETE' then old.match_key else new.match_key end;
+ end if;
+ if sleutel is not null then perform synchroniseer_matchstatistieken(sleutel); end if;
+ return null;
+end $$;
+revoke all on function public.werk_matchstatistieken_bij() from public,anon,authenticated;
+drop trigger if exists verslag_statistieken on public.match_reports;
+create trigger verslag_statistieken after insert or update or delete on public.match_reports for each row execute function public.werk_matchstatistieken_bij();
+drop trigger if exists spelers_statistieken on public.lineup_players;
+create trigger spelers_statistieken after insert or update or delete on public.lineup_players for each row execute function public.werk_matchstatistieken_bij();
+drop trigger if exists opstelling_statistieken on public.lineups;
+create trigger opstelling_statistieken after delete on public.lineups for each row execute function public.werk_matchstatistieken_bij();
+drop trigger if exists uitslag_statistieken on public.matches;
+create trigger uitslag_statistieken after update of status,thuis_score,uit_score on public.matches for each row execute function public.werk_matchstatistieken_bij();
+
+-- Bestaande eenduidige namen één keer vastleggen als spelers-id, ook vóór een latere naamswijziging.
+update public.match_reports r set momenten=r.momenten
+where exists (select 1 from matches m cross join lateral jsonb_array_elements(r.momenten) e
+ where m.match_key=r.match_key and e->>'kant'=case when m.thuis_id=152 then 'thuis' else 'uit' end
+ and ((nullif(e->>'speler','') is not null and e->>'speler_id' is null)
+ or (nullif(e->>'assist','') is not null and e->>'assist_id' is null)))
+and not exists (select 1 from matches m cross join lateral jsonb_array_elements(r.momenten) e
+ cross join lateral (values(e->>'speler_id',e->>'speler'),(case when e->>'soort'='goal' then e->>'assist_id' end,case when e->>'soort'='goal' then e->>'assist' end)) n(id,naam)
+ where m.match_key=r.match_key and e->>'kant'=case when m.thuis_id=152 then 'thuis' else 'uit' end
+ and nullif(btrim(n.naam),'') is not null and verslag_lid(n.id,n.naam) is null);
+
+-- Ook reeds gespeelde matchen en opgeslagen verslagen verwerken.
+do $$ declare k text; begin
+ for k in select match_key from matches where (thuis_id=152 or uit_id=152)
+ and (status='gespeeld' or exists(select 1 from match_reports r where r.match_key=matches.match_key))
+ loop perform synchroniseer_matchstatistieken(k); end loop;
+end $$;

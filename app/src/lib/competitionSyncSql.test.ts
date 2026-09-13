@@ -9,7 +9,7 @@ it('dwingt adminrechten, uitsluitend servertoegang, exclusiviteit en vijf minute
    create table public.members(id uuid primary key,is_admin boolean,status text);
    insert into public.members values ('00000000-0000-0000-0000-000000000001',true,'actief'),
    ('00000000-0000-0000-0000-000000000002',false,'actief');`);
-  const sql=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8').split('-- Handmatige competitie-update:')[1];
+  const sql=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8').split('-- Handmatige competitie-update:')[1].split('-- Statistieken uit verslag')[0];
   await db.exec('-- Handmatige competitie-update:'+sql);
   await db.exec('-- Handmatige competitie-update:'+sql); // herhaalbare installatie
   await db.exec('set role authenticated');
