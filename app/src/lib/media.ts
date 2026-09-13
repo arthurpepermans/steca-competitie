@@ -6,7 +6,7 @@ export const MEDIA_TYPES: Record<string, string> = {
   "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif",
   "image/heic": "heic", "image/heif": "heif", "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm",
 };
-export type Sfeerbeeld = { name: string; path: string; url: string; video: boolean; createdAt: string | null; eigenaar: string };
+export type Sfeerbeeld = { name: string; path: string; url: string; video: boolean; createdAt: string | null; eigenaar: string; uploaderNaam?: string };
 
 // Hex houdt wedstrijdsleutels met slashes, spaties en accenten veilig in één map.
 export function mediaMap(matchKey: string): string {
@@ -73,4 +73,13 @@ export async function verwijderSfeerbeeld(path: string): Promise<void> {
   const { data, error } = await supabase.storage.from(MEDIA_BUCKET).remove([path]);
   if (error) throw error;
   if (!data?.length) throw new Error("Dit beeld kon niet verwijderd worden. Vernieuw het album of controleer je rechten.");
+}
+
+
+export async function haalUploaderNamen(eigenaren: string[]): Promise<Map<string, string>> {
+  const ids = [...new Set(eigenaren.filter(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)))];
+  if (!ids.length) return new Map();
+  const {data,error} = await supabase.rpc("sfeerbeeld_uploaders", {p_ids: ids});
+  if (error) throw new Error("De namen van de uploaders konden niet geladen worden.");
+  return new Map((data as {user_id: string; naam: string}[]).map(r => [r.user_id,r.naam]));
 }
