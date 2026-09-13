@@ -1,3 +1,4 @@
+import {SupporterProfielBadges} from "../components/SupporterKlassement";
 import { CompetitieBeheer } from "../components/CompetitieBeheer";
 import { SpelerBadges } from "../components/SpelerBadges";
 import { InstallatieHulp } from "../components/InstallatieHulp";
@@ -66,6 +67,7 @@ export function Profiel() {
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
       </div> : <div className="kaart"><h3>{supporter?.naam}</h3><p className="zacht">Supporter · {session?.user.email}</p></div>}
+      {supporter && <SupporterProfielBadges />}
       {!onboarding && lid && lid.functie !== "supporter" && <SpelerBadges memberId={lid.id} />}
       {!onboarding && lid?.speelt && <SpelerStatistieken memberId={lid.id} />}
       {!onboarding && r.isAdmin && <LichtkrantBeheer />}
