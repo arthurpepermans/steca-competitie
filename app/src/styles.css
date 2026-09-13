@@ -449,3 +449,8 @@ html,body,#root{touch-action:pan-x pan-y}
 
 .supporter-aanwezigheid { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rand); }
 .supporter-aanwezigheid > p { margin: 6px 0; }
+
+.supporter-profiel-tellingen { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.supporter-profiel-tellingen p { display:flex; flex-direction:column; gap:4px; margin:8px 0; padding:12px; border:1px solid var(--rand); }
+.supporter-profiel-tellingen strong { font-size:28px; }
+.supporter-profiel-tellingen span { font-size:13px; }

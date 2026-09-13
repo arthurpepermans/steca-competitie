@@ -1,3 +1,4 @@
+import {SupporterProfielBadges} from './SupporterKlassement';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {supabase} from '../lib/supabase';
@@ -14,6 +15,7 @@ export function SupporterBeheer(){
  return <><h2>Supporters beheren</h2><input aria-label="Supporter zoeken" placeholder="Supporter zoeken…" value={zoek} onChange={e=>setZoek(e.target.value)}/><Fout tekst={data.fout}/>{data.laden?<Laden/>:<ul className="lijst omrand">{data.data?.filter(s=>s.naam.toLowerCase().includes(zoek.toLowerCase())).map(s=><SupporterRij key={s.id} supporter={s}/>)}{!data.data?.length&&<li>Nog geen supporters.</li>}</ul>}</>;
 }
 function SupporterRij({supporter:s}:{supporter:Supporter}){
+ const [profielOpen,setProfielOpen]=useState(false);
  const [functie,setFunctie]=useState<Functie>('supporter');const [bezig,setBezig]=useState(false);const [fout,setFout]=useState<string|null>(null);const navigate=useNavigate();
- return <li><strong>{s.naam}</strong><p className="klein zacht">{s.heeft_account?'Supporteraccount':'Zonder account'}{!s.actief?' · inactief':''}</p><div className="knoppen"><select aria-label={'Functie van '+s.naam} value={functie} disabled={bezig} onChange={e=>setFunctie(e.target.value as Functie)}>{FUNCTIES.map(f=><option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}</select><button className="knop klein" disabled={bezig||functie==='supporter'} onClick={async()=>{setBezig(true);setFout(null);try{const id=await veranderAccountfunctie(s.id,functie);navigate('/leden/'+id);}catch(e){setFout(foutTekst(e));}finally{setBezig(false)}}}>Functie opslaan</button></div><Fout tekst={fout}/></li>;
+ return <li><button type="button" className="tekst-knop" aria-expanded={profielOpen} aria-controls={'supporter-profiel-'+s.id} onClick={()=>setProfielOpen(!profielOpen)}><strong>{s.naam}</strong></button><p className="klein zacht">{s.heeft_account?'Supporteraccount':'Zonder account'}{!s.actief?' · inactief':''}</p><div className="knoppen"><select aria-label={'Functie van '+s.naam} value={functie} disabled={bezig} onChange={e=>setFunctie(e.target.value as Functie)}>{FUNCTIES.map(f=><option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}</select><button className="knop klein" disabled={bezig||functie==='supporter'} onClick={async()=>{setBezig(true);setFout(null);try{const id=await veranderAccountfunctie(s.id,functie);navigate('/leden/'+id);}catch(e){setFout(foutTekst(e));}finally{setBezig(false)}}}>Functie opslaan</button></div><Fout tekst={fout}/>{profielOpen&&<div id={'supporter-profiel-'+s.id}><SupporterProfielBadges userId={s.id}/></div>}</li>;
 }
