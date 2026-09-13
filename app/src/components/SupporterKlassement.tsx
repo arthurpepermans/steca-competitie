@@ -1,8 +1,8 @@
 import {Shirt} from './Shirt';
 import {useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link,useParams} from 'react-router-dom';
 import {supabase} from '../lib/supabase';
-import {useAuth} from '../lib/auth';
+import {rechten,useAuth} from '../lib/auth';
 import {useAsync} from '../lib/useAsync';
 import {seizoenNu} from '../lib/badgeCatalogus';
 import {FAN_BADGES,berekenFans,type FanBadge,type FanData} from '../lib/supporterBadges';
@@ -33,3 +33,9 @@ export function SupporterBadgeIcoon({badge:b}:{badge:FanBadge}){
 function FanProfiel({rij}:{rij:ReturnType<typeof berekenFans>[number]}){return <section className="kaart"><h2>{rij.naam}</h2><div className="supporter-profiel-tellingen"><p><strong>{rij.perSeizoen[seizoenNu()] ?? 0}</strong><span>Dit seizoen ({seizoenNu().replace('-','/')})</span></p><p><strong>{rij.matchen}</strong><span>Aller tijden</span></p></div><p className="klein zacht">Waarvan {rij.uit} uitmatchen aller tijden.</p><h3>Supportersbadges</h3>{!rij.badges.length&&<p>Nog geen badges verdiend.</p>}<div className="badge-test-grid">{rij.badges.map(b=>{const badge=FAN_BADGES.find(x=>x.id===b.badge);return badge?<article className="badge-test-kaart" key={b.badge+(b.seizoen??'')}><SupporterBadgeIcoon badge={badge}/><strong>{badge.titel}</strong>{b.seizoen&&<small>{b.seizoen.replace('-','/')}</small>}<span>{badge.uitleg}</span></article>:null;})}</div></section>;}
 export function SupporterProfielBadges({userId}:{userId?:string}={}){const {supporter}=useAuth();const info=useFans();const rij=info.data&&berekenFans(info.data,null).find(p=>p.user_id===(userId ?? supporter?.user_id));return <><Fout tekst={info.fout}/>{info.laden?<Laden/>:rij?<FanProfiel rij={rij}/>:<p>Nog geen supportersprofiel gevonden.</p>}<p><Link className="knop" to="/supporter-klassement">Supportersklassement</Link></p></>;}
 export function SupporterKlassement(){const info=useFans();const [seizoen,setSeizoen]=useState(seizoenNu());const [persoon,setPersoon]=useState('');if(info.laden)return <Laden/>;if(!info.data)return <><Fout tekst={info.fout}/><button onClick={info.herlaad}>Opnieuw laden</button></>;const data=info.data;const rijen=berekenFans(data,seizoen||null);const seizoenen=[...new Set([seizoenNu(),...data.matches.map(m=>m.seizoen)])].sort().reverse();let rang=0;return <><h2>Supportersklassement</h2><p>Op deze ultras kunnen we rekenen. Alleen bijgewoonde, gespeelde matchen tellen mee.</p><label>Periode<select value={seizoen} onChange={e=>setSeizoen(e.target.value)}><option value="">Aller tijden</option>{seizoenen.map(s=><option key={s} value={s}>{s.replace('-','/')}</option>)}</select></label><div className="tabel-wrap"><table className="tabel"><thead><tr><th>#</th><th>Supporter</th><th>Matchen</th></tr></thead><tbody>{rijen.map((r,i)=>{if(i===0||rijen[i-1].aantal!==r.aantal)rang=i+1;return <tr key={r.id}><td>{rang}</td><td><button className="tekst-knop" onClick={()=>setPersoon(persoon===r.id?'':r.id)}>{r.naam}</button></td><td><strong>{r.aantal}</strong></td></tr>;})}</tbody></table></div>{!rijen.length&&<p>Nog geen supporters.</p>}{persoon&&rijen.find(r=>r.id===persoon)&&<FanProfiel rij={rijen.find(r=>r.id===persoon)!}/>}</>;}
+
+export function SupporterDetail(){
+ const {id}=useParams();const {lid}=useAuth();const info=useFans();
+ const rij=info.data&&berekenFans(info.data,null).find(p=>p.user_id===id);
+ return <><p><Link to={rechten(lid).isAdmin?'/leden?tab=supporters':'/supporter-klassement'}>← Terug naar {rechten(lid).isAdmin?'supporters beheren':'supportersklassement'}</Link></p><h1>Supportersprofiel</h1><Fout tekst={info.fout}/>{info.laden?<Laden/>:rij?<FanProfiel rij={rij}/>:!info.fout&&<p>Supporter niet gevonden of geen toegang.</p>}</>;
+}

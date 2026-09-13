@@ -1,7 +1,7 @@
 import { SpelerBadges } from "../components/SpelerBadges";
 import {SupporterBeheer, veranderAccountfunctie} from '../components/SupporterBeheer';
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   adminOntkoppelAccount, adminVerwijderLid, adminZetWachtwoord, haalLeden,
   haalLedenBasis, haalLid, haalLidBasis, voegLidToe, wijzigLid,
@@ -22,7 +22,8 @@ export function Leden() {
   const navigate = useNavigate();
   const [zoek, setZoek] = useState("");
   const [functie, setFunctie] = useState<string>("");
-  const [tab, setTab] = useState<"leden" | "supporters">("leden");
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<"leden" | "supporters">(r.isAdmin && params.get("tab") === "supporters" ? "supporters" : "leden");
   const [toevoegen, setToevoegen] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
   const leden = useAsync<Array<Member | MemberBasis>>(() => (r.zietGegevens ? haalLeden() : haalLedenBasis()), [r.zietGegevens]);
