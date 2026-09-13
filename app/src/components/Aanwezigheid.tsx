@@ -1,3 +1,4 @@
+import { SupporterAanwezigheid } from "./SupporterAanwezigheid";
 import { useState } from "react";
 import { Check } from "@phosphor-icons/react/dist/csr/Check";
 import { X } from "@phosphor-icons/react/dist/csr/X";
@@ -84,6 +85,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
         </div>
       )}
       <p className="aanwezig-bevestiging" role="status">{bezig ? "Bezig met opslaan…" : eigenStatus ? `Je staat als ${eigenStatus}.` : isSpeler ? "Je hebt nog niet geantwoord." : "Bekijk de aanwezigheid van de ploeg."}</p>
+      <h4 className="klein" style={{ margin: "12px 0 4px" }}>Spelers</h4>
       <div className="rij klein zacht">
         <span>{groepen.map((g) => `${g.label.replace(" ?", "")}: ${g.namen.length}`).join(" · ")} · nog niets: {zonder.length}</span>
         <button type="button" className="tekst-knop" aria-expanded={namenOpen} onClick={() => setNamenOpen(!namenOpen)}>
@@ -141,6 +143,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
           )}
         </div>
       )}
+      <SupporterAanwezigheid match={match} />
     </div>
   );
 }

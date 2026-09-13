@@ -16,7 +16,7 @@ export function MapsKnop({ terrein }: { terrein: string | null }) {
 }
 
 export function MatchKaart({ match, children, toonDatum = true, verslagKnop }: { match: Match; children?: ReactNode; toonDatum?: boolean; verslagKnop?: ReactNode }) {
-  const { lid } = useAuth();
+  const { lid, supporter } = useAuth();
   const res = isEigen(match) ? resultaat(match) : null;
   const eigenThuis = match.thuis_id === EIGEN_PLOEGID;
   const eigenUit = match.uit_id === EIGEN_PLOEGID;
@@ -41,7 +41,7 @@ export function MatchKaart({ match, children, toonDatum = true, verslagKnop }: {
         </span>
       </div>
       {match.opmerking && <div className="klein zacht" style={{ marginTop: 4 }}>{match.opmerking}</div>}
-      {verslagKnop ?? (lid && isEigen(match) && <p><Link className="knop licht klein" to={`/match/${encodeURIComponent(match.match_key)}`}>Matchverslag bekijken</Link></p>)}
+      {verslagKnop ?? ((lid || supporter) && isEigen(match) && <p><Link className="knop licht klein" to={`/match/${encodeURIComponent(match.match_key)}`}>Matchverslag bekijken</Link></p>)}
       {children && <div className="ticket-scheur" aria-hidden="true" />}
       {children}
     </div>

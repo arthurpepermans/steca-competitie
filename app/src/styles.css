@@ -446,3 +446,6 @@ html,body,#root{touch-action:pan-x pan-y}
 @keyframes klap { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
 @keyframes knipper { 50% { opacity: .2; } }
 @media (prefers-reduced-motion: reduce) { .aftel-sep, .aftel-vak b.klap, .stand-pijl { animation: none; } }
+
+.supporter-aanwezigheid { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rand); }
+.supporter-aanwezigheid > p { margin: 6px 0; }

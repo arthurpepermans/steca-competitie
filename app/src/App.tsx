@@ -22,7 +22,13 @@ function Poort() {
   const { klaar, session, lid, supporter, fout } = useAuth();
   const locatie = useLocation();
   if (!klaar) return <Laden tekst="Even geduld…" />;
-  if (locatie.pathname === "/supporters") return <Supporters />;
+  if (locatie.pathname === "/supporters") {
+    if (supporter?.actief) {
+      const tab = new URLSearchParams(locatie.search).get("tab");
+      return <Navigate to={tab ? "/" + tab.toLowerCase().replace("home", "") : "/"} replace />;
+    }
+    return <Supporters />;
+  }
 
   if (!session) {
     return (
@@ -37,10 +43,10 @@ function Poort() {
   }
   if (locatie.pathname === "/nieuw-wachtwoord") return <NieuwWachtwoord />;
   if (fout) return <Geblokkeerd tekst={`Je gegevens konden niet geladen worden: ${fout}`} />;
-  if (supporter) return supporter.actief ? <Navigate to="/supporters?tab=Kantine" replace /> : <Geblokkeerd tekst="Dit supporteraccount is gedeactiveerd." />;
-  if (!lid) return <Geblokkeerd tekst="Er is geen lid gekoppeld aan dit account. Vraag een beheerder om hulp." />;
-  if (lid.status === "wacht_op_goedkeuring") return <WachtOpGoedkeuring />;
-  if (lid.status === "inactief") return <Geblokkeerd tekst="Dit account is gedeactiveerd. Vraag een beheerder om het opnieuw te activeren." />;
+  if (supporter && !supporter.actief) return <Geblokkeerd tekst="Dit supporteraccount is gedeactiveerd." />;
+  if (!lid && !supporter) return <Geblokkeerd tekst="Er is geen lid gekoppeld aan dit account. Vraag een beheerder om hulp." />;
+  if (lid?.status === "wacht_op_goedkeuring") return <WachtOpGoedkeuring />;
+  if (lid?.status === "inactief") return <Geblokkeerd tekst="Dit account is gedeactiveerd. Vraag een beheerder om het opnieuw te activeren." />;
 
   const r = rechten(lid);
   if (!r.gegevensVolledig && locatie.pathname !== "/profiel") return <Navigate to="/profiel" replace />;

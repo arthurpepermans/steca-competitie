@@ -17,8 +17,11 @@ const bewijs = (id: string, user: string, expires: string) => enc.encode(`${id}\
 async function member(user: string) {
   const { data, error } = await db.from("members").select("is_admin").eq("user_id", user).eq("status", "actief").maybeSingle();
   if (error) throw new Fout("Lidmaatschap controleren mislukt.", 503);
-  if (!data) throw new Fout("Alleen actieve leden hebben toegang tot sfeerbeelden.", 403);
-  return data;
+  if (data) return data;
+  const { data: supporter, error: supporterError } = await db.from("supporter_profiles").select("actief").eq("user_id", user).eq("actief", true).maybeSingle();
+  if (supporterError) throw new Fout("Supporteraccount controleren mislukt.", 503);
+  if (!supporter) throw new Fout("Alleen actieve clubaccounts hebben toegang tot sfeerbeelden.", 403);
+  return { is_admin: false };
 }
 async function drive() {
   const { data, error } = await db.from("drive_connection").select("folder_id,refresh_token_cipher").eq("id", 1).maybeSingle();
