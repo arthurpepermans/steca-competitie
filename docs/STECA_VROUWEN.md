@@ -4,7 +4,8 @@ De route `#/vrouwen` draait binnen dezelfde origin als de Juniors. De ingang
 `vrouwen.stecajuniors.app` verwijst hiernaar; het aparte repository
 `arthurpepermans/steca-vrouwen` bevat uitsluitend deze doorverwijzing.
 Zo verlaat de ploegwissel de geinstalleerde PWA niet en blijven accountsessies behouden.
-De laatst gekozen ploeg wordt als optionele lokale voorkeur bewaard.
+De ploegwissel wordt voorlopig uitsluitend in de vrouwenomgeving getoond.
+De mannenapp en het inlogscherm krijgen geen wisselknop en openen altijd zoals voordien.
 
 ## Wat werkt
 - Eigen roze/wit/zwarte presentatie, licht en donker.
