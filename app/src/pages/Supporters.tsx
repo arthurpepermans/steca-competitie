@@ -32,7 +32,7 @@ export function Supporters() {
   const gespeeld = matches.filter((m) => m.status === "gespeeld").reverse();
   return <>
     <header className="kop">
-      <Link to="/supporters" className="clubmerk"><img src={import.meta.env.BASE_URL + "logo-retro.png"} alt="" width="44" height="52" /><span>STECA JUNIORS<small>SUPPORTERS</small></span></Link>
+      <Link to="/supporters" className="clubmerk"><img src={import.meta.env.BASE_URL + "logo-retro.png"} alt="" width="44" height="52" /><span>STECA JUNIORS<small>SUPPORTERS</small></span></Link><Link to="/vrouwen">Steca Vrouwen ↗</Link>
       {supporter ? <button className="knop licht klein" onClick={()=>supabase.auth.signOut()}>Uitloggen</button> : <Link to="/login" className="knop licht klein">Inloggen</Link>}
     </header>
     <main className="inhoud supporters-inhoud">

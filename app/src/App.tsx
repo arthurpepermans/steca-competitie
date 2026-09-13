@@ -1,3 +1,4 @@
+import {Vrouwen} from "./pages/Vrouwen";
 import {SupporterKlassement,SupporterDetail} from "./components/SupporterKlassement";
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, rechten, useAuth } from "./lib/auth";
@@ -22,6 +23,7 @@ import { Kantine } from "./pages/Kantine";
 function Poort() {
   const { klaar, session, lid, supporter, fout } = useAuth();
   const locatie = useLocation();
+  if (locatie.pathname.startsWith("/vrouwen")) return <Vrouwen />;
   if (!klaar) return <Laden tekst="Even geduld…" />;
   if (locatie.pathname === "/supporters") {
     if (supporter?.actief) {

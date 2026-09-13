@@ -1,0 +1,867 @@
+{
+  "seizoen": "2026-2027",
+  "bijgewerkt": "2026-09-13T17:11:32.762301+00:00",
+  "bron": "https://app.twizzit.com/v2/ranking/widget/team?id=1342487&wsid=156007&lg=2",
+  "wedstrijden": [
+    {
+      "id": 43152609,
+      "thuis": "VEDETJES",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-09T19:00:00+02:00",
+      "score": [
+        21,
+        0
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152609&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152634,
+      "thuis": "STECA VROUWEN",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-09-16T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152634&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152664,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-22T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152664&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152704,
+      "thuis": "MG HOTSJOT",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-28T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152704&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152729,
+      "thuis": "APERO'S",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-10-06T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152729&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152779,
+      "thuis": "STECA VROUWEN",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-10-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152779&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152794,
+      "thuis": "STECA VROUWEN",
+      "uit": "LA TRAP",
+      "aftrap": "2026-10-20T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152794&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152819,
+      "thuis": "CALIBABES",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-11-12T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152819&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152849,
+      "thuis": "STECA VROUWEN",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-11-17T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152849&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152874,
+      "thuis": "STECA VROUWEN",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-11-24T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152874&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152909,
+      "thuis": "STECA VROUWEN",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-12-03T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152909&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152929,
+      "thuis": "KVM MELANGE",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-12-10T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152929&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152964,
+      "thuis": "STECA VROUWEN",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-12-17T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152964&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152979,
+      "thuis": "STECA VROUWEN",
+      "uit": "VEDETJES",
+      "aftrap": "2027-01-05T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152979&wsid=156007&lg=2"
+    },
+    {
+      "id": 43156877,
+      "thuis": "STECA VROUWEN",
+      "uit": "FC SJOT & ZOT",
+      "aftrap": "2027-01-12T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "BEKER DAMES (BEKER)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43156877&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153034,
+      "thuis": "PUR BOEUF",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-01-26T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153034&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153069,
+      "thuis": "STECA VROUWEN",
+      "uit": "APERO'S",
+      "aftrap": "2027-02-02T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153069&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153119,
+      "thuis": "MABIBO GIRLS",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-02-17T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153119&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153134,
+      "thuis": "STECA VROUWEN",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-02-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153134&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153164,
+      "thuis": "LA TRAP",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-03-02T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153164&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153209,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-03-18T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153209&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153219,
+      "thuis": "STECA VROUWEN",
+      "uit": "CALIBABES",
+      "aftrap": "2027-03-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153219&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153279,
+      "thuis": "REAL BASIL",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-04-13T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153279&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153399,
+      "thuis": "STECA VROUWEN",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-04-22T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153399&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153499,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-05-04T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153499&wsid=156007&lg=2"
+    }
+  ],
+  "klassementen": [
+    {
+      "id": "ranking-216248",
+      "naam": "DAMES ZELE (DAMES)",
+      "rijen": [
+        {
+          "positie": 1,
+          "gespeeld": 2,
+          "winst": 2,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 30,
+          "tegen": 1,
+          "saldo": 29,
+          "punten": 6,
+          "naam": "VEDETJES"
+        },
+        {
+          "positie": 2,
+          "gespeeld": 2,
+          "winst": 2,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 16,
+          "tegen": 1,
+          "saldo": 15,
+          "punten": 6,
+          "naam": "MABIBO GIRLS"
+        },
+        {
+          "positie": 3,
+          "gespeeld": 2,
+          "winst": 2,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 14,
+          "tegen": 3,
+          "saldo": 11,
+          "punten": 6,
+          "naam": "REAL BASIL"
+        },
+        {
+          "positie": 4,
+          "gespeeld": 1,
+          "winst": 1,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 1,
+          "tegen": 0,
+          "saldo": 1,
+          "punten": 3,
+          "naam": "LA DOCE SPRITZ"
+        },
+        {
+          "positie": 5,
+          "gespeeld": 2,
+          "winst": 1,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 5,
+          "tegen": 5,
+          "saldo": 0,
+          "punten": 3,
+          "naam": "CALIBABES"
+        },
+        {
+          "positie": 6,
+          "gespeeld": 2,
+          "winst": 1,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 1,
+          "tegen": 1,
+          "saldo": 0,
+          "punten": 3,
+          "naam": "LA TRAP"
+        },
+        {
+          "positie": 7,
+          "gespeeld": 2,
+          "winst": 1,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 5,
+          "tegen": 12,
+          "saldo": -7,
+          "punten": 3,
+          "naam": "DE TAEY GIRLS"
+        },
+        {
+          "positie": 8,
+          "gespeeld": 2,
+          "winst": 1,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 4,
+          "tegen": 12,
+          "saldo": -8,
+          "punten": 3,
+          "naam": "APERO'S"
+        },
+        {
+          "positie": 9,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "MG HOTSJOT"
+        },
+        {
+          "positie": 10,
+          "gespeeld": 2,
+          "winst": 0,
+          "verlies": 2,
+          "gelijk": 0,
+          "voor": 2,
+          "tegen": 5,
+          "saldo": -3,
+          "punten": 0,
+          "naam": "KVM MELANGE"
+        },
+        {
+          "positie": 11,
+          "gespeeld": 2,
+          "winst": 0,
+          "verlies": 2,
+          "gelijk": 0,
+          "voor": 4,
+          "tegen": 9,
+          "saldo": -5,
+          "punten": 0,
+          "naam": "PUR BOEUF"
+        },
+        {
+          "positie": 12,
+          "gespeeld": 2,
+          "winst": 0,
+          "verlies": 2,
+          "gelijk": 0,
+          "voor": 3,
+          "tegen": 15,
+          "saldo": -12,
+          "punten": 0,
+          "naam": "DEGELIJKE DAMES DICHTBIJ"
+        },
+        {
+          "positie": 13,
+          "gespeeld": 1,
+          "winst": 0,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 21,
+          "saldo": -21,
+          "punten": 0,
+          "naam": "STECA VROUWEN"
+        }
+      ]
+    },
+    {
+      "id": "ranking-216228",
+      "naam": "BEKER DAMES (BEKER)",
+      "rijen": [
+        {
+          "positie": 1,
+          "gespeeld": 1,
+          "winst": 1,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 4,
+          "tegen": 3,
+          "saldo": 1,
+          "punten": 3,
+          "naam": "PUR BOEUF"
+        },
+        {
+          "positie": 2,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "FC SJOT & ZOT"
+        },
+        {
+          "positie": 3,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "LA TRAP"
+        },
+        {
+          "positie": 4,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "MOESKES"
+        },
+        {
+          "positie": 5,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "DEL POMPE"
+        },
+        {
+          "positie": 6,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "DE TAEY GIRLS"
+        },
+        {
+          "positie": 7,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "BUITENGEWOON"
+        },
+        {
+          "positie": 8,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "REAL BASIL"
+        },
+        {
+          "positie": 9,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "MG HOTSJOT"
+        },
+        {
+          "positie": 10,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "MANCHESTER TITTY"
+        },
+        {
+          "positie": 11,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "CALIBABES"
+        },
+        {
+          "positie": 12,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "FLEX"
+        },
+        {
+          "positie": 13,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "STECA VROUWEN"
+        },
+        {
+          "positie": 14,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "ADILETTI MADRID"
+        },
+        {
+          "positie": 15,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "LA DOCE SPRITZ"
+        },
+        {
+          "positie": 16,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "VEDETJES"
+        },
+        {
+          "positie": 17,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "LA DOCE GRL PWR"
+        },
+        {
+          "positie": 18,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "MABIBO GIRLS"
+        },
+        {
+          "positie": 19,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "UNITED GIRLS"
+        },
+        {
+          "positie": 20,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "BLUE STARS"
+        },
+        {
+          "positie": 21,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "KVM MELANGE"
+        },
+        {
+          "positie": 22,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "APERO'S"
+        },
+        {
+          "positie": 23,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "FEMPELZ"
+        },
+        {
+          "positie": 24,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "DEGELIJKE DAMES DICHTBIJ"
+        },
+        {
+          "positie": 25,
+          "gespeeld": 0,
+          "winst": 0,
+          "verlies": 0,
+          "gelijk": 0,
+          "voor": 0,
+          "tegen": 0,
+          "saldo": 0,
+          "punten": 0,
+          "naam": "DE PLEKKERS"
+        },
+        {
+          "positie": 26,
+          "gespeeld": 1,
+          "winst": 0,
+          "verlies": 1,
+          "gelijk": 0,
+          "voor": 3,
+          "tegen": 4,
+          "saldo": -1,
+          "punten": 0,
+          "naam": "PINK FLAMINGO'S"
+        }
+      ]
+    }
+  ]
+}
