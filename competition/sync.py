@@ -225,6 +225,7 @@ def bouw_plan(
         m = Match(
             seizoen=seizoen, reeks=f.reeks, datum=f.datum, uur=f.uur, thuis=f.thuis, uit=f.uit,
             thuis_id=f.thuis_id, uit_id=f.uit_id, terrein=terrein_van(f.thuis_id),
+            opmerking=f.opmerking,
         )
         oud = bestaand_per_key.get(m.key)
         if oud is not None and m.terrein is None:
