@@ -9,3 +9,7 @@ verify_jwt = false
 [functions.match-push]
 # Eigen controle van gebruikers-JWT en geheim crontoken.
 verify_jwt = false
+
+[functions.competition-sync]
+# De functie controleert gebruikers-JWT en actieve adminrechten zelf.
+verify_jwt = false
