@@ -24,10 +24,11 @@ type Props = {
   isSpeler: boolean;
   isStaf: boolean;
   isAdmin: boolean;
+  toonSupporters?: boolean;
   onGewijzigd: () => Promise<void> | void;
 };
 
-export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpeler, isStaf, isAdmin, onGewijzigd }: Props) {
+export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpeler, isStaf, isAdmin, toonSupporters = false, onGewijzigd }: Props) {
   const [fout, setFout] = useState<string | null>(null);
   const [bezig, setBezig] = useState(false);
   const [namenOpen, setNamenOpen] = useState(false);
@@ -143,7 +144,7 @@ export function Aanwezigheid({ match, spelers, aanwezigheden, eigenLidId, isSpel
           )}
         </div>
       )}
-      <SupporterAanwezigheid match={match} />
+      {toonSupporters && <SupporterAanwezigheid match={match} />}
     </div>
   );
 }
