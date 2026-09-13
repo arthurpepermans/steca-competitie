@@ -21,7 +21,7 @@ import { standBeweging } from "../lib/stand";
 import { haalStandGeschiedenis } from "../lib/api";
 
 export function Home({ openbaar }: { openbaar?: import("../lib/supporters").SupportersData }) {
-  const { lid } = useAuth();
+  const { lid, supporter } = useAuth();
   const r = rechten(lid);
   const matches = useAsync(() => openbaar ? Promise.resolve(openbaar.matches) : haalMatches(), [openbaar]);
   const klassement = useAsync(() => openbaar ? Promise.resolve(openbaar.klassement) : haalKlassement(), [openbaar]);
@@ -55,7 +55,7 @@ export function Home({ openbaar }: { openbaar?: import("../lib/supporters").Supp
               <div className="match-terrein"><MapPin size={20} /><span>{volgende.terrein ?? "Terrein nog niet bekend"}</span><MapsKnop terrein={volgende.terrein} /></div>
             </div>
             {!openbaar && <div className="match-aanwezigheid">
-              <div className="sectie-kop"><h3>{r.isSpeler ? "Ben je erbij?" : "Wie is erbij?"}</h3>{r.isSpeler && <span className="zacht">Laat je ploeg iets weten.</span>}</div>
+              <div className="sectie-kop"><h3>{(r.isSpeler || supporter) ? "Ben je erbij?" : "Wie is erbij?"}</h3>{r.isSpeler && <span className="zacht">Laat je ploeg iets weten.</span>}</div>
               {aanw.laden ? <Laden tekst="Aanwezigheden laden…" /> : <><Fout tekst={aanw.fout} /><Aanwezigheid match={volgende} spelers={spelers} aanwezigheden={aanw.data ?? []} eigenLidId={lid?.id ?? null} isSpeler={r.isSpeler} isStaf={r.isStaf} isAdmin={r.isAdmin} onGewijzigd={aanw.herlaad} /></>}
             </div>}
           </> : <div className="lege-staat"><CalendarBlank size={32} /><h3>Even geen match gepland</h3><p>De volgende match verschijnt hier zodra de kalender is bijgewerkt.</p><Link to={openbaar ? "/supporters?tab=Kalender" : "/kalender"}>Bekijk de kalender <ArrowRight size={16} /></Link></div>}

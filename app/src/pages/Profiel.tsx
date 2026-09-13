@@ -13,7 +13,7 @@ import { foutTekst } from "../lib/useAsync";
 import { LidFormulier } from "./Leden";
 
 export function Profiel() {
-  const { lid, herlaad, session } = useAuth();
+  const { lid, supporter, herlaad, session } = useAuth();
   const r = rechten(lid);
   const navigate = useNavigate();
   const [fout, setFout] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function Profiel() {
   const [bevestiging, setBevestiging] = useState("");
   const onboarding = !r.gegevensVolledig;
 
-  if (!lid) return null;
+  if (!lid && !supporter) return null;
 
   async function opslaan(velden: Parameters<typeof wijzigLid>[1]) {
     setFout(null);
@@ -60,14 +60,14 @@ export function Profiel() {
       {fout && <div className="melding fout">{fout}</div>}
       {ok && <div className="melding ok">{ok}</div>}
       <InstallatieHulp />
-      {!onboarding && <p><Link className="knop licht" to="/meldingen">Meldingen beheren</Link></p>}
+      {!onboarding && lid && <p><Link className="knop licht" to="/meldingen">Meldingen beheren</Link></p>}
       {r.isAdmin && <p><Link className="knop licht" to="/drive">Google Drive beheren</Link></p>}
-      <div className="kaart">
+      {lid ? <div className="kaart">
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
-      </div>
-      {!onboarding && lid.functie !== "supporter" && <SpelerBadges memberId={lid.id} />}
-      {!onboarding && lid.speelt && <SpelerStatistieken memberId={lid.id} />}
+      </div> : <div className="kaart"><h3>{supporter?.naam}</h3><p className="zacht">Supporter · {session?.user.email}</p></div>}
+      {!onboarding && lid && lid.functie !== "supporter" && <SpelerBadges memberId={lid.id} />}
+      {!onboarding && lid?.speelt && <SpelerStatistieken memberId={lid.id} />}
       {!onboarding && r.isAdmin && <LichtkrantBeheer />}
       {!onboarding && r.isAdmin && <CompetitieBeheer />}
       {!onboarding && (

@@ -15,7 +15,7 @@ beforeAll(async()=>{
  create table lineup_players(lineup_id uuid references lineups on delete cascade,member_id uuid,positie text);
  create table match_stats(match_key text references matches on delete cascade,member_id uuid,gespeeld bool,goals int,assists int,geel int,rood int,primary key(match_key,member_id));`);
  const schema=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');
- await db.exec('-- Statistieken uit verslag'+schema.split('-- Statistieken uit verslag')[1]);
+ await db.exec('-- Statistieken uit verslag'+schema.split('-- Statistieken uit verslag')[1].split('-- Supporteraanwezigheid:')[0]);
 },30000);
 afterAll(async()=>await db.close());
 beforeEach(async()=>{

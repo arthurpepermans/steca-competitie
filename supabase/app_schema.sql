@@ -1525,3 +1525,73 @@ do $$ declare k text; begin
  and (status='gespeeld' or exists(select 1 from match_reports r where r.match_key=matches.match_key))
  loop perform synchroniseer_matchstatistieken(k); end loop;
 end $$;
+
+
+-- Supporteraanwezigheid: apart van de spelers en zonder extra schrijfrechten.
+create or replace function public.is_supporter_account() returns boolean
+language sql stable security definer set search_path=public as $$
+ select exists(select 1 from supporter_profiles where user_id=auth.uid() and actief);
+$$;
+revoke all on function public.is_supporter_account() from public,anon;
+grant execute on function public.is_supporter_account() to authenticated;
+
+create table if not exists public.supporter_attendance (
+ match_key text not null references public.matches(match_key) on delete cascade,
+ user_id uuid not null references public.supporter_profiles(user_id) on delete cascade,
+ status text not null check(status in ('aanwezig','afwezig','onzeker')),
+ updated_at timestamptz not null default now(),
+ primary key(match_key,user_id)
+);
+alter table public.supporter_attendance enable row level security;
+revoke all on public.supporter_attendance from anon,authenticated;
+grant all on public.supporter_attendance to service_role;
+
+-- Alleen namen en antwoorden, geen e-mailadressen of andere profielgegevens.
+create or replace function public.supporter_aanwezigheden() returns table(match_key text,user_id uuid,naam text,status text)
+language sql stable security definer set search_path=public as $$
+ select a.match_key,a.user_id,s.naam,a.status
+ from supporter_attendance a join supporter_profiles s on s.user_id=a.user_id
+ where s.actief and (is_actief() or is_supporter_account())
+ order by s.naam;
+$$;
+revoke all on function public.supporter_aanwezigheden() from public,anon;
+grant execute on function public.supporter_aanwezigheden() to authenticated;
+
+-- Geen user-id als invoer: een supporter kan uitsluitend zijn eigen antwoord zetten.
+create or replace function public.zet_supporter_aanwezigheid(p_match text,p_status text) returns void
+language plpgsql security definer set search_path=public as $$
+begin
+ perform 1 from supporter_profiles where user_id=auth.uid() and actief for share;
+ if not found then raise exception 'Log in met een actief supporteraccount.'; end if;
+ if p_status is null or p_status not in ('aanwezig','afwezig','onzeker') then raise exception 'Ongeldige aanwezigheid.'; end if;
+ perform 1 from matches where match_key=p_match and (thuis_id=152 or uit_id=152)
+  and status='gepland' and datum >= (now() at time zone 'Europe/Brussels')::date for share;
+ if not found then raise exception 'Je kunt alleen antwoorden voor een komende match van Steca Juniors.'; end if;
+ insert into supporter_attendance(match_key,user_id,status) values(p_match,auth.uid(),p_status)
+ on conflict(match_key,user_id) do update set status=excluded.status,updated_at=now();
+end;
+$$;
+revoke all on function public.zet_supporter_aanwezigheid(text,text) from public,anon;
+grant execute on function public.zet_supporter_aanwezigheid(text,text) to authenticated;
+
+-- Dezelfde leesweergave in de app, zonder lid te worden of stem-/stafrechten te krijgen.
+do $$
+declare tabel text;
+begin
+ foreach tabel in array array['attendance','lineups','lineup_players','match_stats','fines','laundry_turns','match_reports','ticker_messages'] loop
+  execute format('drop policy if exists supporter_app_lezen on public.%I',tabel);
+  execute format('create policy supporter_app_lezen on public.%I for select to authenticated using (public.is_supporter_account())',tabel);
+ end loop;
+end;
+$$;
+
+create or replace view public.match_vote_points as
+ select s.match_key,s.member_id,sum(s.punten)::int as punten,count(*)::int as stemmen
+ from (
+  select match_key,eerste as member_id,3 as punten from match_votes
+  union all select match_key,tweede,2 from match_votes
+  union all select match_key,derde,1 from match_votes
+ ) s where is_actief() or is_supporter_account() group by s.match_key,s.member_id;
+create or replace view public.match_vote_counts as
+ select match_key,count(*)::int as stemmers from match_votes
+ where is_actief() or is_supporter_account() group by match_key;

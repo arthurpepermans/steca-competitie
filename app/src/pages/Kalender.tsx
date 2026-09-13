@@ -19,7 +19,7 @@ import { Ploegen } from "./Ploegen";
 export function Kalender() {
   const [params, setParams] = useSearchParams();
   const gekozenMatch = params.get('match');
-  const { lid } = useAuth();
+  const { lid, supporter } = useAuth();
   const r = rechten(lid);
   const [tab, setTab] = useState<"eigen" | "reeks" | "ploegen">("eigen");
   const [toonGespeeld, setToonGespeeld] = useState(true);
@@ -63,7 +63,7 @@ export function Kalender() {
         <section key={datum}>
           {tab === "reeks" && <h3 style={{ marginTop: 12 }}>{fmtDatum(datum === "onbekend" ? null : datum)}</h3>}
           {ms.map((m) => (
-            <MatchKaart key={m.match_key} match={m} toonDatum={tab === "eigen"} verslagKnop={isEigen(m) && lid ? (
+            <MatchKaart key={m.match_key} match={m} toonDatum={tab === "eigen"} verslagKnop={isEigen(m) && (lid || supporter) ? (
               <MatchverslagUitklap match={m} verslag={verslagen.data?.find((v) => v.match_key === m.match_key)} stats={stats.data ?? []} spelers={spelers} isStaf={r.isStaf} onGewijzigd={async () => { await Promise.all([verslagen.herlaad(), matches.herlaad(), stats.herlaad()]); }} />
             ) : undefined}>
               {isEigen(m) && (

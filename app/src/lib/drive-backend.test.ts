@@ -8,7 +8,7 @@ const user = "11111111-1111-4111-8111-111111111111";
 const imageId = "22222222-2222-4222-8222-222222222222";
 const endpoint = "https://odgrmhcmkvbdadjhphiz.supabase.co/functions/v1/drive-media";
 let handler: (req: Request) => Promise<Response>;
-let admin: boolean, active: boolean, readyFails: boolean, cipher: string;
+let supporter: boolean, admin: boolean, active: boolean, readyFails: boolean, cipher: string;
 const calls: { url: string; method: string; body: unknown }[] = [];
 const row = { id: imageId, drive_id: "google-test-file", owner_id: user, status: "ready", mime_type: "image/jpeg", name: "test.jpg", created_at: "2026-09-10" };
 const encode = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -16,7 +16,7 @@ const response = (data: unknown, status = 200, headers = {}) => new Response(JSO
 const post = (data: unknown) => new Request(endpoint, { method: "POST", headers: { origin, Authorization: "Bearer fake-user-jwt", "Content-Type": "application/json" }, body: JSON.stringify(data) });
 
 beforeEach(async () => {
-  admin = false; active = true; readyFails = false; calls.length = 0;
+  supporter = false; admin = false; active = true; readyFails = false; calls.length = 0;
   const key = await crypto.subtle.importKey("raw", await crypto.subtle.digest("SHA-256", new TextEncoder().encode("test-secret")), "AES-GCM", false, ["encrypt"]);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   cipher = `${encode(iv)}.${encode(new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode("test-refresh"))))}`;
@@ -24,6 +24,7 @@ beforeEach(async () => {
     const url = String(input), method = init?.method ?? "GET";
     calls.push({ url, method, body: init?.body });
     if (url.includes("/auth/v1/user")) return response({ id: user });
+    if (url.includes("/rest/v1/supporter_profiles")) return response(supporter ? { actief: true } : null);
     if (url.includes("/rest/v1/members")) return response(active ? { is_admin: admin } : null);
     if (url.includes("/rest/v1/matches")) return response({ match_key: "wedstrijd", thuis: "Steca", uit: "Test", datum: "2026-09-10" });
     if (url.includes("/rest/v1/drive_connection")) return response({ folder_id: "club-folder", refresh_token_cipher: cipher });
@@ -55,6 +56,13 @@ describe("Drive-backend rechten en upload", () => {
     active = false;
     expect((await handler(post({ action: "list", matchKey: "wedstrijd" }))).status).toBe(403);
     expect(calls.some(c => c.url.includes("googleapis"))).toBe(false);
+  });
+  it("laat supporters beelden zien zonder adminrechten te geven", async () => {
+    active = false; supporter = true;
+    expect((await handler(post({ action: "list", matchKey: "wedstrijd" }))).status).toBe(200);
+    row.owner_id = "ander";
+    expect((await handler(post({ action: "delete", id: imageId }))).status).toBe(403);
+    row.owner_id = user;
   });
   it("weigert verwijderen van iemand anders zonder adminrechten", async () => {
     row.owner_id = "33333333-3333-4333-8333-333333333333";

@@ -1,3 +1,4 @@
+import { SupporterAanwezigheidProvider } from "./SupporterAanwezigheid";
 import { useEffect, useState } from "react";
 import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 import { House } from "@phosphor-icons/react/dist/csr/House";
@@ -25,7 +26,9 @@ const TABS = [
 ];
 
 export function Layout() {
-  const { lid } = useAuth();
+  const { lid, supporter } = useAuth();
+  const voornaam = lid?.voornaam ?? supporter?.naam.split(" ")[0] ?? "Profiel";
+  const initialen = lid ? `${lid.voornaam?.[0] ?? "S"}${lid.achternaam?.[0] ?? "J"}` : supporter?.naam.split(" ").map(n => n[0]).slice(0,2).join("") ?? "SJ";
   const { pathname } = useLocation();
   const navRef = useNavViewport(pathname);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -52,14 +55,14 @@ export function Layout() {
           <button className="thema-knop" type="button" onClick={() => setDonker(!donker)} aria-label={donker ? "Licht thema" : "Donker thema"}>
             {donker ? <Sun size={21} /> : <Moon size={21} />}
           </button>
-          <Link className="profiel-link" to="/profiel" aria-label={"Profiel van " + (lid?.voornaam ?? "lid")}>
-            <span className="initialen" aria-hidden="true">{lid?.voornaam?.slice(0, 1) ?? "S"}{lid?.achternaam?.slice(0, 1) ?? "J"}</span>
-            <span className="profiel-naam">{lid?.voornaam ?? "Profiel"}</span>
+          <Link className="profiel-link" to="/profiel" aria-label={"Profiel van " + voornaam}>
+            <span className="initialen" aria-hidden="true">{initialen}</span>
+            <span className="profiel-naam">{voornaam}</span>
           </Link>
         </div>
       </header>
       <Lichtkrant />
-      <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><Outlet /></main>
+      <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><SupporterAanwezigheidProvider><Outlet /></SupporterAanwezigheidProvider></main>
       <MeldingenPopup />
       <nav ref={navRef} className="nav" aria-label="Hoofdnavigatie">
         {TABS.map(({ to, label, Icon }) => (
