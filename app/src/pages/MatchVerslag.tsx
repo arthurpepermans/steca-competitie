@@ -44,12 +44,12 @@ export function MatchVerslag() {
       <VerslagTijdlijn match={match} verslag={verslag} totalen={totalen} />
       <Sfeerbeelden matchKey={key} />
     </article>
-    {rechten(lid).isStaf && <div className="kaart"><button className="knop licht" aria-expanded={bewerk} onClick={() => setBewerk(!bewerk)}>{bewerk ? 'Invoer sluiten' : 'Uitslag en matchverslag invullen'}</button>{bewerk && <VerslagInvoer key={verslag?.updated_at ?? key} match={origineel} verslag={verslag} namen={spelers.map(p => p.naam)} klaar={async () => { await info.herlaad(); setBewerk(false); }} />}</div>}
+    {rechten(lid).isStaf && <div className="kaart"><button className="knop licht" aria-expanded={bewerk} onClick={() => setBewerk(!bewerk)}>{bewerk ? 'Invoer sluiten' : 'Uitslag en matchverslag invullen'}</button>{bewerk && <VerslagInvoer key={verslag?.updated_at ?? key} match={origineel} verslag={verslag} spelers={spelers} klaar={async () => { await info.herlaad(); setBewerk(false); }} />}</div>}
     {match.status === 'gespeeld' && <JuniorStemming match={match} spelers={spelers} aanwezigheden={d.aanw} punten={d.punten} stemmers={d.stemmers} mijnStem={d.stemmen.find(s => s.match_key === key) ?? null} eigenLidId={lid?.id ?? null} onGewijzigd={info.herlaad} />}
   </>;
 }
 
-export function VerslagInvoer({ match, verslag, namen, klaar }: { match: Match; verslag?: Verslag; namen: string[]; klaar: () => Promise<void> }) {
+export function VerslagInvoer({ match, verslag, spelers, klaar }: { match: Match; verslag?: Verslag; spelers: {id: string; naam: string}[]; klaar: () => Promise<void> }) {
   const [thuis, setThuis] = useState(verslag?.thuis_score ?? match.thuis_score ?? 0);
   const [uit, setUit] = useState(verslag?.uit_score ?? match.uit_score ?? 0);
   const [momenten, setMomenten] = useState<Moment[]>(verslag?.momenten ?? []);
@@ -59,12 +59,12 @@ export function VerslagInvoer({ match, verslag, namen, klaar }: { match: Match; 
   async function opslaan(e: FormEvent) { e.preventDefault(); setBezig(true); setFout(''); try { await bewaarVerslag(match.match_key, thuis, uit, momenten.map(m => ({...m,minuut:null})), verslag?.updated_at ?? null); await klaar(); } catch(e) { setFout(foutTekst(e)); } finally { setBezig(false); } }
   return <form onSubmit={opslaan} className="verslag-invoer"><Fout tekst={fout} /><fieldset disabled={bezig}><legend>Uitslag</legend><div className="verslag-scoreinvoer"><label>{match.thuis}<input aria-label="Thuisscore" type="number" min="0" max="99" required value={thuis} onChange={e => setThuis(Number(e.target.value))} /></label><label>{match.uit}<input aria-label="Uitscore" type="number" min="0" max="99" required value={uit} onChange={e => setUit(Number(e.target.value))} /></label></div>
     <p className="klein zacht">De stemmelding vertrekt pas vanaf 80 minuten na aftrap. Je mag de uitslag eerder invoeren.</p>
-    <datalist id="verslag-spelers">{namen.map(n => <option key={n} value={n} />)}</datalist>
+    <p className="klein zacht">Goals, assists en kaarten tellen automatisch mee in de statistieken. Iedereen in de basis en op de bank telt als gespeeld; bij nul tegengoals krijgen zij een clean sheet.</p>
     {momenten.map((m, i) => <fieldset className="verslag-momentinvoer" key={i}><legend>Moment {i + 1}</legend>
       <label>Gebeurtenis<select value={m.soort} onChange={e => wijzig(i, { soort: e.target.value as Moment['soort'], ...(e.target.value !== 'goal' ? { assist: '' } : {}) })}><option value="goal">Goal</option><option value="geel">Gele kaart</option><option value="rood">Rode kaart</option></select></label>
-      <label>Ploeg<select value={m.kant} onChange={e => wijzig(i, { kant: e.target.value as Moment['kant'] })}><option value="thuis">{match.thuis}</option><option value="uit">{match.uit}</option></select></label>
-      <label>Speler<input list="verslag-spelers" maxLength={100} value={m.speler} onChange={e => wijzig(i, { speler: e.target.value })} /></label>
-      {m.soort === 'goal' && <label>Assist (optioneel)<input list="verslag-spelers" maxLength={100} value={m.assist} onChange={e => wijzig(i, { assist: e.target.value })} /></label>}
+      <label>Ploeg<select value={m.kant} onChange={e => wijzig(i, { kant: e.target.value as Moment['kant'], speler: '', assist: '', speler_id: null, assist_id: null })}><option value="thuis">{match.thuis}</option><option value="uit">{match.uit}</option></select></label>
+      <label>Speler{m.kant === (match.thuis_id === 152 ? 'thuis' : 'uit') ? <select value={m.speler_id ?? spelers.find(p => p.naam === m.speler)?.id ?? ''} onChange={e => wijzig(i,{speler_id:e.target.value || null,speler:spelers.find(p=>p.id===e.target.value)?.naam ?? ''})}><option value="">Kies een speler…</option>{spelers.map(p=><option key={p.id} value={p.id}>{p.naam}</option>)}</select> : <input maxLength={100} value={m.speler} onChange={e => wijzig(i, { speler: e.target.value, speler_id:null })} />}</label>
+      {m.soort === 'goal' && <label>Assist (optioneel){m.kant === (match.thuis_id === 152 ? 'thuis' : 'uit') ? <select value={m.assist_id ?? spelers.find(p => p.naam === m.assist)?.id ?? ''} onChange={e=>wijzig(i,{assist_id:e.target.value || null,assist:spelers.find(p=>p.id===e.target.value)?.naam ?? ''})}><option value="">Geen assist</option>{spelers.map(p=><option key={p.id} value={p.id}>{p.naam}</option>)}</select> : <input maxLength={100} value={m.assist} onChange={e => wijzig(i, { assist: e.target.value,assist_id:null })} />}</label>}
       <button type="button" className="knop licht klein" onClick={() => setMomenten(ms => ms.filter((_, n) => i !== n))}>Moment verwijderen</button>
     </fieldset>)}
     <div className="knoppen"><button type="button" className="knop licht" onClick={() => setMomenten(ms => [...ms, { minuut: null, soort: 'goal', kant: match.thuis_id === 152 ? 'thuis' : 'uit', speler: '', assist: '' }])}>Moment toevoegen</button><button className="knop" disabled={bezig}>{bezig ? 'Opslaan…' : 'Matchverslag opslaan'}</button></div></fieldset></form>;

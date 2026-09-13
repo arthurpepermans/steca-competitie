@@ -10,6 +10,7 @@ beforeAll(async()=>{
  await db.exec(`create role anon; create role authenticated;
  create table members(id uuid primary key,functie text);
  create table matches(match_key text primary key,seizoen text,datum date,uur text,thuis_id int,uit_id int,status text,thuis_score int,uit_score int);
+ create table match_reports(match_key text,thuis_score int,uit_score int);
  create table match_stats(match_key text,member_id uuid,gespeeld bool,goals int,assists int,geel int,rood int);
  create table attendance(match_key text,member_id uuid,status text);
  create table match_votes(match_key text,voter_id uuid,eerste uuid,tweede uuid,derde uuid);
@@ -17,7 +18,7 @@ beforeAll(async()=>{
  create function my_member_id() returns uuid language sql as $$select nullif(current_setting('test.lid',true),'')::uuid$$;
  create function is_actief() returns bool language sql as $$select my_member_id() is not null$$;`);
  const schema=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');
- await db.exec(schema.slice(schema.indexOf('-- Automatische badges:')).split('-- Alleen test: handmatige')[0].split('-- Handmatige competitie-update:')[0]);
+ await db.exec(schema.slice(schema.indexOf('-- Automatische badges:')).split('-- Alleen test: handmatige')[0].split('-- Handmatige competitie-update:')[0].split('-- Statistieken uit verslag')[0]);
 },30000);
 afterAll(async()=>{await db?.close();});
 beforeEach(async()=>{

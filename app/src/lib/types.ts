@@ -118,6 +118,9 @@ export type LineupPlayer = {
 };
 
 export type MatchStat = {
+  clean_sheet?: boolean | null;
+  uit_verslag?: boolean;
+  uit_opstelling?: boolean;
   match_key: string;
   member_id: string;
   gespeeld: boolean;

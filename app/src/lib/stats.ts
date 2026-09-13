@@ -31,7 +31,7 @@ export function totalen(stats: MatchStat[], matches: Match[]): Totalen[] {
       t.gespeeld += 1;
       const m = perMatch.get(s.match_key);
       const sc = m ? eigenScore(m) : null;
-      if (sc && sc.tegen === 0) t.cleanSheets += 1;
+      if (s.clean_sheet ?? (sc !== null && sc.tegen === 0)) t.cleanSheets += 1;
     }
     out.set(s.member_id, t);
   }

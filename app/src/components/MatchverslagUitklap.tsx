@@ -33,7 +33,7 @@ export function MatchverslagUitklap({ match, verslag, stats, spelers, isStaf, on
           {isStaf && (
             <>
               <button type="button" className="knop licht klein" aria-expanded={bewerk} onClick={() => setBewerk(!bewerk)}>{bewerk ? "Invoer sluiten" : "Uitslag en matchverslag invullen"}</button>
-              {bewerk && <VerslagInvoer key={verslag?.updated_at ?? match.match_key} match={match} verslag={verslag} namen={spelers.map((p) => p.naam)} klaar={async () => { await onGewijzigd(); setBewerk(false); }} />}
+              {bewerk && <VerslagInvoer key={verslag?.updated_at ?? match.match_key} match={match} verslag={verslag} spelers={spelers} klaar={async () => { await onGewijzigd(); setBewerk(false); }} />}
             </>
           )}
         </div>

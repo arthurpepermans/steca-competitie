@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type { Match, MatchStat } from './types';
 
-export type Moment = { minuut: number | null; soort: 'goal' | 'geel' | 'rood'; kant: 'thuis' | 'uit'; speler: string; assist: string };
+export type Moment = { speler_id?: string | null; assist_id?: string | null; minuut: number | null; soort: 'goal' | 'geel' | 'rood'; kant: 'thuis' | 'uit'; speler: string; assist: string };
 export type Verslag = { match_key: string; thuis_score: number; uit_score: number; momenten: Moment[]; score_at: string; updated_at: string };
 export async function haalVerslagen(): Promise<Verslag[]> {
   const { data, error } = await supabase.from('match_reports').select('match_key,thuis_score,uit_score,momenten,score_at,updated_at');
