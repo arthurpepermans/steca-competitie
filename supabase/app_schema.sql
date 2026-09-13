@@ -1609,3 +1609,36 @@ language sql stable security definer set search_path=public as $$
 $$;
 revoke all on function public.sfeerbeeld_uploaders(uuid[]) from public,anon;
 grant execute on function public.sfeerbeeld_uploaders(uuid[]) to authenticated;
+
+-- Supportersklassement: uitsluitend echte supporteraccounts en wedstrijden.
+create or replace function public.supporter_klassement_data() returns jsonb
+language plpgsql stable security definer set search_path=public as $$
+begin
+ if not (coalesce(is_actief(),false) or coalesce(is_supporter_account(),false)) then
+  raise exception 'Log in met een actief account.';
+ end if;
+ return jsonb_build_object(
+  'personen',coalesce((select jsonb_agg(jsonb_build_object('id',user_id,'user_id',user_id,'naam',naam) order by naam) from supporter_profiles where actief),'[]'::jsonb),
+  'matches',coalesce((select jsonb_agg(to_jsonb(m)) from (
+   select match_key as id,seizoen,datum,(uit_id=152) as uit,
+    (status='gespeeld' and match_aftrap(datum,uur)+interval '80 minutes'<=now()) as gespeeld,
+    thuis||' - '||uit as label
+   from matches where (thuis_id=152 or uit_id=152) and datum is not null
+    and status in ('gepland','gespeeld') and coalesce(bron,'') not in ('push-test','test-invoer')
+    and match_key<>'test-matchverslag-voorbeeld'
+  ) m),'[]'::jsonb),
+  'bezoeken',coalesce((select jsonb_agg(jsonb_build_object('persoon',a.user_id,'match',a.match_key))
+   from supporter_attendance a join supporter_profiles s on s.user_id=a.user_id where s.actief and a.status='aanwezig'),'[]'::jsonb),
+  -- Seizoenen lopen van juli tot juni. Een lopend seizoen krijgt nooit Perfect seizoen.
+  'afgerond',coalesce((select jsonb_agg(seizoen) from (
+   select distinct seizoen from matches where (thuis_id=152 or uit_id=152)
+    and seizoen ~ '^[0-9]{4}-[0-9]{4}$'
+    and seizoen < (case when extract(month from now() at time zone 'Europe/Brussels')>=7
+      then extract(year from now() at time zone 'Europe/Brussels')::int
+      else extract(year from now() at time zone 'Europe/Brussels')::int-1 end)::text
+  ) s),'[]'::jsonb),
+  'testbadges','[]'::jsonb
+ );
+end $$;
+revoke all on function public.supporter_klassement_data() from public,anon;
+grant execute on function public.supporter_klassement_data() to authenticated;
