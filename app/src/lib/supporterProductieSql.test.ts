@@ -13,7 +13,7 @@ create function match_aftrap(date,text) returns timestamptz language sql as $$se
 insert into supporter_profiles values('00000000-0000-0000-0000-000000000001','Fan',true);
 insert into matches values('echt','2020-2021','2020-09-01','15:00',152,1,'gespeeld','Steca','Ploeg','scrape'),('proef','2020-2021','2020-09-01','15:00',152,1,'gespeeld','Steca','Proef','push-test');
 insert into supporter_attendance values('00000000-0000-0000-0000-000000000001','echt','aanwezig');`);
-const s=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');await db.exec(s.slice(s.indexOf('-- Supportersklassement: uitsluitend echte')));},30000);
+const s=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');await db.exec(s.slice(s.indexOf('-- Supportersklassement: uitsluitend echte')).split('-- Supporteraccount beheren,')[0]);},30000);
 afterAll(async()=>{await db?.close();});
 it('weigert ongeauthenticeerde toegang en anonieme RPC-rechten',async()=>{await expect(db.query('select supporter_klassement_data()')).rejects.toThrow('Log in');expect((await db.query<{ok:boolean}>("select has_function_privilege('anon','supporter_klassement_data()','EXECUTE') ok")).rows[0].ok).toBe(false);});
 it('geeft echte data aan supporters zonder testbadges of testmatches',async()=>{await db.exec("select set_config('test.supporter','yes',false)");const r=await db.query<{d:{personen:unknown[],matches:{id:string}[],afgerond:string[],bezoeken:unknown[],testbadges:unknown[]}}>('select supporter_klassement_data() d');expect(r.rows[0].d).toMatchObject({matches:[{id:'echt'}],afgerond:['2020-2021'],testbadges:[]});expect(r.rows[0].d.personen).toHaveLength(1);expect(r.rows[0].d.bezoeken).toHaveLength(1);});

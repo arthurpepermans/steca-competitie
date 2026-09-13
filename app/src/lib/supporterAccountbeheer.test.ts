@@ -1,0 +1,21 @@
+/// <reference types="node" />
+import {beforeAll,beforeEach,afterAll,it,expect} from 'vitest';
+import {PGlite} from '@electric-sql/pglite';
+import {readFileSync} from 'node:fs';
+let db:PGlite;const fan='00000000-0000-0000-0000-000000000002';
+beforeAll(async()=>{db=new PGlite();await db.exec(`create role anon;create role authenticated;create schema auth;
+create function auth.uid() returns uuid language sql as $$select '00000000-0000-0000-0000-000000000001'::uuid$$;
+create function is_admin() returns boolean language sql as $$select current_setting('test.admin',true)='yes'$$;
+create function my_member_id() returns uuid language sql as $$select auth.uid()$$;
+create table auth.users(id uuid primary key);
+create table members(user_id uuid);
+create table supporter_profiles(user_id uuid primary key references auth.users on delete cascade,naam text,actief boolean);
+create table supporter_attendance(user_id uuid references supporter_profiles on delete cascade,match_key text,status text);
+create table audit_log(tabel text,rij_id text,actie text,oud jsonb,door uuid,door_user uuid);
+create function supporter_klassement_data() returns jsonb language sql as $$select '{"personen":[],"bezoeken":[]}'::jsonb$$;`);const s=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');await db.exec(s.slice(s.indexOf('-- Supporteraccount beheren,')));},30000);
+afterAll(async()=>{await db?.close();});
+beforeEach(async()=>{await db.exec(`truncate auth.users,members,audit_log cascade;insert into auth.users values('${fan}');insert into supporter_profiles values('${fan}','Fan',true);insert into supporter_attendance values('${fan}','match','aanwezig');select set_config('test.admin','yes',false);`);});
+it('weigert gewone accounts en onbekende acties',async()=>{await db.exec("select set_config('test.admin','no',false)");await expect(db.query("select admin_supporter_account($1,'verwijderen')",[fan])).rejects.toThrow('Alleen admins');await db.exec("select set_config('test.admin','yes',false)");await expect(db.query("select admin_supporter_account($1,'anders')",[fan])).rejects.toThrow('Onbekende actie');});
+it('deactiveert en reactiveert zonder gegevensverlies, profiel blijft leesbaar voor admin',async()=>{await db.query("select admin_supporter_account($1,'deactiveren')",[fan]);expect((await db.query<{actief:boolean}>('select actief from supporter_profiles')).rows[0].actief).toBe(false);const r=await db.query<{d:{personen:{actief:boolean}[],bezoeken:unknown[]}}>('select admin_supporter_profiel($1) d',[fan]);expect(r.rows[0].d.personen[0].actief).toBe(false);expect(r.rows[0].d.bezoeken).toHaveLength(1);await db.query("select admin_supporter_account($1,'activeren')",[fan]);expect((await db.query<{actief:boolean}>('select actief from supporter_profiles')).rows[0].actief).toBe(true);});
+it('verwijdert supporter en aanwezigheid, met auditregistratie',async()=>{await db.query("select admin_supporter_account($1,'verwijderen')",[fan]);expect((await db.query('select * from auth.users')).rows).toHaveLength(0);expect((await db.query('select * from supporter_attendance')).rows).toHaveLength(0);expect((await db.query('select * from audit_log')).rows).toHaveLength(1);});
+it('weigert een inmiddels gekoppeld spelersaccount',async()=>{await db.query('insert into members values($1)',[fan]);await expect(db.query("select admin_supporter_account($1,'verwijderen')",[fan])).rejects.toThrow('afzonderlijk supporteraccount');expect((await db.query('select * from auth.users')).rows).toHaveLength(1);});

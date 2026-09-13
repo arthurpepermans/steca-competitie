@@ -9,7 +9,7 @@ export const FAN_BADGES:FanBadge[]=[
  ...([['welkom','Welkom langs de lijn',1],['smaak','Smaak te pakken',5],['toog','Toog én tribune',10],['hardcore','Hardcore fan',25],['team','Part of the team',50],['tribune','Tribunelegende',100]] as const).map(([id,titel,aantal])=>({id,titel,aantal,uitleg:`${aantal} gespeelde match${aantal===1?'':'en'} bijgewoond.`,soort:'verzameling' as const,icoon:aantal>=50?'shirt' as const:'sjaal' as const,veld:'matchen' as const})),
  {id:'busje',titel:'Busje komt zo',uitleg:'5 opeenvolgende uitmatchen bijgewoond. Thuismatchen onderbreken deze reeks niet.',soort:'verzameling',icoon:'bus',veld:'uitreeks',aantal:5},
 ];
-export type Fan={id:string;naam:string;user_id:string|null};
+export type Fan={id:string;naam:string;user_id:string|null;actief?:boolean};
 export type FanMatch={id:string;seizoen:string;datum:string;uit:boolean;gespeeld:boolean;label:string};
 export type FanBezoek={persoon:string;match:string};
 export type FanToewijzing={persoon:string;badge:string;seizoen:string|null};

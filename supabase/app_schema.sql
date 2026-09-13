@@ -1642,3 +1642,35 @@ begin
 end $$;
 revoke all on function public.supporter_klassement_data() from public,anon;
 grant execute on function public.supporter_klassement_data() to authenticated;
+
+-- Supporteraccount beheren, met dezelfde admincontrole als bij leden.
+create or replace function public.admin_supporter_account(p_id uuid,p_actie text) returns void
+language plpgsql security definer set search_path=public as $$
+declare s supporter_profiles;
+begin
+ if not coalesce(is_admin(),false) then raise exception 'Alleen admins mogen supporteraccounts beheren.';end if;
+ perform pg_advisory_xact_lock(hashtextextended('steca-accountfunctie',0));
+ select * into s from supporter_profiles where user_id=p_id for update;
+ if not found then raise exception 'Supporter niet gevonden.';end if;
+ if p_id=auth.uid() or exists(select 1 from members where user_id=p_id) then raise exception 'Dit is geen afzonderlijk supporteraccount.';end if;
+ if p_actie not in ('deactiveren','activeren','verwijderen') or p_actie is null then raise exception 'Onbekende actie.';end if;
+ insert into audit_log(tabel,rij_id,actie,oud,door,door_user) values('supporter_profiles',p_id::text,upper(p_actie),jsonb_build_object('naam',s.naam,'actief',s.actief),my_member_id(),auth.uid());
+ if p_actie='verwijderen' then delete from auth.users where id=p_id;
+ else update supporter_profiles set actief=(p_actie='activeren') where user_id=p_id;end if;
+end $$;
+revoke all on function admin_supporter_account(uuid,text) from public,anon;
+grant execute on function admin_supporter_account(uuid,text) to authenticated;
+
+create or replace function public.admin_supporter_profiel(p_id uuid) returns jsonb
+language plpgsql stable security definer set search_path=public as $$
+declare d jsonb; s supporter_profiles;
+begin
+ if not coalesce(is_admin(),false) then raise exception 'Alleen admins.';end if;
+ select * into s from supporter_profiles where user_id=p_id;
+ d:=supporter_klassement_data();
+ if not found then return d;end if;
+ d:=jsonb_set(d,'{personen}',coalesce((select jsonb_agg(p) from jsonb_array_elements(d->'personen') p where p->>'id'<>p_id::text),'[]')||jsonb_build_array(jsonb_build_object('id',s.user_id,'user_id',s.user_id,'naam',s.naam,'actief',s.actief)));
+ return jsonb_set(d,'{bezoeken}',coalesce((select jsonb_agg(jsonb_build_object('persoon',a.user_id,'match',a.match_key)) from supporter_attendance a join supporter_profiles sp on sp.user_id=a.user_id where a.status='aanwezig' and (sp.actief or sp.user_id=p_id)),'[]'));
+end $$;
+revoke all on function admin_supporter_profiel(uuid) from public,anon;
+grant execute on function admin_supporter_profiel(uuid) to authenticated;
