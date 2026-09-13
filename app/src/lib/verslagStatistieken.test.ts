@@ -69,3 +69,10 @@ it('laat gewone accounts de serverberekening niet rechtstreeks oproepen',async()
  await expect(db.query("select synchroniseer_matchstatistieken('m')")).rejects.toThrow(/permission denied/);
  await db.exec('reset role');
 });
+
+it('twee geel wordt één rood, zonder dubbel rood, en een correctie trekt dat terug',async()=>{
+ const geel={soort:'geel',kant:'thuis',speler:'Speler A'};
+ await report([geel,geel]);expect((await stats())[0]).toMatchObject({geel:2,rood:1});
+ await report([geel,geel,{...geel,soort:'rood'}]);expect((await stats())[0]).toMatchObject({geel:2,rood:1});
+ await report([geel]);expect((await stats())[0]).toMatchObject({geel:1,rood:0});
+});

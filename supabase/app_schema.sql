@@ -1472,7 +1472,7 @@ begin
    case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then coalesce(t.goals,0) else coalesce(s.goals,0) end as goals,
    case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then coalesce(t.assists,0) else coalesce(s.assists,0) end as assists,
    case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then least(coalesce(t.geel,0),2) else coalesce(s.geel,0) end as geel,
-   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then least(coalesce(t.rood,0),1) else coalesce(s.rood,0) end as rood
+   case when verslag.match_key is not null or coalesce(s.uit_verslag,false) then case when coalesce(t.geel,0)>=2 then 1 else least(coalesce(t.rood,0),1) end else coalesce(s.rood,0) end as rood
   from personen p left join match_stats s on s.match_key=p_match and s.member_id=p.lid left join totalen t on t.lid=p.lid
  )
  insert into match_stats(match_key,member_id,gespeeld,goals,assists,geel,rood,uit_verslag,uit_opstelling,clean_sheet)

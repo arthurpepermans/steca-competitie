@@ -22,3 +22,21 @@ export function sorteerMomenten(momenten: Moment[]) {
 export function samenvatting(stats: MatchStat[], matchKey: string, namen: Map<string, string>) {
   return stats.filter(s => s.match_key === matchKey && (s.goals || s.assists || s.geel || s.rood)).map(s => ({ ...s, naam: namen.get(s.member_id) ?? 'Speler' }));
 }
+
+/** Tweede geel geeft één rood; een reeds ingevoerde rode kaart niet verdubbelen. */
+export function metAutomatischeRodeKaarten(momenten: Moment[]): Moment[] {
+  const resultaat = [...momenten];
+  const sleutel = (m: Moment) => `${m.kant}:${m.speler_id || m.speler.trim().toLocaleLowerCase()}`;
+  const geel = new Map<string, Moment[]>();
+  for (const m of momenten) {
+    if (m.soort !== 'geel' || (!m.speler_id && !m.speler.trim())) continue;
+    const key = sleutel(m);
+    geel.set(key, [...(geel.get(key) ?? []), m]);
+  }
+  for (const [key, kaarten] of geel) {
+    if (kaarten.length >= 2 && !momenten.some(m => m.soort === 'rood' && sleutel(m) === key)) {
+      resultaat.push({...kaarten[1], soort:'rood', assist:'', assist_id:null});
+    }
+  }
+  return resultaat;
+}
