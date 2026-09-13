@@ -49,3 +49,13 @@ export function goalsControle(stats: MatchStat[], m: Match): { ingevoerd: number
 export function sorteerOp<K extends keyof Totalen>(rows: Totalen[], veld: K): Totalen[] {
   return [...rows].sort((a, b) => (b[veld] as number) - (a[veld] as number) || b.goals - a.goals);
 }
+
+/** De gekozen rangschikking staat meteen na de spelersnaam. */
+export function statistiekKolommen(eerste: keyof Totalen) {
+  const kolommen: {veld: Exclude<keyof Totalen, 'member_id'>; label: string}[] = [
+    {veld:'gespeeld',label:'Gesp.'}, {veld:'goals',label:'Goals'},
+    {veld:'assists',label:'Assists'}, {veld:'geel',label:'Geel'},
+    {veld:'rood',label:'Rood'}, {veld:'cleanSheets',label:'CS'},
+  ];
+  return [...kolommen.filter(k=>k.veld===eerste), ...kolommen.filter(k=>k.veld!==eerste)];
+}
