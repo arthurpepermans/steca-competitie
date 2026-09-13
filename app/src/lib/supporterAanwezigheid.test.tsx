@@ -12,7 +12,7 @@ const spelers=[{id:"p",naam:"Speler"},{id:"p2",naam:"Tweede speler"}];
 const aanw=[{match_key:"m",member_id:"p",status:"aanwezig" as const,gezet_door:null,updated_at:""}];
 it("houdt supporters buiten de spelersaantallen en toont hun eigen keuze apart",()=>{
  const html=renderToStaticMarkup(<AuthContext.Provider value={{klaar:true,session:null,lid:null,supporter:{user_id:"fan",naam:"Supporter",actief:true},fout:null,herlaad:vi.fn()}}><SupporterAanwezigheidContext.Provider value={info}>
- <Aanwezigheid match={match} spelers={spelers} aanwezigheden={aanw} eigenLidId={null} isSpeler={false} isStaf={false} isAdmin={false} onGewijzigd={vi.fn()}/>
+ <Aanwezigheid toonSupporters match={match} spelers={spelers} aanwezigheden={aanw} eigenLidId={null} isSpeler={false} isStaf={false} isAdmin={false} onGewijzigd={vi.fn()}/>
  </SupporterAanwezigheidContext.Provider></AuthContext.Provider>);
  const [ploeg,supporters]=html.split('<section class="supporter-aanwezigheid"');
  expect(ploeg).toContain("Aanwezig: 1 · Afwezig: 0 · Onzeker: 0 · nog niets: 1");
