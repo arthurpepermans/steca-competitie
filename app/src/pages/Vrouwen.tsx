@@ -37,7 +37,6 @@ export function Vrouwen() {
     document.documentElement.dataset.ploeg='vrouwen';
     const oudeTitel=document.title;
     document.title='Steca Vrouwen Clubapp';
-    try{localStorage.setItem('steca-ploeg','vrouwen');}catch{/* Voorkeur is optioneel. */}
     return ()=>{delete document.documentElement.dataset.ploeg;document.title=oudeTitel;};
   },[]);
   useEffect(()=>{document.documentElement.dataset.theme=donker?'dark':'light';try{localStorage.setItem('steca-retro-thema',donker?'dark':'light');}catch{/* Optioneel. */}},[donker]);
@@ -55,7 +54,7 @@ export function Vrouwen() {
   const tab=pathname.split('/')[2]??'';
   return <>
     <header className="kop v-kop"><Link to="/vrouwen" className="clubmerk"><img src={logo} width="48" height="54" alt=""/><span>STECA VROUWEN<small>CLUBAPP</small></span></Link><button className="thema-knop" onClick={()=>setDonker(!donker)} aria-label={donker?'Licht thema':'Donker thema'}>{donker?'☀':'☾'}</button></header>
-    <div className="v-ploegwissel"><span>ROZE. WIT. ZWART.</span><Link to="/" onClick={()=>{try{localStorage.setItem('steca-ploeg','juniors');}catch{/* Optioneel. */}}}>Wissel naar Juniors ↗</Link></div>
+    <div className="v-ploegwissel"><span>ROZE. WIT. ZWART.</span><Link to="/">Wissel naar Juniors ↗</Link></div>
     <main className="inhoud v-inhoud">
       {fout?<div role="alert" className="melding fout">De wedstrijdgegevens konden niet geladen worden. <button onClick={()=>setPoging(p=>p+1)}>Opnieuw proberen</button></div>:!data?<p role="status">Wedstrijden laden…</p>:<>
       {Date.now()-new Date(data.bijgewerkt).getTime()>36*3600000&&<p className="melding">Deze gegevens zijn meer dan een dag oud. Controleer recente wijzigingen via Twizzit.</p>}
