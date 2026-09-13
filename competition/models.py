@@ -55,6 +55,7 @@ class Fixture:
     uit: str
     thuis_id: int | None
     uit_id: int | None
+    opmerking: str = ""
 
 
 @dataclass(frozen=True)

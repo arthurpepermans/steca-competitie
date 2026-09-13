@@ -99,6 +99,7 @@ Lezen kan met de anon key (row level security laat lezen toe, schrijven niet).
 ## Eigenaardigheden van de site
 
 - Klassement-kolommen zijn Pos, Team, Gesp, W, V, G, DV, DT, Pt. **V is verlies, G is gelijk.**
+- Een uitgestelde match gebruikt `(UITGESTELD)` in plaats van het streepje tussen de ploegen. Die blijft gepland zonder score, met `Uitgesteld` als opmerking.
 - De kalender toont alleen nog te spelen wedstrijden; gespeelde verhuizen naar Uitslagen.
   Kalender plus uitslagen vormen samen exact het volledige programma (n × (n-1) per reeks).
 - De kalender heeft geen terrein-kolom; het terrein staat op de ploegpagina van de thuisploeg.

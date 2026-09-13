@@ -184,3 +184,15 @@ def test_seizoen():
     assert parse_seizoen(lees("klassement.html")) == "2026-2027"
     with pytest.raises(ParseError):
         parse_seizoen("<html></html>")
+
+
+def test_kalender_uitgesteld_blijft_een_onbesliste_wedstrijd():
+    f, = parse_kalender(lees("kalender_uitgesteld.html"))
+    assert (f.thuis, f.uit, f.uur) == ("Nickyspurters", "FC Ons Huis", "15:00")
+    assert f.thuis_id is not None and f.uit_id is not None
+    assert f.opmerking == "Uitgesteld"
+
+
+def test_kalender_onbekende_markering_blijft_een_fout():
+    with pytest.raises(ParseError, match="onverwachte rij"):
+        parse_kalender(lees("kalender_uitgesteld.html").replace("UITGESTELD", "ONBEKEND"))
