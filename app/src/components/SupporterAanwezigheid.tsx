@@ -35,6 +35,7 @@ export function SupporterAanwezigheid({match}: {match: Match}) {
   const [fout, setFout] = useState<string | null>(null);
   if (!info) return null;
   const antwoorden = (info.data ?? []).filter(a => a.match_key === match.match_key);
+  const aanwezigen = antwoorden.filter(a => a.status === "aanwezig");
   const eigen = antwoorden.find(a => a.user_id === supporter?.user_id)?.status;
   async function zet(status: AanwezigheidStatus) {
     setBezig(true); setFout(null);
@@ -46,7 +47,7 @@ export function SupporterAanwezigheid({match}: {match: Match}) {
   }
   return <section className="supporter-aanwezigheid" aria-label="Aanwezigheid supporters">
     <div className="rij"><strong>Supporters</strong><button type="button" className="tekst-knop" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Supporters verbergen" : "Supporters tonen"}</button></div>
-    <p className="klein zacht">Apart van de spelers. Tellen niet mee voor de selectie.</p>
+    <p className="klein zacht">Op deze ultras kunnen we rekenen.</p>
     {supporter?.actief && <>
       {magAanwezigheidWijzigen(match) && <div className="status-knoppen">
         {statussen.map(status => <button type="button" key={status} disabled={bezig || info.laden} aria-pressed={eigen === status} className={`${status} ${eigen === status ? "actief" : ""}`} onClick={() => zet(status)}>{status === "aanwezig" ? "Aanwezig" : status === "afwezig" ? "Afwezig" : "Onzeker"}</button>)}
@@ -54,13 +55,10 @@ export function SupporterAanwezigheid({match}: {match: Match}) {
       <p className="aanwezig-bevestiging" role="status">{bezig ? "Bezig met opslaan…" : eigen ? `Je staat als supporter op ${eigen}.` : "Je hebt als supporter nog niet geantwoord."}</p>
     </>}
     {(fout || info.fout) && <p role="alert" className="melding fout">{fout ?? info.fout}<button type="button" className="tekst-knop" onClick={info.herlaad}>Opnieuw laden</button></p>}
-    {info.laden ? <p className="klein zacht">Supporters laden…</p> : <p className="klein zacht">{statussen.map(s => `${s === "aanwezig" ? "Aanwezig" : s === "afwezig" ? "Afwezig" : "Onzeker"}: ${antwoorden.filter(a => a.status === s).length}`).join(" · ")}</p>}
+    {info.laden ? <p className="klein zacht">Supporters laden…</p> : <p className="klein zacht">Aanwezig: {aanwezigen.length}</p>}
     {open && <div>
-      {!antwoorden.length && <p className="klein zacht">Nog geen supporters geantwoord.</p>}
-      {statussen.map(status => {
-        const namen = antwoorden.filter(a => a.status === status);
-        return namen.length ? <div key={status}><p className="klein zacht">{status === "aanwezig" ? "Aanwezig" : status === "afwezig" ? "Afwezig" : "Onzeker"} ({namen.length})</p><div className="namen">{namen.map(a => <span key={a.user_id} className={status}>{a.naam}</span>)}</div></div> : null;
-      })}
+      {!aanwezigen.length && <p className="klein zacht">Nog geen supporters op aanwezig.</p>}
+      <div className="namen">{aanwezigen.map(a => <span key={a.user_id} className="aanwezig">{a.naam}</span>)}</div>
     </div>}
   </section>;
 }
