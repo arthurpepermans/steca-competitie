@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "@phosphor-icons/react/dist/csr/Camera";
 import { rechten, useAuth } from "../lib/auth";
-import { controleerMedia, haalSfeerbeelden, MEDIA_TYPES, uploadSfeerbeeld, verwijderSfeerbeeld, type Sfeerbeeld } from "../lib/media";
+import { controleerMedia, haalSfeerbeelden, haalUploaderNamen, MEDIA_TYPES, uploadSfeerbeeld, verwijderSfeerbeeld, type Sfeerbeeld } from "../lib/media";
 
 export function Sfeerbeelden({ matchKey }: { matchKey: string }) {
   const [open, setOpen] = useState(false);
@@ -30,6 +30,12 @@ function Album({ matchKey }: { matchKey: string }) {
     setLaden(true);
     try {
       const resultaat = await haalSfeerbeelden(matchKey, offset);
+      try {
+        const namen = await haalUploaderNamen(resultaat.beelden.map(b => b.eigenaar));
+        resultaat.beelden = resultaat.beelden.map(b => ({...b,uploaderNaam: namen.get(b.eigenaar)}));
+      } catch {
+        if (actief.current && nr === aanvraag.current) setFout("De beelden zijn geladen, maar de uploadernamen niet. Tik op Vernieuwen om opnieuw te proberen.");
+      }
       if (!actief.current || nr !== aanvraag.current) return;
       setBeelden((oud) => offset ? [...oud, ...resultaat.beelden.filter((b) => !oud.some((o) => o.path === b.path))] : resultaat.beelden);
       setMeer(resultaat.meer);
@@ -70,7 +76,7 @@ function Album({ matchKey }: { matchKey: string }) {
     finally { setBezig(false); }
   }
   return <div className="sfeer-album" aria-busy={bezig || laden}>
-    <p>Foto’s en video’s van deze match. Alleen zichtbaar voor leden.</p>
+    <p>Foto’s en video’s van deze match. Zichtbaar voor clubleden en supporters.</p>
     <div className="knoppen">
       <button type="button" className="knop" disabled={bezig || !(lid?.status === "actief" || supporter?.actief)} onClick={() => invoer.current?.click()}>Foto’s / video’s toevoegen</button>
       <button type="button" className="knop licht klein" disabled={bezig || laden} onClick={() => { setFout(""); void laad(); }}>Vernieuwen</button>
@@ -82,6 +88,7 @@ function Album({ matchKey }: { matchKey: string }) {
     {!laden && !fout && beelden.length === 0 && <p className="sfeer-leeg">Nog geen sfeerbeelden. Voeg de eerste foto of video toe.</p>}
     <div className="sfeer-grid">{beelden.map((beeld) => <article key={beeld.path} className="sfeer-item">
       {beeld.video ? <video src={beeld.url} controls playsInline preload="none" onError={(e) => { e.currentTarget.title = "Kan deze video niet afspelen? Gebruik Openen."; }} /> : <Foto beeld={beeld} />}
+      <p className="klein" style={{ margin: "8px 0 4px" }}>Geüpload door <strong>{beeld.uploaderNaam ?? "Onbekende uploader"}</strong></p>
       <div className="sfeer-meta"><span>{beeld.createdAt ? new Date(beeld.createdAt).toLocaleDateString("nl-BE") : ""}</span><a href={beeld.url} target="_blank" rel="noreferrer">Openen</a></div>
       {(isAdmin || beeld.eigenaar === session?.user.id) && (verwijderen === beeld.path ? <div className="sfeer-wissen"><p>Dit beeld verwijderen?</p><button className="knop klein" disabled={bezig} onClick={() => void wis(beeld.path)}>Verwijderen</button> <button className="knop licht klein" disabled={bezig} onClick={() => setVerwijderen(null)}>Annuleren</button></div> : <button className="knop licht klein" disabled={bezig} onClick={() => setVerwijderen(beeld.path)}>Verwijderen</button>)}
     </article>)}</div>

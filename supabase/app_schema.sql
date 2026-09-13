@@ -1595,3 +1595,17 @@ create or replace view public.match_vote_points as
 create or replace view public.match_vote_counts as
  select match_key,count(*)::int as stemmers from match_votes
  where is_actief() or is_supporter_account() group by match_key;
+
+
+-- Uploadernamen voor sfeerbeelden, zonder contactgegevens.
+create or replace function public.sfeerbeeld_uploaders(p_ids uuid[]) returns table(user_id uuid,naam text)
+language sql stable security definer set search_path=public as $$
+ select m.user_id,m.naam from members m
+ where m.user_id=any(p_ids) and (is_actief() or is_supporter_account())
+ union all
+ select s.user_id,s.naam from supporter_profiles s
+ where s.user_id=any(p_ids) and (is_actief() or is_supporter_account())
+ and not exists(select 1 from members m where m.user_id=s.user_id);
+$$;
+revoke all on function public.sfeerbeeld_uploaders(uuid[]) from public,anon;
+grant execute on function public.sfeerbeeld_uploaders(uuid[]) to authenticated;

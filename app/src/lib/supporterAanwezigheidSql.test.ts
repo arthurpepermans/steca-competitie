@@ -74,3 +74,13 @@ it('bezoekers zonder account kunnen geen supporterantwoorden lezen of plaatsen',
  await expect(db.exec('select * from supporter_aanwezigheden()')).rejects.toThrow(/permission denied/);
  await expect(db.exec("select zet_supporter_aanwezigheid('komend','aanwezig')")).rejects.toThrow(/permission denied/);
 });
+
+it('toont uploadernamen van spelers en supporters zonder contactgegevens',async()=>{
+ const result=await db.query('select * from sfeerbeeld_uploaders($1)',[[speler,supporter,ander]]);
+ expect(result.rows).toEqual(expect.arrayContaining([{user_id:speler,naam:'Speler'},{user_id:supporter,naam:'Supporter A'},{user_id:ander,naam:'Supporter B'}]));
+ expect(result.rows).toHaveLength(3);
+ await db.exec("reset role;update supporter_profiles set actief=false;set role authenticated;");
+ expect((await db.query('select * from sfeerbeeld_uploaders($1)',[[speler]])).rows).toEqual([]);
+ await db.exec('reset role;set role anon');
+ await expect(db.query('select * from sfeerbeeld_uploaders($1)',[[speler]])).rejects.toThrow(/permission denied/);
+});
