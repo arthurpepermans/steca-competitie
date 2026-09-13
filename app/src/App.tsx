@@ -1,4 +1,4 @@
-import {SupporterKlassement} from "./components/SupporterKlassement";
+import {SupporterKlassement,SupporterDetail} from "./components/SupporterKlassement";
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, rechten, useAuth } from "./lib/auth";
 import { configOk } from "./lib/supabase";
@@ -59,6 +59,7 @@ function Poort() {
         <Route path="/match/:key" element={<MatchVerslag />} />
         <Route path="/meldingen" element={<Meldingen />} />
         <Route path="/kalender" element={<Kalender />} />
+        <Route path="/supporter-profiel/:id" element={<SupporterDetail />} />
         <Route path="/supporter-klassement" element={<SupporterKlassement />} />
         <Route path="/klassement" element={<Klassement />} />
         <Route path="/ploegen" element={<Ploegen />} />
