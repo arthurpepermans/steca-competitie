@@ -6,6 +6,7 @@
 # worden na 7 dagen zonder gebruik gepauzeerd) en committeert de job maandelijks docs/LAATSTE_SYNC.md,
 # want GitHub schakelt geplande workflows uit na 60 dagen zonder commits in de repository.
 name: sync-competition
+run-name: Scrape ${{ inputs.request_id || github.event_name }}
 
 on:
   schedule:
@@ -14,6 +15,14 @@ on:
     - cron: "0 8 * * 1"    # maandag 09:00 Brussel (zomertijd 10:00)
   workflow_dispatch:
     inputs:
+      fresh:
+        description: "Alle pagina's opnieuw ophalen"
+        type: boolean
+        default: false
+      request_id:
+        description: "Aanvraag vanuit de clubapp"
+        type: string
+        default: ""
       dry_run:
         description: "Alleen tonen wat zou wijzigen (niets schrijven)"
         type: boolean
@@ -52,7 +61,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SYNC_CONTACT: ${{ secrets.SYNC_CONTACT }}
-        run: sync-competition ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: sync-competition ${{ inputs.dry_run && '--dry-run' || '' }} ${{ inputs.fresh && '--no-cache' || '' }}
 
       - name: HTML bewaren als de parser faalde (site gewijzigd)
         if: always()

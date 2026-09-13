@@ -1,3 +1,4 @@
+import { CompetitieBeheer } from "../components/CompetitieBeheer";
 import { SpelerBadges } from "../components/SpelerBadges";
 import { InstallatieHulp } from "../components/InstallatieHulp";
 import { SpelerStatistieken } from "../components/SpelerStatistieken";
@@ -68,6 +69,7 @@ export function Profiel() {
       {!onboarding && lid.functie !== "supporter" && <SpelerBadges memberId={lid.id} />}
       {!onboarding && lid.speelt && <SpelerStatistieken memberId={lid.id} />}
       {!onboarding && r.isAdmin && <LichtkrantBeheer />}
+      {!onboarding && r.isAdmin && <CompetitieBeheer />}
       {!onboarding && (
         <>
           <div className="kaart">

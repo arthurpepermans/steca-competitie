@@ -1352,3 +1352,40 @@ begin
 end $$;
 revoke all on function public.bewaar_badgevolgorde(text[]) from public,anon;
 grant execute on function public.bewaar_badgevolgorde(text[]) to authenticated;
+
+-- Handmatige competitie-update: alleen de server mag aanvragen vastleggen.
+create table if not exists public.scrape_control (
+  id boolean primary key default true check (id),
+  request_id uuid,
+  requested_at timestamptz,
+  requested_by uuid references public.members(id) on delete set null,
+  status text not null default 'idle' check (status in ('idle','queued','in_progress','success','failure')),
+  run_id bigint,
+  fout text
+);
+insert into public.scrape_control(id) values (true) on conflict do nothing;
+alter table public.scrape_control enable row level security;
+revoke all on public.scrape_control from anon, authenticated;
+grant all on public.scrape_control to service_role;
+
+-- De rijvergrendeling voorkomt twee gelijktijdige aanvragen door verschillende admins.
+create or replace function public.claim_competition_sync(p_member uuid)
+returns uuid language plpgsql security definer set search_path = public as $$
+declare c public.scrape_control; aanvraag uuid := gen_random_uuid();
+begin
+  if not exists (select 1 from public.members where id=p_member and is_admin and status='actief') then
+    raise exception 'Alleen actieve admins kunnen wedstrijdgegevens vernieuwen.';
+  end if;
+  select * into c from public.scrape_control where id=true for update;
+  if c.status in ('queued','in_progress') then
+    raise exception 'Er loopt al een update. Wacht tot die klaar is.';
+  end if;
+  if c.requested_at > now() - interval '5 minutes' then
+    raise exception 'Wacht vijf minuten tussen twee aanvragen.';
+  end if;
+  update public.scrape_control set request_id=aanvraag, requested_at=now(), requested_by=p_member,
+    status='queued', run_id=null, fout=null where id=true;
+  return aanvraag;
+end $$;
+revoke all on function public.claim_competition_sync(uuid) from public, anon, authenticated;
+grant execute on function public.claim_competition_sync(uuid) to service_role;

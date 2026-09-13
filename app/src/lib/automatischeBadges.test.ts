@@ -17,7 +17,7 @@ beforeAll(async()=>{
  create function my_member_id() returns uuid language sql as $$select nullif(current_setting('test.lid',true),'')::uuid$$;
  create function is_actief() returns bool language sql as $$select my_member_id() is not null$$;`);
  const schema=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');
- await db.exec(schema.slice(schema.indexOf('-- Automatische badges:')).split('-- Alleen test: handmatige')[0]);
+ await db.exec(schema.slice(schema.indexOf('-- Automatische badges:')).split('-- Alleen test: handmatige')[0].split('-- Handmatige competitie-update:')[0]);
 },30000);
 afterAll(async()=>{await db?.close();});
 beforeEach(async()=>{
