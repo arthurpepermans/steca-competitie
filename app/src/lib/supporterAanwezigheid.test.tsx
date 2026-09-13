@@ -17,7 +17,10 @@ it("houdt supporters buiten de spelersaantallen en toont hun eigen keuze apart",
  const [ploeg,supporters]=html.split('<section class="supporter-aanwezigheid"');
  expect(ploeg).toContain("Aanwezig: 1 · Afwezig: 0 · Onzeker: 0 · nog niets: 1");
  expect(ploeg).not.toContain('aria-pressed=');
- expect(supporters).toContain("Aanwezig: 1 · Afwezig: 0 · Onzeker: 1");
+ expect(supporters).toContain("Aanwezig: 1");
+ expect(supporters).not.toContain("Afwezig:");
+ expect(supporters).not.toContain("Onzeker:");
+ expect(supporters).toContain("Op deze ultras kunnen we rekenen.");
  expect(supporters).toContain("Je staat als supporter op aanwezig.");
  expect(supporters).toContain('aria-pressed="true"');
  expect(html).not.toContain("Aanwezigheden aanpassen");
