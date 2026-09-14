@@ -29,7 +29,7 @@ beforeAll(async()=>{
  insert into supporter_profiles values('${supporter}','Supporter A',true),('${ander}','Supporter B',true);
  insert into members values('${speler}','${speler}','Speler','actief',true);
  insert into matches values('komend',152,99,'gepland',current_date+7,'15:00'),('voorbij',152,99,'gespeeld',current_date-1,'15:00'),('ander',98,99,'gepland',current_date+7,'15:00');`);
- const schema=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');
+ const schema=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8').split('-- Ploegscheiding:')[0];
  await db.exec('-- Supporteraanwezigheid:'+schema.split('-- Supporteraanwezigheid:')[1]);
  const stem=schema.slice(schema.lastIndexOf('create or replace function stem_geldig(')).split('$$;')[0]+'$$;';
  await db.exec(stem);

@@ -49,14 +49,14 @@ export function MatchVerslag() {
   </>;
 }
 
-export function VerslagInvoer({ match, verslag, spelers, klaar }: { match: Match; verslag?: Verslag; spelers: {id: string; naam: string}[]; klaar: () => Promise<void> }) {
+export function VerslagInvoer({ match, verslag, spelers, klaar, bewaar }: { match: Match; verslag?: Verslag; spelers: {id: string; naam: string}[]; klaar: () => Promise<void>; bewaar?: (thuis:number,uit:number,momenten:Moment[])=>Promise<void> }) {
   const [thuis, setThuis] = useState(verslag?.thuis_score ?? match.thuis_score ?? 0);
   const [uit, setUit] = useState(verslag?.uit_score ?? match.uit_score ?? 0);
   const [momenten, setMomenten] = useState<Moment[]>(verslag?.momenten ?? []);
   const [fout, setFout] = useState('');
   const [bezig, setBezig] = useState(false);
   function wijzig(i: number, v: Partial<Moment>) { setMomenten(ms => ms.map((m, n) => n === i ? { ...m, ...v } : m)); }
-  async function opslaan(e: FormEvent) { e.preventDefault(); setBezig(true); setFout(''); try { await bewaarVerslag(match.match_key, thuis, uit, momenten.map(m => ({...m,minuut:null})), verslag?.updated_at ?? null); await klaar(); } catch(e) { setFout(foutTekst(e)); } finally { setBezig(false); } }
+  async function opslaan(e: FormEvent) { e.preventDefault(); setBezig(true); setFout(''); try { if(bewaar) await bewaar(thuis,uit,momenten.map(m=>({...m,minuut:null}))); else await bewaarVerslag(match.match_key, thuis, uit, momenten.map(m => ({...m,minuut:null})), verslag?.updated_at ?? null); await klaar(); } catch(e) { setFout(foutTekst(e)); } finally { setBezig(false); } }
   return <form onSubmit={opslaan} className="verslag-invoer"><Fout tekst={fout} /><fieldset disabled={bezig}><legend>Uitslag</legend><div className="verslag-scoreinvoer"><label>{match.thuis}<input aria-label="Thuisscore" type="number" min="0" max="99" required value={thuis} onChange={e => setThuis(Number(e.target.value))} /></label><label>{match.uit}<input aria-label="Uitscore" type="number" min="0" max="99" required value={uit} onChange={e => setUit(Number(e.target.value))} /></label></div>
     <p className="klein zacht">De stemmelding vertrekt pas vanaf 80 minuten na aftrap. Je mag de uitslag eerder invoeren.</p>
     <p className="klein zacht">Twee gele kaarten voor dezelfde speler geven automatisch één rode kaart en uitsluitend één bak bier boete. Goals, assists en kaarten tellen automatisch mee in de statistieken. Iedereen in de basis en op de bank telt als gespeeld; bij nul tegengoals krijgen zij een clean sheet.</p>

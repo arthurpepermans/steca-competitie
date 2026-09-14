@@ -1,0 +1,22 @@
+name: Twizzit vrouwen bijwerken
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: twizzit-vrouwen
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 truststore tzdata
+      - run: python scripts/run_vrouwen_sync.py
+        env:
+          SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          TWIZZIT_WORKER_TOKEN: ${{ secrets.TWIZZIT_WORKER_TOKEN }}

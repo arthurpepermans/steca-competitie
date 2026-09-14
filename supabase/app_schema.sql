@@ -1674,3 +1674,537 @@ begin
 end $$;
 revoke all on function admin_supporter_profiel(uuid) from public,anon;
 grant execute on function admin_supporter_profiel(uuid) to authenticated;
+
+-- Ploegscheiding: gedeelde accounts, afzonderlijke vrouwenrollen en gegevens.
+-- Dit blok is aanvullend. Bestaande mannen-RPCs en notificatiejobs blijven intact.
+create table if not exists public.club_members (
+ id uuid primary key default gen_random_uuid(), club_id text not null check(club_id='vrouwen'),
+ user_id uuid references auth.users(id) on delete set null, naam text not null check(length(naam) between 1 and 100),
+ functie text not null default 'supporter' check(functie in ('speler','spelercoach','coach','verantwoordelijke','supporter')),
+ status text not null default 'actief' check(status in ('actief','wacht_op_goedkeuring','inactief')),
+ is_admin boolean not null default false, speelt boolean not null default false,
+ unique(club_id,user_id), unique(club_id,id)
+);
+create table if not exists public.club_role_requests (
+ club_id text not null check(club_id='vrouwen'), user_id uuid references auth.users(id) on delete cascade,
+ functie text not null check(functie in ('speler','spelercoach','coach','verantwoordelijke')),
+ primary key(club_id,user_id)
+);
+create or replace function public.club_role(p_club text) returns text language sql stable security definer set search_path=public as $$
+ select case when p_club='vrouwen' and auth.uid() is not null then coalesce((select case when status='actief' then functie else 'geblokkeerd' end from club_members where club_id=p_club and user_id=auth.uid()),'supporter') else 'geblokkeerd' end
+$$;
+create or replace function public.club_admin(p_club text) returns boolean language sql stable security definer set search_path=public as $$
+ select p_club='vrouwen' and public.is_admin()
+$$;
+create or replace function public.club_staf(p_club text) returns boolean language sql stable security definer set search_path=public as $$
+ select club_admin(p_club) or club_role(p_club) in ('coach','spelercoach','verantwoordelijke')
+$$;
+create table if not exists public.club_matches (
+ club_id text not null check(club_id='vrouwen'), match_key text not null, seizoen text not null,
+ aftrap timestamptz not null, thuis text not null, uit text not null, locaties jsonb not null default '[]',
+ reeks text not null default '', thuis_score integer check(thuis_score between 0 and 99), uit_score integer check(uit_score between 0 and 99),
+ score_at timestamptz, is_test boolean not null default false, primary key(club_id,match_key),
+ check((thuis_score is null)=(uit_score is null))
+);
+create table if not exists public.club_attendance (
+ club_id text not null, match_key text not null, user_id uuid references auth.users(id) on delete cascade,
+ status text not null check(status in ('aanwezig','afwezig','onzeker')), primary key(club_id,match_key,user_id),
+ foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade
+);
+create table if not exists public.club_lineups (
+ club_id text not null, match_key text not null, keuze jsonb not null default '{}', slotjes jsonb not null default '[]',
+ versie integer not null default 1, primary key(club_id,match_key),
+ foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade
+);
+create table if not exists public.club_reports (
+ club_id text not null, match_key text not null, statistieken jsonb not null default '[]',
+ verslag text not null default '', primary key(club_id,match_key),
+ foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade
+);
+create table if not exists public.club_predictions (
+ club_id text not null, match_key text not null, user_id uuid references auth.users(id) on delete cascade,
+ thuis integer not null check(thuis between 0 and 99), uit integer not null check(uit between 0 and 99),
+ primary key(club_id,match_key,user_id), foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade
+);
+create table if not exists public.club_dream (
+ club_id text not null check(club_id='vrouwen'), user_id uuid references auth.users(id) on delete cascade,
+ keuze jsonb not null default '{}', versie integer not null default 1, primary key(club_id,user_id)
+);
+create table if not exists public.club_votes (
+ club_id text not null, match_key text not null, user_id uuid references auth.users(id) on delete cascade,
+ eerste uuid not null, tweede uuid not null, derde uuid not null,
+ primary key(club_id,match_key,user_id), foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade,
+ foreign key(club_id,eerste) references club_members(club_id,id),
+ foreign key(club_id,tweede) references club_members(club_id,id), foreign key(club_id,derde) references club_members(club_id,id),
+ check(eerste<>tweede and eerste<>derde and tweede<>derde)
+);
+create table if not exists public.club_laundry (
+ club_id text not null, match_key text not null, member_id uuid not null,
+ primary key(club_id,match_key), foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade,
+ foreign key(club_id,member_id) references club_members(club_id,id)
+);
+-- Geen directe mutaties. Alle schrijfacties lopen door gecontroleerde RPCs.
+do $$ declare t text; begin
+ foreach t in array array['club_members','club_role_requests','club_matches','club_attendance','club_lineups','club_reports','club_predictions','club_dream','club_votes','club_laundry'] loop
+ execute format('alter table public.%I enable row level security',t);
+ execute format('revoke all on public.%I from anon,authenticated',t);
+ execute format('grant all on public.%I to service_role',t);
+ end loop;
+end $$;
+create or replace function public.club_naam(p_user uuid) returns text language sql stable security definer set search_path=public as $$
+ select coalesce((select naam from members where user_id=p_user),(select naam from supporter_profiles where user_id=p_user),'Clublid')
+$$;
+-- Aanwezigheid van ingeschreven speelsters die nog geen login hebben.
+create table if not exists public.club_member_attendance (
+ club_id text not null,match_key text not null,member_id uuid not null,
+ status text not null check(status in ('aanwezig','afwezig','onzeker')),
+ primary key(club_id,match_key,member_id),
+ foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade,
+ foreign key(club_id,member_id) references club_members(club_id,id) on delete cascade
+);
+alter table club_member_attendance enable row level security;
+revoke all on club_member_attendance from public,anon,authenticated;
+grant all on club_member_attendance to service_role;
+create or replace function public.club_aanwezig_lid(p_club text,p_match text,p_lid uuid,p_status text) returns void
+language plpgsql security definer set search_path=public as $$
+declare u uuid;
+begin
+ if not club_staf(p_club) then raise exception 'Alleen de staf kan aanwezigheden aanpassen.';end if;
+ if not exists(select 1 from club_matches where club_id=p_club and match_key=p_match ) then raise exception 'Wedstrijd niet gevonden.';end if;
+ select user_id into u from club_members where club_id=p_club and id=p_lid and speelt and status='actief';
+ if not found then raise exception 'Geen actieve speelster.';end if;
+ if u is not null then
+ insert into club_attendance values(p_club,p_match,u,p_status) on conflict(club_id,match_key,user_id) do update set status=excluded.status;
+ delete from club_member_attendance where club_id=p_club and match_key=p_match and member_id=p_lid;
+ else
+ insert into club_member_attendance values(p_club,p_match,p_lid,p_status) on conflict(club_id,match_key,member_id) do update set status=excluded.status;
+ end if;
+end $$;
+create or replace function public.club_data(p_club text) returns jsonb language plpgsql stable security definer set search_path=public as $$
+begin
+ if club_role(p_club)='geblokkeerd' then raise exception 'Log in met een actief account.';end if;
+ return jsonb_build_object(
+ 'rol',club_role(p_club),'admin',club_admin(p_club),'staf',club_staf(p_club),'user_id',auth.uid(),
+ 'leden',coalesce((select jsonb_agg(to_jsonb(m)) from club_members m where club_id=p_club and (status='actief' or club_admin(p_club))),'[]'),
+ 'aanvragen',case when club_admin(p_club) then coalesce((select jsonb_agg(jsonb_build_object('user_id',r.user_id,'naam',club_naam(r.user_id),'functie',r.functie)) from club_role_requests r where r.club_id=p_club),'[]') else '[]'::jsonb end,
+ 'matches',coalesce((select jsonb_agg(to_jsonb(m) order by aftrap) from club_matches m where club_id=p_club),'[]'),
+ 'aanwezigheden',coalesce((select jsonb_agg(v) from (
+ select a.match_key,a.user_id,m.id as member_id,coalesce(m.naam,club_naam(a.user_id)) as naam,a.status,coalesce(m.status='actief' and m.speelt,false) as speler from club_attendance a left join club_members m on m.club_id=a.club_id and m.user_id=a.user_id where a.club_id=p_club
+ union all select a.match_key,coalesce(m.user_id,m.id),m.id,m.naam,a.status,m.status='actief' and m.speelt from club_member_attendance a join club_members m on m.id=a.member_id and m.club_id=a.club_id where a.club_id=p_club and not exists(select 1 from club_attendance c where c.club_id=a.club_id and c.match_key=a.match_key and c.user_id=m.user_id)
+ ) v),'[]'),
+ 'opstellingen',coalesce((select jsonb_agg(to_jsonb(l)) from club_lineups l where club_id=p_club),'[]'),
+ 'verslagen',coalesce((select jsonb_agg(to_jsonb(r)) from club_reports r where club_id=p_club),'[]'),
+ 'pronos',coalesce((select jsonb_agg(to_jsonb(p)) from club_predictions p join club_matches m using(club_id,match_key) where p.club_id=p_club and (p.user_id=auth.uid() or m.aftrap<=now())),'[]'),
+ 'dream',(select to_jsonb(d) from club_dream d where club_id=p_club and user_id=auth.uid()),
+ 'stemmen',coalesce((select jsonb_agg(to_jsonb(v)) from club_votes v where club_id=p_club and user_id=auth.uid()),'[]'),
+ 'stempunten',coalesce((select jsonb_agg(to_jsonb(r)) from (select v.match_key,k.member_id,sum(k.punten)::int punten,count(*)::int stemmen from club_votes v join club_matches m on m.club_id=v.club_id and m.match_key=v.match_key cross join lateral (values(v.eerste,3),(v.tweede,2),(v.derde,1)) k(member_id,punten) where v.club_id=p_club and m.thuis_score is not null and m.aftrap+interval '80 minutes'<=now() group by v.match_key,k.member_id) r),'[]'),
+ 'wasmand',coalesce((select jsonb_agg(to_jsonb(l)) from club_laundry l where club_id=p_club),'[]'),
+ 'pronoleden',coalesce((select jsonb_agg(jsonb_build_object('user_id',u.id,'naam',club_naam(u.id))) from auth.users u where exists(select 1 from members m where m.user_id=u.id and m.status='actief') or exists(select 1 from supporter_profiles s where s.user_id=u.id and s.actief)),'[]')
+ );
+end $$;
+create or replace function public.club_vraag_rol(p_club text,p_functie text) returns void language plpgsql security definer set search_path=public as $$
+begin
+ if club_role(p_club)='geblokkeerd' then raise exception 'Log eerst in.';end if;
+ insert into club_role_requests values(p_club,auth.uid(),p_functie) on conflict(club_id,user_id) do update set functie=excluded.functie;
+end $$;
+create or replace function public.club_zet_lid(p_club text,p_user uuid,p_functie text,p_speelt boolean,p_admin boolean default false,p_status text default 'actief') returns void language plpgsql security definer set search_path=public as $$
+begin
+ if not club_admin(p_club) then raise exception 'Alleen een beheerder van deze ploeg.';end if;
+ perform pg_advisory_xact_lock(hashtextextended('clubbeheer-'||p_club,0));
+ if p_user=auth.uid() and p_status<>'actief' then raise exception 'Je kunt jezelf niet als beheerder uitschakelen.';end if;
+ if p_functie='supporter' and p_speelt then raise exception 'Een supporter kan niet opgesteld worden of beheerder zijn.';end if;
+ insert into club_members(club_id,user_id,naam,functie,speelt,is_admin,status) values(p_club,p_user,club_naam(p_user),p_functie,p_speelt,exists(select 1 from members where user_id=p_user and status='actief' and is_admin),p_status)
+ on conflict(club_id,user_id) do update set functie=excluded.functie,speelt=excluded.speelt,is_admin=excluded.is_admin,status=excluded.status;
+ delete from club_role_requests where club_id=p_club and user_id=p_user;
+end $$;
+create or replace function public.club_aanwezig(p_club text,p_match text,p_status text,p_user uuid default null) returns void language plpgsql security definer set search_path=public as $$
+declare u uuid:=coalesce(p_user,auth.uid());begin
+ if club_role(p_club)='geblokkeerd' or (u<>auth.uid() and not club_staf(p_club)) then raise exception 'Geen bevoegdheid voor deze aanwezigheid.';end if;
+ if not exists(select 1 from club_matches where club_id=p_club and match_key=p_match and aftrap>now()) then raise exception 'Alleen voor een komende match.';end if;
+ insert into club_attendance values(p_club,p_match,u,p_status) on conflict(club_id,match_key,user_id) do update set status=excluded.status;
+end $$;
+create or replace function public.club_controle_keuze(p_club text,p_keuze jsonb,p_match text default null) returns void language plpgsql security definer set search_path=public as $$
+declare k text; v text; gezien text[]:='{}';begin
+ if jsonb_typeof(p_keuze)<>'object' or length(p_keuze::text)>8000 then raise exception 'Ongeldige opstelling.';end if;
+ for k,v in select * from jsonb_each_text(p_keuze) loop
+ if k='__formatie' then if v is null or v not in ('2-2','3-1','1-2-1') then raise exception 'Onbekende formatie.';end if;continue;end if;
+ if k not in ('GK','LB','RB','LW','RW','BANK1','BANK2','BANK3','BANK4','BANK5') then raise exception 'Onbekende positie.';end if;
+ if v is null or v='' then continue;end if;
+ if v=any(gezien) then raise exception 'Iemand staat dubbel in de opstelling.';end if;gezien:=array_append(gezien,v);
+ if not exists(select 1 from club_members m where m.club_id=p_club and m.id::text=v and m.status='actief' and m.speelt and (p_match is null or exists(select 1 from club_attendance a where a.club_id=p_club and a.match_key=p_match and a.user_id=m.user_id and a.status='aanwezig') or exists(select 1 from club_member_attendance a where a.club_id=m.club_id and a.match_key=p_match and a.member_id=m.id and a.status='aanwezig' and not exists(select 1 from club_attendance c where c.club_id=a.club_id and c.match_key=a.match_key and c.user_id=m.user_id)))) then raise exception 'Alleen aanwezige speelsters van deze ploeg kunnen geselecteerd worden.';end if;
+ end loop;
+end $$;
+create or replace function public.club_bewaar_opstelling(p_club text,p_match text,p_keuze jsonb,p_slotjes jsonb,p_versie integer) returns integer language plpgsql security definer set search_path=public as $$
+declare v integer;begin
+ if not (coalesce(club_staf(p_club),false) or (p_club='vrouwen' and exists(select 1 from club_members where club_id=p_club and user_id=auth.uid() and status='actief' and speelt and functie<>'supporter'))) then raise exception 'Geen opstellingsrechten voor deze ploeg.';end if;
+ perform pg_advisory_xact_lock(hashtextextended(p_club||p_match,0));
+ select versie into v from club_lineups where club_id=p_club and match_key=p_match;
+ if coalesce(v,0)<>p_versie then raise exception 'De opstelling is ondertussen gewijzigd. Herlaad eerst.';end if;
+ if not exists(select 1 from club_matches where club_id=p_club and match_key=p_match and aftrap>now()) then raise exception 'Deze opstelling is afgesloten.';end if;
+ perform club_controle_keuze(p_club,p_keuze,p_match);
+ if jsonb_typeof(p_slotjes)<>'array' or jsonb_array_length(p_slotjes)>12 then raise exception 'Ongeldige slotjes.';end if;
+ insert into club_lineups values(p_club,p_match,p_keuze,p_slotjes,coalesce(v,0)+1) on conflict(club_id,match_key) do update set keuze=excluded.keuze,slotjes=excluded.slotjes,versie=excluded.versie returning versie into v;
+ return v;
+end $$;
+create or replace function public.club_bewaar_dream(p_club text,p_keuze jsonb,p_versie integer) returns integer language plpgsql security definer set search_path=public as $$
+declare v integer;begin
+ if club_role(p_club)='geblokkeerd' then raise exception 'Log eerst in.';end if;
+ perform pg_advisory_xact_lock(hashtextextended(p_club||auth.uid()::text,0));
+ select versie into v from club_dream where club_id=p_club and user_id=auth.uid();
+ if coalesce(v,0)<>p_versie then raise exception 'Je droomploeg is elders aangepast. Herlaad eerst.';end if;
+ perform club_controle_keuze(p_club,p_keuze);
+ insert into club_dream values(p_club,auth.uid(),p_keuze,coalesce(v,0)+1) on conflict(club_id,user_id) do update set keuze=excluded.keuze,versie=excluded.versie returning versie into v;return v;
+end $$;
+create or replace function public.club_bewaar_prono(p_club text,p_match text,p_thuis integer,p_uit integer) returns void language plpgsql security definer set search_path=public as $$
+begin
+ if club_role(p_club)='geblokkeerd' then raise exception 'Log eerst in.';end if;
+ if not exists(select 1 from club_matches where club_id=p_club and match_key=p_match and aftrap>now() and thuis_score is null) then raise exception 'Pronostieken zijn afgesloten.';end if;
+ insert into club_predictions values(p_club,p_match,auth.uid(),p_thuis,p_uit) on conflict(club_id,match_key,user_id) do update set thuis=excluded.thuis,uit=excluded.uit;
+end $$;
+create or replace function public.club_bewaar_verslag(p_club text,p_match text,p_thuis integer,p_uit integer,p_stats jsonb,p_verslag text) returns void language plpgsql security definer set search_path=public as $$
+declare r jsonb;k text;begin
+ if not club_staf(p_club) then raise exception 'Geen verslagrechten voor deze ploeg.';end if;
+ if jsonb_typeof(p_stats)<>'array' or jsonb_array_length(p_stats)>30 or length(p_verslag)>10000 then raise exception 'Ongeldig verslag.';end if;
+ for r in select * from jsonb_array_elements(p_stats) loop
+ if not exists(select 1 from club_members where club_id=p_club and id::text=r->>'id' and speelt and status='actief') then raise exception 'Onbekende speelster.';end if;
+ foreach k in array array['goals','assists','geel','rood'] loop
+ if coalesce((r->>k)::integer,0) not between 0 and (case when k='geel' then 2 when k='rood' then 1 else 30 end) then raise exception 'Ongeldige statistiek.';end if;
+ end loop;end loop;
+ update club_matches set thuis_score=p_thuis,uit_score=p_uit,score_at=coalesce(score_at,now()) where club_id=p_club and match_key=p_match and aftrap<=now();
+ if not found then raise exception 'Deze wedstrijd is nog niet begonnen.';end if;
+ insert into club_reports values(p_club,p_match,p_stats,p_verslag) on conflict(club_id,match_key) do update set statistieken=excluded.statistieken,verslag=excluded.verslag;
+end $$;
+create or replace function public.club_stem(p_club text,p_match text,p_eerste uuid,p_tweede uuid,p_derde uuid) returns void language plpgsql security definer set search_path=public as $$
+declare v uuid;begin
+ if not exists(select 1 from club_members m join club_attendance a on a.club_id=m.club_id and a.user_id=m.user_id where m.club_id=p_club and m.user_id=auth.uid() and m.status='actief' and m.speelt and a.match_key=p_match and a.status='aanwezig') then raise exception 'Alleen aanwezige speelsters kunnen stemmen.';end if;
+ if not exists(select 1 from club_matches where club_id=p_club and match_key=p_match and thuis_score is not null and now()>=aftrap+interval '80 minutes' and now()<aftrap+interval '24 hours') then raise exception 'Stemmen is nog niet geopend of al afgesloten.';end if;
+ foreach v in array array[p_eerste,p_tweede,p_derde] loop
+ if not exists(select 1 from club_members m join club_lineups l on l.club_id=m.club_id where m.club_id=p_club and m.id=v and m.user_id is distinct from auth.uid() and m.speelt and l.match_key=p_match and exists(select 1 from jsonb_each_text(l.keuze) kv where kv.value=v::text)) then raise exception 'Kies drie andere geselecteerde speelsters.';end if;end loop;
+ insert into club_votes values(p_club,p_match,auth.uid(),p_eerste,p_tweede,p_derde) on conflict(club_id,match_key,user_id) do update set eerste=excluded.eerste,tweede=excluded.tweede,derde=excluded.derde;
+end $$;
+create or replace function public.club_zet_wasmand(p_club text,p_match text,p_lid uuid) returns void language plpgsql security definer set search_path=public as $$
+begin
+ if not club_staf(p_club) then raise exception 'Geen bevoegdheid voor deze ploeg.';end if;
+ if not exists(select 1 from club_members where club_id=p_club and id=p_lid and status='actief' and functie<>'supporter') then raise exception 'Kies een clublid van deze ploeg.';end if;
+ insert into club_laundry values(p_club,p_match,p_lid) on conflict(club_id,match_key) do update set member_id=excluded.member_id;
+end $$;
+-- Alleen server-/SQL-toegang voor import. Een browser kan geen wedstrijden aanmaken.
+create or replace function public.club_import_matches(p_data jsonb) returns void language plpgsql security definer set search_path=public as $$
+declare m jsonb;begin
+ for m in select * from jsonb_array_elements(p_data->'wedstrijden') loop
+ insert into club_matches(club_id,match_key,seizoen,aftrap,thuis,uit,locaties,reeks,thuis_score,uit_score,score_at)
+ values('vrouwen','twizzit-'||(m->>'id'),p_data->>'seizoen',(m->>'aftrap')::timestamptz,m->>'thuis',m->>'uit',m->'locaties',m->>'reeks',(m->'score'->>0)::integer,(m->'score'->>1)::integer,case when m->'score'->>0 is not null then now() end)
+ on conflict(club_id,match_key) do update set aftrap=excluded.aftrap,locaties=excluded.locaties,reeks=excluded.reeks;
+ end loop;
+end $$;
+-- Nieuwe vrouwenaccounts zijn bij de mannen supporter. Zelfgekozen vrouwenrollen
+-- zijn uitsluitend aanvragen, nooit automatische beheer- of spelersrechten.
+create or replace function public.club_nieuw_account() returns trigger language plpgsql security definer set search_path=public as $$
+begin
+ if not exists(select 1 from club_members where club_id='vrouwen' and user_id=new.id and status='actief') and new.raw_user_meta_data->>'club'='vrouwen' and new.raw_user_meta_data->>'club_functie' in ('speler','spelercoach','coach','verantwoordelijke') then
+ insert into club_role_requests values('vrouwen',new.id,new.raw_user_meta_data->>'club_functie') on conflict do nothing;
+ end if;return new;
+end $$;
+drop trigger if exists on_club_user_created on auth.users;
+create trigger on_club_user_created after insert on auth.users for each row execute function club_nieuw_account();
+-- Sluit ook standaard PUBLIC-execute op security-definer helpers af.
+do $$ declare f record;begin
+ for f in select p.oid::regprocedure as naam from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname like 'club\_%' escape '\' loop
+ execute format('revoke all on function %s from public,anon,authenticated',f.naam);
+ execute format('grant execute on function %s to service_role',f.naam);
+ end loop;
+end $$;
+grant execute on function club_aanwezig_lid(text,text,uuid,text),club_data(text),club_vraag_rol(text,text),club_zet_lid(text,uuid,text,boolean,boolean,text),club_aanwezig(text,text,text,uuid),club_bewaar_opstelling(text,text,jsonb,jsonb,integer),club_bewaar_dream(text,jsonb,integer),club_bewaar_prono(text,text,integer,integer),club_bewaar_verslag(text,text,integer,integer,jsonb,text),club_stem(text,text,uuid,uuid,uuid),club_zet_wasmand(text,text,uuid) to authenticated;
+-- Einde ploegscheiding.
+-- Ploegregistratie: private e-mailkoppeling met vooraf ingeschreven speelsters.
+create table if not exists public.club_registration (
+ club_id text not null check(club_id='vrouwen'),
+ email text not null check(email=lower(trim(email)) and position('@' in email)>1),
+ member_id uuid not null,
+ primary key(club_id,email), unique(club_id,member_id),
+ foreign key(club_id,member_id) references club_members(club_id,id) on delete cascade
+);
+alter table public.club_registration enable row level security;
+revoke all on public.club_registration from public,anon,authenticated;
+grant all on public.club_registration to service_role;
+
+create or replace function public.club_koppel_registratie() returns trigger
+language plpgsql security definer set search_path=public as $$
+declare doel uuid;
+begin
+ if new.email_confirmed_at is null then return new; end if;
+ select member_id into doel from club_registration where club_id='vrouwen' and email=lower(trim(new.email));
+ if doel is null then return new; end if;
+ -- Een bestaande koppeling of handmatige blokkering nooit overschrijven.
+ if exists(select 1 from club_members where club_id='vrouwen' and user_id=new.id and id<>doel) then return new; end if;
+ update club_members set user_id=new.id where id=doel and club_id='vrouwen'
+   and status='actief' and (user_id is null or user_id=new.id);
+ if found then
+  delete from club_role_requests where club_id='vrouwen' and user_id=new.id;
+  insert into club_attendance(club_id,match_key,user_id,status)
+  select club_id,match_key,new.id,status from club_member_attendance where club_id='vrouwen' and member_id=doel
+  on conflict(club_id,match_key,user_id) do nothing;
+  delete from club_member_attendance where club_id='vrouwen' and member_id=doel;
+ end if;
+ return new;
+end $$;
+drop trigger if exists on_club_registration on auth.users;
+create trigger on_club_registration after insert or update of email,email_confirmed_at on auth.users
+for each row execute function club_koppel_registratie();
+
+create or replace function public.club_import_members(p_leden jsonb) returns integer
+language plpgsql security definer set search_path=public as $$
+declare r jsonb; mail text; doel uuid; gebruiker uuid; aantal integer:=0;
+begin
+ if jsonb_typeof(p_leden)<>'array' then raise exception 'Verwacht een ledenlijst.'; end if;
+ for r in select value from jsonb_array_elements(p_leden) loop
+ mail:=lower(trim(r->>'email'));
+ if mail is null or position('@' in mail)<2 or coalesce(r->>'naam','')='' or coalesce(r->>'functie','') not in ('speler','coach','verantwoordelijke') then
+ raise exception 'Ongeldige inschrijving.'; end if;
+ select member_id into doel from club_registration where club_id='vrouwen' and email=mail;
+ -- Een herhaalde import verandert geen handmatig ingestelde rechten.
+ if doel is not null then continue; end if;
+ select id into gebruiker from auth.users where lower(trim(email))=mail and email_confirmed_at is not null;
+ if gebruiker is not null then select id into doel from club_members where club_id='vrouwen' and user_id=gebruiker; end if;
+ if doel is null then
+ insert into club_members(club_id,user_id,naam,functie,speelt) values('vrouwen',gebruiker,r->>'naam',r->>'functie',r->>'functie'='speler') returning id into doel;
+ end if;
+ insert into club_registration(club_id,email,member_id) values('vrouwen',mail,doel);
+ if gebruiker is not null then delete from club_role_requests where club_id='vrouwen' and user_id=gebruiker; end if;
+ aantal:=aantal+1;
+ end loop;
+ return aantal;
+end $$;
+revoke all on function public.club_import_members(jsonb),public.club_koppel_registratie() from public,anon,authenticated;
+grant execute on function public.club_import_members(jsonb),public.club_koppel_registratie() to service_role;
+-- Einde ploegregistratie.
+-- Vrouwenprofielbeheer, ook voor ingeschreven leden zonder account.
+create or replace function public.club_wijzig_lid(p_club text,p_lid uuid,p_functie text,p_speelt boolean) returns void
+language plpgsql security definer set search_path=public as $$
+begin
+ if not club_admin(p_club) then raise exception 'Alleen een ploegbeheerder kan functies aanpassen.'; end if;
+ if p_functie is null or p_functie not in ('speler','spelercoach','coach','verantwoordelijke','supporter') or p_speelt is null then raise exception 'Ongeldige functie.'; end if;
+ if exists(select 1 from club_members where club_id=p_club and id=p_lid and is_admin) and p_functie='supporter' then raise exception 'Verwijder eerst de beheerdersrol.'; end if;
+ update club_members set functie=p_functie,speelt=(p_functie<>'supporter' and p_speelt) where club_id=p_club and id=p_lid;
+ if not found then raise exception 'Lid niet gevonden.'; end if;
+end $$;
+revoke all on function public.club_wijzig_lid(text,uuid,text,boolean) from public,anon;
+grant execute on function public.club_wijzig_lid(text,uuid,text,boolean) to authenticated,service_role;
+-- Einde vrouwenprofielbeheer.
+
+
+-- Ploegmeldingen: aparte voorkeuren en unieke jobs, nooit de mannenwachtrij.
+create table if not exists public.club_push_preferences (
+ club_id text not null check(club_id='vrouwen'),user_id uuid references auth.users(id) on delete cascade,
+ enabled boolean not null default false,primary key(club_id,user_id)
+);
+create table if not exists public.club_push_jobs (
+ id uuid primary key default gen_random_uuid(),club_id text not null,match_key text not null,user_id uuid references auth.users(id) on delete cascade,
+ soort text not null check(soort in ('aanwezig72','aanwezig48','stemmen','stemherinnering','wasmand')),
+ sent_at timestamptz,primary_attempt_at timestamptz,unique(club_id,match_key,user_id,soort),
+ foreign key(club_id,match_key) references club_matches(club_id,match_key) on delete cascade
+);
+create table if not exists public.club_push_subscriptions (
+ user_id uuid references auth.users(id) on delete cascade,endpoint text primary key,subscription jsonb not null
+);
+create table if not exists public.club_push_config (
+ id integer primary key check(id=1),enabled boolean not null default false,allowed_user uuid references auth.users(id)
+);
+insert into club_push_config(id) values(1) on conflict do nothing;
+do $$ declare t text;begin
+ foreach t in array array['club_push_preferences','club_push_jobs','club_push_subscriptions','club_push_config'] loop
+ execute format('alter table public.%I enable row level security',t);
+ execute format('revoke all on public.%I from anon,authenticated',t);
+ execute format('grant all on public.%I to service_role',t);
+ end loop;end $$;
+create or replace function public.club_push_planning(p_nu timestamptz default now()) returns table(club_id text,match_key text,user_id uuid,soort text,tegenstander text,thuis_score integer,uit_score integer,steca_thuis boolean)
+language sql stable security definer set search_path=public as $$
+ with basis as (
+ select m.club_id,m.match_key,l.user_id,m.aftrap,m.score_at,m.thuis_score,m.uit_score,m.thuis='STECA VROUWEN' as eigen_thuis,
+ case when m.thuis='STECA VROUWEN' then m.uit else m.thuis end as tegenstander,l.speelt,
+ exists(select 1 from club_attendance a where a.club_id=m.club_id and a.match_key=m.match_key and a.user_id=l.user_id) as antwoord,
+ exists(select 1 from club_attendance a where a.club_id=m.club_id and a.match_key=m.match_key and a.user_id=l.user_id and a.status='aanwezig') as aanwezig,
+ exists(select 1 from club_votes v where v.club_id=m.club_id and v.match_key=m.match_key and v.user_id=l.user_id) as gestemd,
+ exists(select 1 from club_laundry w where w.club_id=m.club_id and w.match_key=m.match_key and w.member_id=l.id) as wasmand,
+ (select j.sent_at from club_push_jobs j where j.club_id=m.club_id and j.match_key=m.match_key and j.user_id=l.user_id and j.soort='stemmen') as eerste
+ from club_matches m join club_members l on l.club_id=m.club_id and l.status='actief' and l.functie<>'supporter'
+ join club_push_preferences p on p.club_id=l.club_id and p.user_id=l.user_id and p.enabled
+ where m.aftrap>p_nu-interval '24 hours' and m.aftrap<=p_nu+interval '72 hours'
+ ), kandidaten as (
+ select b.*,s.soort from basis b cross join lateral (
+ select 'aanwezig72'::text soort where b.speelt and not b.antwoord and p_nu>=b.aftrap-interval '72 hours' and p_nu<b.aftrap-interval '48 hours'
+ union all select 'aanwezig48' where b.speelt and not b.antwoord and p_nu>=b.aftrap-interval '48 hours' and p_nu<b.aftrap
+ union all select 'wasmand' where b.wasmand and p_nu>=b.aftrap+interval '100 minutes'
+ union all select 'stemmen' where b.speelt and b.aanwezig and not b.gestemd and b.thuis_score is not null and b.score_at is not null and p_nu>=greatest(b.aftrap+interval '80 minutes',b.score_at) and b.eerste is null
+ union all select 'stemherinnering' where b.speelt and b.aanwezig and not b.gestemd and p_nu>=b.eerste+interval '3 hours'
+ ) s
+ ) select k.club_id,k.match_key,k.user_id,k.soort,k.tegenstander,k.thuis_score,k.uit_score,k.eigen_thuis from kandidaten k
+ where not exists(select 1 from club_push_jobs j where j.club_id=k.club_id and j.match_key=k.match_key and j.user_id=k.user_id and j.soort=k.soort and j.sent_at is not null)
+$$;
+revoke all on function club_push_planning(timestamptz) from public,anon,authenticated;
+grant execute on function club_push_planning(timestamptz) to service_role;
+-- Einde ploegmeldingen.
+
+
+create or replace function public.club_claim_push(p_id uuid) returns boolean language plpgsql security definer set search_path=public as $$
+begin
+ update club_push_jobs set primary_attempt_at=now() where id=p_id and sent_at is null and (primary_attempt_at is null or primary_attempt_at<now()-interval '5 minutes');return found;
+end $$;
+revoke all on function club_claim_push(uuid) from public,anon,authenticated;
+grant execute on function club_claim_push(uuid) to service_role;
+
+-- Twizzit: afgeschermde worker, openbare broncache en adminaanvragen.
+create table if not exists public.vrouwen_sync (
+ id boolean primary key default true check(id), token_hash text not null,
+ data jsonb, laatste_succes timestamptz, aangevraagd timestamptz,
+ gestart timestamptz, afgerond timestamptz, run_id uuid, fout text
+);
+alter table vrouwen_sync enable row level security;
+revoke all on vrouwen_sync from anon,authenticated;
+create or replace function public.vrouwen_bron() returns jsonb language sql stable security definer set search_path=public as $$ select data from vrouwen_sync where id $$;
+grant execute on function vrouwen_bron() to anon,authenticated;
+create or replace function public.club_twizzit(p_club text,p_start boolean default false) returns jsonb language plpgsql security definer set search_path=public as $$
+declare r vrouwen_sync;begin
+ if p_club<>'vrouwen' or not club_admin(p_club) then raise exception 'Alleen een vrouwenadmin kan Twizzit bijwerken.';end if;
+ select * into r from vrouwen_sync where id for update;
+ if p_start and (r.aangevraagd is null or r.afgerond>=r.aangevraagd) and (r.gestart is null or r.afgerond>=r.gestart or r.gestart<now()-interval '10 minutes') then
+ update vrouwen_sync set aangevraagd=now(),fout=null where id returning * into r;
+ end if;
+ return jsonb_build_object('laatste_succes',r.laatste_succes,'wacht',r.aangevraagd is not null and (r.afgerond is null or r.aangevraagd>r.afgerond),'bezig',r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes','fout',r.fout);
+end $$;
+revoke all on function club_twizzit(text,boolean) from public;
+grant execute on function club_twizzit(text,boolean) to authenticated;
+create or replace function public.vrouwen_sync_worker(p_token text,p_actie text,p_id uuid default null,p_data jsonb default null) returns jsonb language plpgsql security definer set search_path=public,extensions as $$
+declare r vrouwen_sync; lokaal timestamp:=now() at time zone 'Europe/Brussels'; due boolean; m jsonb;begin
+ select * into r from vrouwen_sync where id for update;
+ if r.token_hash is null or encode(digest(p_token,'sha256'),'hex') is distinct from r.token_hash then raise exception 'Geen toegang.';end if;
+ if p_actie='claim' then
+ if r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes' then return null;end if;
+ due:=r.laatste_succes is null or coalesce(r.aangevraagd>coalesce(r.afgerond,'epoch'),false);
+ -- Laatste dinsdag/woensdag/donderdag om 22u, inclusief gemiste scheduler-runs.
+ due:=due or exists(select 1 from generate_series(lokaal::date-6,lokaal::date,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
+ due:=due or exists(select 1 from club_matches where club_id='vrouwen' and not is_test and aftrap+interval '2 hours'<=now() and aftrap+interval '2 hours'>coalesce(r.laatste_succes,'epoch'));
+ if not due or (r.fout is not null and r.afgerond>now()-interval '10 minutes') then return null;end if;
+ update vrouwen_sync set gestart=now(),run_id=gen_random_uuid(),fout=null where id returning * into r;
+ return jsonb_build_object('id',r.run_id);
+ end if;
+ if p_id is distinct from r.run_id or r.afgerond>=r.gestart then raise exception 'Verlopen update.';end if;
+ if p_actie='fout' then update vrouwen_sync set afgerond=now(),fout='Twizzit ophalen mislukt. De vorige gegevens blijven behouden.' where id;return '{}'::jsonb;end if;
+ if p_actie<>'klaar' or jsonb_typeof(p_data->'wedstrijden') is distinct from 'array' or jsonb_array_length(p_data->'wedstrijden')=0 or jsonb_typeof(p_data->'klassementen') is distinct from 'array' or jsonb_array_length(p_data->'klassementen')=0 then raise exception 'Ongeldige Twizzit-gegevens.';end if;
+ perform club_import_matches(p_data);
+ -- Een handmatig ingevuld matchverslag blijft leidend; openbare uitslagen vullen de overige matchen aan.
+ for m in select * from jsonb_array_elements(p_data->'wedstrijden') loop
+ if m->'score'->>0 is not null then
+ update club_matches set thuis_score=(m->'score'->>0)::int,uit_score=(m->'score'->>1)::int,score_at=coalesce(score_at,now()) where club_id='vrouwen' and match_key='twizzit-'||(m->>'id') and not exists(select 1 from club_reports v where v.club_id='vrouwen' and v.match_key='twizzit-'||(m->>'id'));
+ end if;
+ end loop;
+ update vrouwen_sync set data=p_data,laatste_succes=gestart,afgerond=now(),fout=null where id;
+ return '{}'::jsonb;
+end $$;
+revoke all on function vrouwen_sync_worker(text,text,uuid,jsonb) from public;
+grant execute on function vrouwen_sync_worker(text,text,uuid,jsonb) to anon;
+
+create table if not exists public.club_berichten(id uuid primary key default gen_random_uuid(),club_id text not null,tekst text not null check(length(btrim(tekst)) between 1 and 140),actief boolean not null default true,auteur uuid not null default auth.uid(),created_at timestamptz not null default now(),updated_at timestamptz not null default now());
+alter table club_berichten enable row level security;
+revoke all on club_berichten from anon,authenticated;
+create or replace function public.club_lichtkrant(p_club text) returns jsonb language sql stable security definer set search_path=public as $$
+ select coalesce(jsonb_agg(jsonb_build_object('id',b.id,'tekst',b.tekst,'actief',b.actief,'auteur',coalesce(m.naam,'Staf'),'updated_at',b.updated_at) order by b.created_at),'[]') from club_berichten b left join club_members m on m.club_id=b.club_id and m.user_id=b.auteur where b.club_id=p_club and (b.actief or club_staf(p_club))
+$$;
+create or replace function public.club_bewaar_bericht(p_club text,p_id uuid default null,p_tekst text default '',p_actief boolean default true,p_verwijder boolean default false) returns void language plpgsql security definer set search_path=public as $$
+begin
+ if not coalesce(club_staf(p_club),false) then raise exception 'Alleen coaches, verantwoordelijken en admins kunnen boodschappen beheren.';end if;
+ if p_id is null then insert into club_berichten(club_id,tekst) values(p_club,btrim(p_tekst));
+ elsif p_verwijder then delete from club_berichten where club_id=p_club and id=p_id;if not found then raise exception 'Boodschap niet gevonden.';end if;
+ else update club_berichten set tekst=btrim(p_tekst),actief=p_actief,updated_at=now() where club_id=p_club and id=p_id;if not found then raise exception 'Boodschap niet gevonden.';end if;end if;
+end $$;
+revoke all on function club_bewaar_bericht(text,uuid,text,boolean,boolean) from public;
+grant execute on function club_bewaar_bericht(text,uuid,text,boolean,boolean) to authenticated;
+grant execute on function club_lichtkrant(text) to anon,authenticated;
+
+
+
+-- Rechtstreekse Twizzit-start: alleen de database controleert de planning.
+alter table public.vrouwen_sync add column if not exists dispatch_at timestamptz;
+create or replace function public.vrouwen_dispatch(p_force boolean default false) returns boolean
+language plpgsql security definer set search_path=public,extensions as $$
+declare r vrouwen_sync; lokaal timestamp:=now() at time zone 'Europe/Brussels'; due boolean; sleutel text;
+begin
+ select * into r from vrouwen_sync where id for update;
+ if not found then return false;end if;
+ if r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes' then return false;end if;
+ if r.dispatch_at>coalesce(r.afgerond,'epoch') and r.dispatch_at>now()-interval '10 minutes' then return false;end if;
+ due:=p_force or r.laatste_succes is null or coalesce(r.aangevraagd>coalesce(r.afgerond,'epoch'),false);
+ due:=due or exists(select 1 from generate_series(lokaal::date-6,lokaal::date,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
+ due:=due or exists(select 1 from club_matches where club_id='vrouwen' and not is_test and aftrap+interval '2 hours'<=now() and aftrap+interval '2 hours'>coalesce(r.laatste_succes,'epoch'));
+ if not due or (r.fout is not null and r.afgerond>now()-interval '10 minutes' and not p_force) then return false;end if;
+ select cron_secret into sleutel from public.push_config where id=1;
+ if sleutel is null then raise exception 'De rechtstreekse updatekoppeling is nog niet ingesteld.';end if;
+ perform net.http_post(url:='https://odgrmhcmkvbdadjhphiz.supabase.co/functions/v1/club-push',
+ headers:=jsonb_build_object('x-club-cron',sleutel,'Content-Type','application/json','User-Agent','Steca-Twizzit'),
+ body:='{"action":"twizzit"}'::jsonb,timeout_milliseconds:=15000);
+ update vrouwen_sync set dispatch_at=now(),aangevraagd=case when p_force then now() else aangevraagd end,fout=null where id;
+ return true;
+end $$;
+revoke all on function public.vrouwen_dispatch(boolean) from public,anon,authenticated;
+create or replace function public.club_twizzit(p_club text,p_start boolean default false) returns jsonb language plpgsql security definer set search_path=public as $$
+declare r vrouwen_sync;begin
+ if p_club<>'vrouwen' or not club_admin(p_club) then raise exception 'Alleen een vrouwenadmin kan Twizzit bijwerken.';end if;
+ if p_start then perform vrouwen_dispatch(true);end if;
+ select * into r from vrouwen_sync where id;
+ return jsonb_build_object('laatste_succes',r.laatste_succes,'wacht',r.dispatch_at>coalesce(r.afgerond,'epoch') and r.dispatch_at>now()-interval '10 minutes','bezig',r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes','fout',r.fout);
+end $$;
+-- Idempotent: vervangt dezelfde job. De GitHub-workflow heeft geen kwartiercron meer.
+select cron.schedule('steca-twizzit-planning','* * * * *','select public.vrouwen_dispatch(false)');
+-- Einde rechtstreekse Twizzit-start.
+
+-- Vrouwenmeldingen vereisen steeds een eigen opt-in en een actieve ploegrol.
+select cron.schedule('steca-vrouwen-push','* * * * *',$job$select net.http_post(url:='https://odgrmhcmkvbdadjhphiz.supabase.co/functions/v1/club-push',headers:=jsonb_build_object('Content-Type','application/json','x-club-cron',cron_secret),body:='{"action":"process"}'::jsonb) from public.push_config where id=1 and exists(select 1 from club_push_config where enabled);$job$);
+
+-- Ingeschreven speelsters blijven ook bij registratie via het mannenformulier supporter.
+create or replace function handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  eerste boolean;
+  v_functie text := coalesce(new.raw_user_meta_data->>'functie', 'speler');
+  v_voornaam text := nullif(trim(coalesce(new.raw_user_meta_data->>'voornaam', '')), '');
+  v_achternaam text := nullif(trim(coalesce(new.raw_user_meta_data->>'achternaam', '')), '');
+  v_id uuid;
+begin
+  if new.raw_user_meta_data->>'account_type'='supporter' or exists(select 1 from club_registration r join club_members c on c.id=r.member_id and c.club_id=r.club_id where r.club_id='vrouwen' and lower(trim(new.email))=r.email and c.speelt) then
+    insert into supporter_profiles(user_id,naam) values(new.id,left(coalesce(nullif(trim(new.raw_user_meta_data->>'naam'),''),'Supporter'),100));
+    return new;
+  end if;
+  if v_functie not in ('speler', 'spelercoach', 'coach', 'verantwoordelijke', 'supporter') then
+    v_functie := 'speler';
+  end if;
+  select id into v_id from members
+   where user_id is null and lower(email) = lower(new.email)
+   order by aangemaakt_op limit 1;
+  if v_id is not null then
+    update members
+       set user_id = new.id,
+           status = case when status = 'inactief' then 'wacht_op_goedkeuring' else status end
+     where id = v_id;
+    return new;
+  end if;
+  if v_voornaam is not null and v_achternaam is not null then
+    select id into v_id from members
+     where user_id is null and lower(voornaam) = lower(v_voornaam) and lower(achternaam) = lower(v_achternaam)
+     order by aangemaakt_op limit 1;
+    if v_id is not null then
+      update members set user_id = new.id, status = 'wacht_op_goedkeuring' where id = v_id;
+      return new;
+    end if;
+  end if;
+  select not exists (select 1 from members) into eerste;
+  insert into members (user_id, naam, voornaam, achternaam, email, functie, status, is_admin, is_hoofdadmin, bron)
+  values (
+    new.id,
+    coalesce(nullif(trim(new.raw_user_meta_data->>'naam'), ''), split_part(new.email, '@', 1)),
+    v_voornaam, v_achternaam, new.email,
+    case when eerste then 'verantwoordelijke' else v_functie end,
+    case when eerste then 'actief' else 'wacht_op_goedkeuring' end,
+    eerste, eerste, 'registratie'
+  );
+  return new;
+end $$;

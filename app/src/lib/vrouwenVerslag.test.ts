@@ -1,0 +1,10 @@
+import {it,expect} from 'vitest';
+import {leesVrouwenVerslag,vrouwenMomentStats} from './vrouwenVerslag';
+import type {ClubLid} from './club';
+import type {Moment} from './matchverslag';
+const leden=[{id:'a',naam:'Anna',speelt:true,status:'actief'},{id:'b',naam:'Bea',speelt:true,status:'actief'}] as ClubLid[];
+const goal:Moment={soort:'goal',kant:'thuis',speler:'Anna',assist:'Bea',minuut:null};
+it('telt eigen goals en assists, maar geen tegenstanders',()=>{expect(vrouwenMomentStats([goal,{...goal,kant:'uit'}],leden,'thuis')).toEqual([{id:'a',goals:1,assists:0,geel:0,rood:0},{id:'b',goals:0,assists:1,geel:0,rood:0}]);});
+it('telt twee gele kaarten ook als rood',()=>{expect(vrouwenMomentStats([{...goal,soort:'geel',assist:''},{...goal,soort:'geel',assist:''}],leden,'thuis')[0]).toMatchObject({geel:2,rood:1});});
+it('bewaart oude tekst en totalen zonder momenten te verzinnen',()=>{const stats=[{id:'a',goals:3,assists:0,geel:0,rood:0}];const d=leesVrouwenVerslag('Mooi gespeeld',stats);expect(d.momenten).toEqual([]);expect(d.tekst).toBe('Mooi gespeeld');expect(vrouwenMomentStats([goal],leden,'thuis',d.oudeStatistieken)[0].goals).toBe(4);expect(leesVrouwenVerslag(JSON.stringify({...d,momenten:[goal]}),stats).momenten).toEqual([goal]);});
+it('weigert onbekende eigen speelsters',()=>{expect(()=>vrouwenMomentStats([{...goal,speler:'Onbekend'}],leden,'thuis')).toThrow();});
