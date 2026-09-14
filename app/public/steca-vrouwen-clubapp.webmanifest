@@ -11,13 +11,13 @@
   "lang": "nl-BE",
   "icons": [
     {
-      "src": "icon-vrouwen-schild-192.png",
+      "src": "icon-vrouwen-gelijk-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-vrouwen-schild-512.png",
+      "src": "icon-vrouwen-gelijk-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
