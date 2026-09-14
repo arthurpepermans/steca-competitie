@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "Steca Vrouwen Clubapp",
+  "short_name": "Steca Vrouwen Clubapp",
+  "description": "De clubapp van Steca Vrouwen",
+  "start_url": "./#/vrouwen",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f5b5d1",
+  "lang": "nl-BE",
+  "icons": [{"src": "logo-vrouwen.png", "sizes": "1254x1254", "type": "image/png", "purpose": "any"}]
+}

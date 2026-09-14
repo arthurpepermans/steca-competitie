@@ -39,7 +39,13 @@ export function useNavViewport(route: string) {
     document.addEventListener("focusout", herstel);
     document.addEventListener("visibilitychange", herstel);
     // na het loslaatmoment van een veerbeweging komt niet altijd een scroll-event van de visual viewport
-    window.addEventListener("touchend", herstel, { passive: true });
+    // Verplaats de balk niet tussen touchend en de daaropvolgende click.
+    // Anders kan WebKit de tik verliezen doordat het raakvlak net verspringt.
+    const naAanraking = (event: TouchEvent) => {
+      if (event.target instanceof Node && nav.contains(event.target)) return;
+      herstel();
+    };
+    window.addEventListener("touchend", naAanraking, { passive: true });
     window.addEventListener("scrollend", meet);
     herstel();
     return () => {
@@ -51,7 +57,7 @@ export function useNavViewport(route: string) {
       window.removeEventListener("pageshow", herstel);
       document.removeEventListener("focusout", herstel);
       document.removeEventListener("visibilitychange", herstel);
-      window.removeEventListener("touchend", herstel);
+      window.removeEventListener("touchend", naAanraking);
       window.removeEventListener("scrollend", meet);
       delete nav.dataset.viewport;
       nav.style.removeProperty("--nav-schermonderkant");

@@ -52,10 +52,10 @@ def wedstrijd(event):
     game = html(url)
     profile = html('https://static.twizzit.com/v2/ajax/activity/profile/public', {'activityId':ident,'languageId':2})
     title = profile.select_one('.activity-title')
-    if not title or TEAM not in title.get_text():
+    if not title or not all(t in title.get_text() for t in event['title'].split(' - ',1)):
         raise ValueError(f'Wedstrijd {ident} kon niet worden bevestigd')
     teams = event['title'].split(' - ', 1)
-    if len(teams) != 2 or TEAM not in teams:
+    if len(teams) != 2:
         raise ValueError('Onbekende teamindeling')
     resources = []
     for node in profile.select('.resource'):
@@ -75,13 +75,15 @@ def main():
         'languageId':2,'view':'website','widget-settings-id':232450,
         'fc-start':f'{year}-07-01 00:00','fc-end':f'{year+1}-07-01 00:00'})
     r.raise_for_status()
-    events = {int(e['eventId']):e for e in r.json() if TEAM in e['title'].split(' - ') and e.get('active',True)}
+    standen = rankings(html(SOURCE))
+    ploegen = {rij['naam'] for rij in standen[0]['rijen']}
+    events = {int(e['eventId']):e for e in r.json() if e.get('active',True) and (TEAM in e['title'].split(' - ') or (len(e['title'].split(' - '))==2 and set(e['title'].split(' - '))<=ploegen))}
     if not events:
         raise ValueError('Geen wedstrijden gevonden; bestaande gegevens blijven behouden')
     with ThreadPoolExecutor(max_workers=3) as pool:
         matches = sorted(pool.map(wedstrijd, events.values()), key=lambda m:m['aftrap'])
     data = {'seizoen':f'{year}-{year+1}','bijgewerkt':datetime.now(timezone.utc).isoformat(),
-            'bron':SOURCE, 'wedstrijden':matches,'klassementen':rankings(html(SOURCE))}
+            'bron':SOURCE, 'wedstrijden':[m for m in matches if TEAM in (m['thuis'],m['uit'])], 'reekswedstrijden':[m for m in matches if m['reeks']==standen[0]['naam']], 'klassementen':standen}
     dest = ROOT/'app/public/vrouwen-data.json'
     temp = dest.with_suffix('.tmp')
     temp.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')

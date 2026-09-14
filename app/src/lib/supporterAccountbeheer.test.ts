@@ -12,7 +12,7 @@ create table members(user_id uuid);
 create table supporter_profiles(user_id uuid primary key references auth.users on delete cascade,naam text,actief boolean);
 create table supporter_attendance(user_id uuid references supporter_profiles on delete cascade,match_key text,status text);
 create table audit_log(tabel text,rij_id text,actie text,oud jsonb,door uuid,door_user uuid);
-create function supporter_klassement_data() returns jsonb language sql as $$select '{"personen":[],"bezoeken":[]}'::jsonb$$;`);const s=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8');await db.exec(s.slice(s.indexOf('-- Supporteraccount beheren,')));},30000);
+create function supporter_klassement_data() returns jsonb language sql as $$select '{"personen":[],"bezoeken":[]}'::jsonb$$;`);const s=readFileSync(new URL('../../../supabase/app_schema.sql',import.meta.url),'utf8').split('-- Ploegscheiding:')[0];await db.exec(s.slice(s.indexOf('-- Supporteraccount beheren,')));},30000);
 afterAll(async()=>{await db?.close();});
 beforeEach(async()=>{await db.exec(`truncate auth.users,members,audit_log cascade;insert into auth.users values('${fan}');insert into supporter_profiles values('${fan}','Fan',true);insert into supporter_attendance values('${fan}','match','aanwezig');select set_config('test.admin','yes',false);`);});
 it('weigert gewone accounts en onbekende acties',async()=>{await db.exec("select set_config('test.admin','no',false)");await expect(db.query("select admin_supporter_account($1,'verwijderen')",[fan])).rejects.toThrow('Alleen admins');await db.exec("select set_config('test.admin','yes',false)");await expect(db.query("select admin_supporter_account($1,'anders')",[fan])).rejects.toThrow('Onbekende actie');});

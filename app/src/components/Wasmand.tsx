@@ -7,8 +7,8 @@ import type { LaundryTurn, Match } from "../lib/types";
 type Speler = { id: string; naam: string };
 
 /** Wasmand vol verfrommelde truitjes, in de kleuren van de shirts op het veld. */
-export function WasmandTekening() {
-  const Z = "#292929", Z2 = "#1c1c1c", Z3 = "#3a3a3a", R = "#f8f5e9", L = "#171717", V = "#4d4d4d";
+export function WasmandTekening({vrouwen=false}:{vrouwen?:boolean}={}) {
+  const Z = vrouwen ? "#ffffff" : "#292929", Z2 = vrouwen ? "#eeeeee" : "#1c1c1c", Z3 = vrouwen ? "#f7f7f7" : "#3a3a3a", R = vrouwen ? "#f5b5d1" : "#f8f5e9", L = "#171717", V = vrouwen ? "#b8b8b8" : "#4d4d4d";
   return (
     <svg className="wasmand-tekening" viewBox="0 0 150 140" role="img" aria-label="Wasmand vol truitjes">
       {/* hoop verfrommelde truitjes achter de rand */}

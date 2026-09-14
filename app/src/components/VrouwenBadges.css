@@ -1,0 +1,7 @@
+.v-badge{display:inline-flex;vertical-align:middle}.v-badge>span{display:contents}
+.v-badge .badge-icoon>circle:first-child{fill:#f5b5d1;stroke:#171717}
+.v-badge [fill="#e2b63c"],.v-badge [fill="#f5eedb"]{fill:#fff}
+.v-badge [stroke="#e2b63c"],.v-badge [stroke="#f5eedb"]{stroke:#171717}
+.v-badge [fill="#ba5144"]{fill:#b6294d}
+.v-badges-test .badge-test-kaart{cursor:pointer;color:var(--tekst);font:inherit}
+.v-badges-test .badge-test-kaart[aria-pressed="true"]{outline:3px solid var(--kleur)}

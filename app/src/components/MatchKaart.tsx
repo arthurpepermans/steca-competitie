@@ -47,3 +47,14 @@ export function MatchKaart({ match, children, toonDatum = true, verslagKnop }: {
     </div>
   );
 }
+
+/** Dezelfde ticketopbouw voor beide ploegen; gegevens en rechten komen van de aanroeper. */
+export function KalenderTicket({toonDatum=true,datum,uur,reeks,thuis,uit,eigenThuis,eigenUit,status,scoreTekst,terrein,res,opmerking,verslagKnop,children,ticketScheur=false}:{toonDatum?:boolean;datum:string;uur?:string|null;reeks?:string|null;thuis:string;uit:string;eigenThuis:boolean;eigenUit:boolean;status:string;scoreTekst:string;terrein?:string|null;res?:string|null;opmerking?:string|null;verslagKnop?:ReactNode;children?:ReactNode;ticketScheur?:boolean}){
+ return <div className={`kaart ${eigenThuis||eigenUit?'accent':''}`}>
+ {toonDatum&&<div className="rij zacht" style={{marginBottom:6}}><span>{datum}{uur?` · ${uur}`:''}</span><span>{reeks}</span></div>}
+ <div className="uitslag"><div className="thuis" style={{fontWeight:eigenThuis?700:400}}>{thuis}</div><div className={`score ${status}`}>{scoreTekst}</div><div style={{fontWeight:eigenUit?700:400}}>{uit}</div></div>
+ <div className="rij kalender-locatie" style={{marginTop:8}}><span className="zacht">{terrein??'terrein onbekend'}</span><span className="rij kalender-route" style={{gap:6}}>{res&&<span className={`res ${res}`}>{res}</span>}<MapsKnop terrein={terrein??null}/></span></div>
+ {opmerking&&<div className="klein zacht" style={{marginTop:4}}>{opmerking}</div>}
+ {verslagKnop}{(children||ticketScheur)&&<div className="ticket-scheur" aria-hidden="true"/>}{children}
+ </div>;
+}

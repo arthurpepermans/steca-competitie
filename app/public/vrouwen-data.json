@@ -1,6 +1,6 @@
 {
   "seizoen": "2026-2027",
-  "bijgewerkt": "2026-09-13T17:11:32.762301+00:00",
+  "bijgewerkt": "2026-09-13T19:50:27.767686+00:00",
   "bron": "https://app.twizzit.com/v2/ranking/widget/team?id=1342487&wsid=156007&lg=2",
   "wedstrijden": [
     {
@@ -380,6 +380,2376 @@
       ],
       "reeks": "DAMES ZELE (DAMES)",
       "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153499&wsid=156007&lg=2"
+    }
+  ],
+  "reekswedstrijden": [
+    {
+      "id": 43152574,
+      "thuis": "KVM MELANGE",
+      "uit": "LA TRAP",
+      "aftrap": "2026-09-02T19:00:00+02:00",
+      "score": [
+        0,
+        1
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152574&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152594,
+      "thuis": "APERO'S",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-09-03T19:00:00+02:00",
+      "score": [
+        4,
+        1
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152594&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152599,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "VEDETJES",
+      "aftrap": "2026-09-03T21:00:00+02:00",
+      "score": [
+        1,
+        9
+      ],
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152599&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152589,
+      "thuis": "REAL BASIL",
+      "uit": "CALIBABES",
+      "aftrap": "2026-09-03T21:30:00+02:00",
+      "score": [
+        3,
+        1
+      ],
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152589&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152579,
+      "thuis": "PUR BOEUF",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-09-04T21:00:00+02:00",
+      "score": [
+        1,
+        5
+      ],
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152579&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152609,
+      "thuis": "VEDETJES",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-09T19:00:00+02:00",
+      "score": [
+        21,
+        0
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152609&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152614,
+      "thuis": "MABIBO GIRLS",
+      "uit": "APERO'S",
+      "aftrap": "2026-09-09T19:00:00+02:00",
+      "score": [
+        11,
+        0
+      ],
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152614&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152629,
+      "thuis": "CALIBABES",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-09-09T20:00:00+02:00",
+      "score": [
+        4,
+        2
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152629&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152604,
+      "thuis": "PUR BOEUF",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-09-10T19:00:00+02:00",
+      "score": [
+        3,
+        4
+      ],
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152604&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152619,
+      "thuis": "LA TRAP",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-09-10T19:00:00+02:00",
+      "score": [
+        0,
+        1
+      ],
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152619&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152624,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-09-10T21:00:00+02:00",
+      "score": [
+        2,
+        11
+      ],
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152624&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152634,
+      "thuis": "STECA VROUWEN",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-09-16T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152634&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152639,
+      "thuis": "KVM MELANGE",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-09-16T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152639&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152644,
+      "thuis": "REAL BASIL",
+      "uit": "APERO'S",
+      "aftrap": "2026-09-17T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152644&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152654,
+      "thuis": "VEDETJES",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-09-17T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152654&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152649,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-09-17T22:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152649&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152679,
+      "thuis": "MABIBO GIRLS",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-09-21T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152679&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152664,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-22T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152664&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152674,
+      "thuis": "LA TRAP",
+      "uit": "VEDETJES",
+      "aftrap": "2026-09-22T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152674&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152669,
+      "thuis": "APERO'S",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-09-23T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152669&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152684,
+      "thuis": "MG HOTSJOT",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-09-24T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152684&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152689,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-09-24T22:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152689&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152704,
+      "thuis": "MG HOTSJOT",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-09-28T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152704&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152719,
+      "thuis": "LA TRAP",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-09-29T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152719&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152714,
+      "thuis": "MABIBO GIRLS",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-09-30T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152714&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152699,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "VEDETJES",
+      "aftrap": "2026-10-01T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152699&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152709,
+      "thuis": "REAL BASIL",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-10-02T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152709&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152694,
+      "thuis": "CALIBABES",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-10-02T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152694&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152729,
+      "thuis": "APERO'S",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-10-06T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152729&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152734,
+      "thuis": "KVM MELANGE",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-10-07T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152734&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152724,
+      "thuis": "REAL BASIL",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-10-08T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152724&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152749,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-10-08T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152749&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152739,
+      "thuis": "CALIBABES",
+      "uit": "LA TRAP",
+      "aftrap": "2026-10-08T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152739&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152744,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "VEDETJES",
+      "aftrap": "2026-10-08T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152744&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152764,
+      "thuis": "KVM MELANGE",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-10-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152764&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152774,
+      "thuis": "VEDETJES",
+      "uit": "CALIBABES",
+      "aftrap": "2026-10-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152774&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152779,
+      "thuis": "STECA VROUWEN",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-10-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152779&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152754,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-10-15T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152754&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152759,
+      "thuis": "PUR BOEUF",
+      "uit": "LA TRAP",
+      "aftrap": "2026-10-15T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152759&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152769,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "APERO'S",
+      "aftrap": "2026-10-16T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152769&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152794,
+      "thuis": "STECA VROUWEN",
+      "uit": "LA TRAP",
+      "aftrap": "2026-10-20T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152794&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152799,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "CALIBABES",
+      "aftrap": "2026-10-21T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152799&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152804,
+      "thuis": "PUR BOEUF",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-10-21T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152804&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152784,
+      "thuis": "VEDETJES",
+      "uit": "APERO'S",
+      "aftrap": "2026-10-22T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152784&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152809,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-10-22T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152809&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152789,
+      "thuis": "MG HOTSJOT",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-10-23T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152789&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152834,
+      "thuis": "LA TRAP",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-11-09T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152834&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152829,
+      "thuis": "REAL BASIL",
+      "uit": "VEDETJES",
+      "aftrap": "2026-11-12T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152829&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152819,
+      "thuis": "CALIBABES",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-11-12T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152819&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152814,
+      "thuis": "APERO'S",
+      "uit": "PUR BOEUF",
+      "aftrap": "2026-11-12T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152814&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152824,
+      "thuis": "MABIBO GIRLS",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-11-13T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152824&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152839,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-11-13T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152839&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152849,
+      "thuis": "STECA VROUWEN",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-11-17T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152849&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152844,
+      "thuis": "KVM MELANGE",
+      "uit": "APERO'S",
+      "aftrap": "2026-11-18T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152844&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152584,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-11-20T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152584&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152874,
+      "thuis": "STECA VROUWEN",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-11-24T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152874&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152864,
+      "thuis": "CALIBABES",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-11-26T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152864&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152869,
+      "thuis": "MG HOTSJOT",
+      "uit": "APERO'S",
+      "aftrap": "2026-11-26T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152869&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152854,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-11-26T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152854&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152859,
+      "thuis": "LA TRAP",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-11-26T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152859&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152879,
+      "thuis": "PUR BOEUF",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-11-27T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152879&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152904,
+      "thuis": "LA TRAP",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-11-30T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152904&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152909,
+      "thuis": "STECA VROUWEN",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2026-12-03T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152909&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152884,
+      "thuis": "VEDETJES",
+      "uit": "KVM MELANGE",
+      "aftrap": "2026-12-03T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152884&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152899,
+      "thuis": "PUR BOEUF",
+      "uit": "REAL BASIL",
+      "aftrap": "2026-12-03T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152899&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152889,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "APERO'S",
+      "aftrap": "2026-12-03T22:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152889&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152894,
+      "thuis": "MG HOTSJOT",
+      "uit": "CALIBABES",
+      "aftrap": "2026-12-04T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152894&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152934,
+      "thuis": "APERO'S",
+      "uit": "LA TRAP",
+      "aftrap": "2026-12-08T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152934&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152919,
+      "thuis": "REAL BASIL",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-12-10T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152919&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152939,
+      "thuis": "MABIBO GIRLS",
+      "uit": "VEDETJES",
+      "aftrap": "2026-12-10T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152939&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152929,
+      "thuis": "KVM MELANGE",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2026-12-10T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152929&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152914,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "CALIBABES",
+      "aftrap": "2026-12-10T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152914&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152924,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2026-12-11T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152924&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152954,
+      "thuis": "REAL BASIL",
+      "uit": "LA TRAP",
+      "aftrap": "2026-12-15T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152954&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152949,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2026-12-16T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152949&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152969,
+      "thuis": "PUR BOEUF",
+      "uit": "VEDETJES",
+      "aftrap": "2026-12-17T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152969&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152964,
+      "thuis": "STECA VROUWEN",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2026-12-17T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152964&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152959,
+      "thuis": "APERO'S",
+      "uit": "CALIBABES",
+      "aftrap": "2026-12-17T22:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152959&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152944,
+      "thuis": "KVM MELANGE",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2026-12-18T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152944&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152979,
+      "thuis": "STECA VROUWEN",
+      "uit": "VEDETJES",
+      "aftrap": "2027-01-05T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152979&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152989,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "LA TRAP",
+      "aftrap": "2027-01-05T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152989&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152984,
+      "thuis": "APERO'S",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2027-01-07T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152984&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152999,
+      "thuis": "KVM MELANGE",
+      "uit": "CALIBABES",
+      "aftrap": "2027-01-07T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152999&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152974,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-01-07T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152974&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152994,
+      "thuis": "REAL BASIL",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-01-07T22:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152994&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153024,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "APERO'S",
+      "aftrap": "2027-01-20T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153024&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153009,
+      "thuis": "MABIBO GIRLS",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-01-20T22:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153009&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153004,
+      "thuis": "LA TRAP",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-01-21T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153004&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153019,
+      "thuis": "CALIBABES",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-01-21T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153019&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153029,
+      "thuis": "VEDETJES",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-01-21T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153029&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153014,
+      "thuis": "MG HOTSJOT",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-01-22T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153014&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153034,
+      "thuis": "PUR BOEUF",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-01-26T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153034&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153039,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-01-27T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153039&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153049,
+      "thuis": "MABIBO GIRLS",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-01-28T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153049&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153054,
+      "thuis": "MG HOTSJOT",
+      "uit": "VEDETJES",
+      "aftrap": "2027-01-28T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153054&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153044,
+      "thuis": "APERO'S",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-01-28T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153044&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153059,
+      "thuis": "CALIBABES",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-01-29T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153059&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153069,
+      "thuis": "STECA VROUWEN",
+      "uit": "APERO'S",
+      "aftrap": "2027-02-02T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153069&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153064,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-02-04T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153064&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153074,
+      "thuis": "PUR BOEUF",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-02-04T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153074&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153079,
+      "thuis": "LA TRAP",
+      "uit": "CALIBABES",
+      "aftrap": "2027-02-04T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153079&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153084,
+      "thuis": "MG HOTSJOT",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-02-05T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153084&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153089,
+      "thuis": "VEDETJES",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-02-12T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153089&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153099,
+      "thuis": "LA TRAP",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-02-16T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153099&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153109,
+      "thuis": "APERO'S",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-02-16T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153109&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153119,
+      "thuis": "MABIBO GIRLS",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-02-17T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153119&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153094,
+      "thuis": "MG HOTSJOT",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-02-18T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153094&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153104,
+      "thuis": "REAL BASIL",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-02-18T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153104&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153114,
+      "thuis": "CALIBABES",
+      "uit": "VEDETJES",
+      "aftrap": "2027-02-18T21:30:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153114&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153149,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "LA TRAP",
+      "aftrap": "2027-02-23T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153149&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153144,
+      "thuis": "KVM MELANGE",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2027-02-24T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153144&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153129,
+      "thuis": "VEDETJES",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-02-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153129&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153134,
+      "thuis": "STECA VROUWEN",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-02-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153134&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153139,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-02-26T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153139&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153124,
+      "thuis": "PUR BOEUF",
+      "uit": "CALIBABES",
+      "aftrap": "2027-02-26T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153124&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153164,
+      "thuis": "LA TRAP",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-03-02T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153164&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153174,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-03-03T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153174&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153169,
+      "thuis": "CALIBABES",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-03-04T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153169&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153179,
+      "thuis": "KVM MELANGE",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-03-04T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153179&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153154,
+      "thuis": "APERO'S",
+      "uit": "VEDETJES",
+      "aftrap": "2027-03-04T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153154&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153159,
+      "thuis": "MABIBO GIRLS",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-03-05T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153159&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153204,
+      "thuis": "MABIBO GIRLS",
+      "uit": "LA TRAP",
+      "aftrap": "2027-03-15T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153204&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153189,
+      "thuis": "APERO'S",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-03-18T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153189&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153209,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-03-18T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153209&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153184,
+      "thuis": "KVM MELANGE",
+      "uit": "VEDETJES",
+      "aftrap": "2027-03-18T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153184&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153199,
+      "thuis": "REAL BASIL",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-03-18T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153199&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153194,
+      "thuis": "CALIBABES",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-03-19T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153194&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153219,
+      "thuis": "STECA VROUWEN",
+      "uit": "CALIBABES",
+      "aftrap": "2027-03-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153219&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153229,
+      "thuis": "VEDETJES",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-03-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153229&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153234,
+      "thuis": "MG HOTSJOT",
+      "uit": "LA TRAP",
+      "aftrap": "2027-03-25T19:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153234&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153214,
+      "thuis": "PUR BOEUF",
+      "uit": "APERO'S",
+      "aftrap": "2027-03-25T21:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153214&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153239,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-03-25T22:00:00+01:00",
+      "score": null,
+      "locaties": [],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153239&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153224,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2027-03-26T20:00:00+01:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153224&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153244,
+      "thuis": "VEDETJES",
+      "uit": "LA TRAP",
+      "aftrap": "2027-04-06T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153244&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153249,
+      "thuis": "REAL BASIL",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2027-04-08T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153249&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153254,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-04-09T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153254&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153279,
+      "thuis": "REAL BASIL",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-04-13T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153279&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153264,
+      "thuis": "DEGELIJKE DAMES DICHTBIJ",
+      "uit": "LA TRAP",
+      "aftrap": "2027-04-13T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153264&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153259,
+      "thuis": "KVM MELANGE",
+      "uit": "DE TAEY GIRLS",
+      "aftrap": "2027-04-14T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153259&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153269,
+      "thuis": "MABIBO GIRLS",
+      "uit": "CALIBABES",
+      "aftrap": "2027-04-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153269&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153274,
+      "thuis": "APERO'S",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-04-15T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153274&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153284,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-04-15T21:30:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153284&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153449,
+      "thuis": "LA TRAP",
+      "uit": "APERO'S",
+      "aftrap": "2027-04-21T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153449&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153294,
+      "thuis": "MG HOTSJOT",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-04-22T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153294&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153469,
+      "thuis": "VEDETJES",
+      "uit": "MABIBO GIRLS",
+      "aftrap": "2027-04-22T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153469&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153399,
+      "thuis": "STECA VROUWEN",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-04-22T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153399&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153339,
+      "thuis": "DE TAEY GIRLS",
+      "uit": "LA DOCE SPRITZ",
+      "aftrap": "2027-04-23T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153339&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153289,
+      "thuis": "CALIBABES",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-04-23T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153289&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153474,
+      "thuis": "PUR BOEUF",
+      "uit": "MG HOTSJOT",
+      "aftrap": "2027-04-29T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153474&wsid=156007&lg=2"
+    },
+    {
+      "id": 43152659,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "CALIBABES",
+      "aftrap": "2027-04-30T22:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "OVERMERE",
+          "adres": "Molenstraat 1, 9290 Berlare, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43152659&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153499,
+      "thuis": "LA DOCE SPRITZ",
+      "uit": "STECA VROUWEN",
+      "aftrap": "2027-05-04T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153499&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153489,
+      "thuis": "LA TRAP",
+      "uit": "REAL BASIL",
+      "aftrap": "2027-05-04T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153489&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153484,
+      "thuis": "MABIBO GIRLS",
+      "uit": "DEGELIJKE DAMES DICHTBIJ",
+      "aftrap": "2027-05-05T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153484&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153494,
+      "thuis": "CALIBABES",
+      "uit": "APERO'S",
+      "aftrap": "2027-05-05T20:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153494&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153504,
+      "thuis": "VEDETJES",
+      "uit": "PUR BOEUF",
+      "aftrap": "2027-05-05T21:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "ZELE",
+          "adres": "Dendermondebaan 10, 9240 Zele, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153504&wsid=156007&lg=2"
+    },
+    {
+      "id": 43153479,
+      "thuis": "MG HOTSJOT",
+      "uit": "KVM MELANGE",
+      "aftrap": "2027-05-07T19:00:00+02:00",
+      "score": null,
+      "locaties": [
+        {
+          "zaal": "HAMME M",
+          "adres": "Kaaiplein 32, 9220 Hamme, Belgium"
+        }
+      ],
+      "reeks": "DAMES ZELE (DAMES)",
+      "bron": "https://app.twizzit.com/v2/ranking/widget/game?id=43153479&wsid=156007&lg=2"
     }
   ],
   "klassementen": [

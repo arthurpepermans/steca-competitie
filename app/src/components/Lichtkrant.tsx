@@ -1,3 +1,4 @@
+import {lichtkrantPositie} from "../lib/lichtkrantPositie";
 import { useEffect, useRef, useState } from "react";
 import { haalBoetes, haalLedenBasis, haalLichtkrantBerichten, haalMatches, haalStats, haalStemPunten, haalWasbeurten } from "../lib/api";
 import { LICHTKRANT_HERLADEN } from "./LichtkrantBeheer";
@@ -13,7 +14,7 @@ import { useAsync } from "../lib/useAsync";
 const KOPIEEN = 6;
 const TUSSENRUIMTE = 56;
 
-function useLichtkrant(tekst: string) {
+function useLichtkrant(tekst: string, wijn = false) {
   const band = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const b = band.current;
@@ -29,19 +30,22 @@ function useLichtkrant(tekst: string) {
     let vorige = performance.now();
     let frame = 0;
     let vast = false;
+    let gestopt = false;
     const teken = () => {
+      if (gestopt || !b.isConnected) return;
       const breedte = kopieen[0].offsetWidth;
-      const periode = breedte + TUSSENRUIMTE;
+      if (breedte <= 0) return;
+      const periode = breedte + (wijn ? 0 : TUSSENRUIMTE);
       const totaal = KOPIEEN * periode;
       kopieen.forEach((k, i) => {
-        let x = basis + i * periode;
-        while (x < -breedte) x += totaal;
-        while (x > totaal - breedte) x -= totaal;
+        const x = lichtkrantPositie(basis + i * periode, breedte, totaal);
+        if (x === null) return;
         k.style.transform = `translate3d(${x}px,0,0)`;
       });
     };
     teken();
     const stap = (nu: number) => {
+      if (gestopt) return;
       const dt = Math.min(64, nu - vorige);
       vorige = nu;
       if (!vast && !document.hidden) {
@@ -58,21 +62,45 @@ function useLichtkrant(tekst: string) {
     b.addEventListener("pointercancel", laatLos);
     b.addEventListener("pointerleave", laatLos);
     return () => {
+      gestopt = true;
       cancelAnimationFrame(frame);
       b.removeEventListener("pointerdown", houdVast);
       b.removeEventListener("pointerup", laatLos);
       b.removeEventListener("pointercancel", laatLos);
       b.removeEventListener("pointerleave", laatLos);
     };
-  }, [tekst]);
+  }, [tekst, wijn]);
   return band;
 }
 
-function Band({ tekst }: { tekst: string }) {
-  const band = useLichtkrant(tekst);
+function Wijnpictogram() {
+  return <svg viewBox="0 0 59 46" width="32" height="25" aria-hidden="true" className="lichtkrant-fles">
+    <ellipse cx="29" cy="43" rx="27" ry="2" fill="currentColor" opacity=".12"/>
+    {/* Het achterste glas staat hoger en bevat minder wijn. */}
+    <g transform="translate(39 -4)" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9h10l2 11c1 6-2 10-7 10S0 26 1 20Z" fill="var(--accent)"/>
+      <path d="M2 24h12c-1 4-3 6-6 6s-5-2-6-6" fill="currentColor" stroke="none"/>
+      <path d="M8 30v8m-5 0h10" fill="none"/><path d="M4 13 3 20" stroke="white" opacity=".65"/>
+    </g>
+    <g transform="translate(3 2)">
+      <path d="M6 2h4v12c0 3 3 4 3 7v16q0 2-2 2H5q-2 0-2-2V21c0-3 3-4 3-7Z" fill="currentColor"/>
+      <path d="M6 1h4v4H6zM4 25h8v9H4z" fill="#f5b5d1"/>
+      <path d="M6 7v9l-1 4v15" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity=".4"/>
+    </g>
+    {/* Het voorste glas staat lager en is voller. */}
+    <g transform="translate(23 3)" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9h10l2 11c1 6-2 10-7 10S0 26 1 20Z" fill="var(--accent)"/>
+      <path d="M1 20h14c1 6-2 10-7 10S0 26 1 20" fill="currentColor" stroke="none"/>
+      <path d="M8 30v8m-5 0h10" fill="none"/><path d="M4 13 3 20q-1 4 1 6" fill="none" stroke="white" opacity=".65"/>
+    </g>
+  </svg>;
+}
+
+export function Band({ tekst,wijn=false }: { tekst: string;wijn?:boolean }) {
+  const band = useLichtkrant(tekst, wijn);
   return (
-    <div className="lichtkrant" ref={band} role="marquee" aria-label="Clubnieuws">
-      {Array.from({ length: KOPIEEN }, (_, i) => <span key={i} aria-hidden={i > 0 || undefined}>{tekst}</span>)}
+    <div className={"lichtkrant"+(wijn?" lichtkrant-wijn":"")} ref={band} role="marquee" aria-label="Clubnieuws">
+      {Array.from({ length: KOPIEEN }, (_, i) => <span key={i} aria-hidden={i > 0 || undefined}>{wijn?tekst.split(" / ").map((t,j)=><i key={j} className="lichtkrant-item"><Wijnpictogram/>{t}</i>):tekst}</span>)}
     </div>
   );
 }

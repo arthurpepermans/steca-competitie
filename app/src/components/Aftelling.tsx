@@ -30,8 +30,8 @@ function Vak({ waarde, label }: { waarde: number; label: string }) {
 }
 
 /** Aftelling naar de aftrap als klapbord: dagen, uren, minuten. Tijdens de match 'Nu bezig', daarna niets. */
-export function Aftelling({ match }: { match: Match }) {
-  const aftrap = aftrapTijd(match);
+export function Aftelling({ match, aftrapIso }: { match?: Match; aftrapIso?: string }) {
+  const aftrap = aftrapIso ? Date.parse(aftrapIso) : match ? aftrapTijd(match) : null;
   const [nu, setNu] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNu(Date.now()), 30000);
