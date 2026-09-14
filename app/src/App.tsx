@@ -23,7 +23,21 @@ import { Kantine } from "./pages/Kantine";
 function Poort() {
   const { klaar, session, lid, supporter, fout } = useAuth();
   const locatie = useLocation();
-  if (locatie.pathname.startsWith("/vrouwen")) return <Vrouwen />;
+  if (locatie.pathname.startsWith("/vrouwen")) {
+    if (!klaar) return <Laden tekst="Even geduld…" />;
+    const pad = locatie.pathname;
+    if (session && pad === '/vrouwen/nieuw-wachtwoord') return <NieuwWachtwoord />;
+    if (['/vrouwen/login', '/vrouwen/registreer', '/vrouwen/supporter-account', '/vrouwen/wachtwoord-vergeten'].includes(pad)) {
+      if (session) return <Navigate to="/vrouwen" replace />;
+      if (pad === '/vrouwen/registreer') return <Registreer />;
+      if (pad === '/vrouwen/supporter-account') return <Registreer supporterAccount />;
+      if (pad === '/vrouwen/wachtwoord-vergeten') return <WachtwoordVergeten />;
+      return <Login />;
+    }
+    if (!session && (pad === '/vrouwen' || pad === '/vrouwen/nieuw-wachtwoord')) return <Navigate to="/vrouwen/login" replace />;
+    return <Vrouwen />;
+  }
+  if (!session && document.documentElement.dataset.installatie === 'vrouwen' && ['/login','/registreer','/supporter-account','/wachtwoord-vergeten'].includes(locatie.pathname)) return <Navigate to={'/vrouwen' + locatie.pathname} replace />;
   if (!klaar) return <Laden tekst="Even geduld…" />;
   if (locatie.pathname === "/supporters") {
     if (supporter?.actief) {

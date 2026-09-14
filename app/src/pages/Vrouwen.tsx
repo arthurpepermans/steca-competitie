@@ -68,7 +68,7 @@ export function Vrouwen() {
   const komend=data?.wedstrijden.filter(m=>new Date(m.aftrap).getTime()>nu&&!m.score)??[];
   const gespeeld=data?.wedstrijden.filter(m=>m.score!==null).slice().reverse()??[];
   const clubActief=import.meta.env.VITE_PLOEGEN_ENABLED==='true';
-  const tab=pathname.split('/')[2]??'';
+  const tab=pathname.split('/')[2]==='supporters'?'':pathname.split('/')[2]??'';
   return <>
     <header className="kop v-kop"><Ploegkeuze ploeg="vrouwen"/><button className="thema-knop" type="button" onClick={()=>setDonker(!donker)} aria-label={donker?'Licht thema':'Donker thema'}>{donker?<Sun size={21}/>:<Moon size={21}/>}</button><Link className="profiel-link" to="/vrouwen/profiel" aria-label="Mijn profiel"><span className="initialen" aria-hidden="true">{initialen||"SV"}</span></Link></header>
     <Band wijn tekst={[...berichten.filter(b=>b.actief).map(b=>b.tekst),komend[0]?`Volgende match: ${komend[0].thuis} tegen ${komend[0].uit} om ${uur(komend[0].aftrap)}`:'Samen op het veld. Samen Steca.','De derde helft: wijntjes drinken!'].join(' / ')}/>
@@ -87,6 +87,6 @@ export function Vrouwen() {
       <p className="v-update">Bijgewerkt op {datum(data.bijgewerkt)} om {uur(data.bijgewerkt)} · <a href="https://hamseliga.be/kalender" target="_blank" rel="noreferrer">Hamse Liga / Twizzit</a></p>
       </>}
     </main>
-    <nav ref={navRef} className="nav" aria-label="Vrouwen hoofdnavigatie">{[{to:'/vrouwen',label:'Home',Icon:House},{to:'/vrouwen/kalender',label:'Kalender',Icon:CalendarDots},{to:'/vrouwen/klassement',label:'Klassement',Icon:Trophy},...(clubActief?[{to:'/vrouwen/opstelling',label:'Opstelling',Icon:SoccerBall},{to:'/vrouwen/kantine',label:'Kantine',Icon:BeerStein},{to:'/vrouwen/leden',label:'Leden',Icon:UsersThree}]:[])].map(({to,label,Icon})=><NavLink key={to} to={to} end={to==='/vrouwen'} className={({isActive})=>isActive||(to==='/vrouwen/klassement'&&tab==='statistieken')?'actief':''}><Icon size={25}/><span>{label}</span></NavLink>)}</nav>
+    <nav ref={navRef} className="nav" aria-label="Vrouwen hoofdnavigatie">{[{to:session?'/vrouwen':'/vrouwen/supporters',label:'Home',Icon:House},{to:'/vrouwen/kalender',label:'Kalender',Icon:CalendarDots},{to:'/vrouwen/klassement',label:'Klassement',Icon:Trophy},...(clubActief?[{to:'/vrouwen/opstelling',label:'Opstelling',Icon:SoccerBall},{to:'/vrouwen/kantine',label:'Kantine',Icon:BeerStein},{to:'/vrouwen/leden',label:'Leden',Icon:UsersThree}]:[])].map(({to,label,Icon})=><NavLink key={to} to={to} end={to==='/vrouwen'} className={({isActive})=>isActive||(to==='/vrouwen/klassement'&&tab==='statistieken')?'actief':''}><Icon size={25}/><span>{label}</span></NavLink>)}</nav>
   </>;
 }
