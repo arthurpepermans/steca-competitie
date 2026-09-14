@@ -1,9 +1,9 @@
 {
-  "id": "./",
+  "id": "./vrouwen",
   "name": "Steca Vrouwen Clubapp",
   "short_name": "Steca Vrouwen Clubapp",
   "description": "De clubapp van Steca Vrouwen",
-  "start_url": "./#/vrouwen",
+  "start_url": "./vrouwen.html#/vrouwen",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
