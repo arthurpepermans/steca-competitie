@@ -2208,3 +2208,32 @@ begin
   );
   return new;
 end $$;
+
+-- Afgeschermde contactgegevens van vrouwenleden.
+create or replace function public.club_lidgegevens(p_club text,p_lid uuid) returns jsonb
+language plpgsql stable security definer set search_path=public as $$
+declare lid club_members; resultaat jsonb;
+begin
+ if auth.uid() is null or p_club is distinct from 'vrouwen' or club_role(p_club)='geblokkeerd' then raise exception 'Geen toegang tot deze gegevens.';end if;
+ select * into lid from club_members where club_id=p_club and id=p_lid;
+ if not found then raise exception 'Lid niet gevonden.';end if;
+ if not coalesce(club_staf(p_club),false) and lid.user_id is distinct from auth.uid() then raise exception 'Alleen de speelster zelf of de staf kan deze gegevens zien.';end if;
+ select jsonb_build_object(
+   'naam',lid.naam,'email',coalesce(u.email,r.email),
+   'telefoon',coalesce(nullif(m.telefoon,''),nullif(h.telefoon,''),nullif(u.raw_user_meta_data->>'telefoon','')),
+   'geboortedatum',coalesce(m.geboortedatum::text,h.geboortedatum::text,nullif(u.raw_user_meta_data->>'geboortedatum','')),
+   'adres',coalesce(nullif(m.adres,''),nullif(h.adres,''),nullif(u.raw_user_meta_data->>'adres','')),
+   'account_gekoppeld',lid.user_id is not null,'email_bevestigd',u.email_confirmed_at is not null,
+   'status',lid.status
+ ) into resultaat
+ from (select 1) basis
+ left join auth.users u on u.id=lid.user_id
+ left join club_registration r on r.club_id=p_club and r.member_id=p_lid
+ left join members m on m.user_id=lid.user_id
+ left join supporter_profiles s on s.user_id=lid.user_id
+ left join members h on h.id=s.member_id;
+ return resultaat;
+end $$;
+revoke all on function public.club_lidgegevens(text,uuid) from public,anon;
+grant execute on function public.club_lidgegevens(text,uuid) to authenticated,service_role;
+-- Einde afgeschermde contactgegevens.
