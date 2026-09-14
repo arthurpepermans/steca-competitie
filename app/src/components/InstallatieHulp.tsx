@@ -11,7 +11,7 @@ const VERBORGEN_SLEUTEL = "steca-installatie-verborgen";
 export function InstallatieHulp({ open = false, wegklikbaar = false }: { open?: boolean; wegklikbaar?: boolean } = {}) {
   const vrouwen = document.documentElement.dataset.installatie === "vrouwen";
   const appNaam = vrouwen ? "Steca Vrouwen Clubapp" : "Steca Juniors Clubapp";
-  const appIcoon = vrouwen ? "icon-vrouwen-schild-180.png" : "icon-retro-180.png";
+  const appIcoon = vrouwen ? "icon-vrouwen-gelijk-180.png" : "icon-retro-180.png";
   const [toestel, setToestel] = useState<"iphone" | "android">(() => /Android/i.test(navigator.userAgent) ? "android" : "iphone");
   const [prompt, setPrompt] = useState<InstallatieEvent | null>(null);
   const [bezig, setBezig] = useState(false);
