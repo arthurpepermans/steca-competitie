@@ -20,8 +20,8 @@ function versieBestand(): Plugin {
         .replace('<html lang="nl">', '<html lang="nl" data-installatie="vrouwen">')
         .replaceAll("Steca Juniors Clubapp", "Steca Vrouwen Clubapp")
         .replace("steca-juniors-clubapp.webmanifest", "steca-vrouwen-clubapp.webmanifest")
-        .replaceAll("icon-retro-192.png", "logo-vrouwen.png")
-        .replaceAll('sizes="180x180" href="icon-retro-180.png"', 'href="logo-vrouwen.png"')
+        .replaceAll("icon-retro-192.png", "icon-vrouwen-schild-192.png")
+        .replaceAll('sizes="180x180" href="icon-retro-180.png"', 'sizes="180x180" href="icon-vrouwen-schild-180.png"')
         .replace('content="#2d2d2b"', 'content="#f5b5d1"')
         .replace('</head>', `<script>if(!location.hash)history.replaceState(null,"",location.pathname+location.search+"#/vrouwen");</script></head>`);
       writeFileSync(resolve(map, "vrouwen.html"), vrouwen);
