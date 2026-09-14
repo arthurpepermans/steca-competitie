@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
-      if (event === "PASSWORD_RECOVERY") window.location.hash = "#/nieuw-wachtwoord";
+      if (event === "PASSWORD_RECOVERY") window.location.hash = document.documentElement.dataset.installatie === "vrouwen" ? "#/vrouwen/nieuw-wachtwoord" : "#/nieuw-wachtwoord";
     });
     return () => sub.subscription.unsubscribe();
   }, []);

@@ -1,26 +1,41 @@
 import { InstallatieHulp } from "../components/InstallatieHulp";
-import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { FUNCTIES, FUNCTIE_LABEL, type Functie } from "../lib/config";
 import { useAuth } from "../lib/auth";
 
+function useAuthPloeg() {
+  const { pathname } = useLocation();
+  const vrouwen = pathname.startsWith('/vrouwen');
+  return { vrouwen, pad: (route: string) => vrouwen ? '/vrouwen' + route : route };
+}
+
 function Kader({ titel, children }: { titel: string; children: React.ReactNode }) {
+  const { vrouwen, pad } = useAuthPloeg();
+  useEffect(() => {
+    if (!vrouwen) return;
+    document.documentElement.dataset.ploeg = 'vrouwen';
+    const titel = document.title;
+    document.title = 'Steca Vrouwen Clubapp';
+    return () => { delete document.documentElement.dataset.ploeg; document.title = titel; };
+  }, [vrouwen]);
   return (
     <div className="auth">
-      <h1>Steca Juniors Clubapp</h1>
+      <h1>{vrouwen ? "Steca Vrouwen Clubapp" : "Steca Juniors Clubapp"}</h1>
       <div className="kaart">
         <h2>{titel}</h2>
         {children}
       </div>
-      <InstallatieHulp />
-      <Link className="knop licht breed" to="/supporters">Doorgaan zonder account</Link>
+      <InstallatieHulp vrouwenPloeg={vrouwen} />
+      <Link className="knop licht breed" to={pad("/supporters")}>Doorgaan zonder account</Link>
       <p className="zacht klein">Bekijk de kalender en volg de ploeg.</p>
     </div>
   );
 }
 
 export function Login() {
+  const { pad } = useAuthPloeg();
   const [email, setEmail] = useState("");
   const [wachtwoord, setWachtwoord] = useState("");
   const [fout, setFout] = useState<string | null>(null);
@@ -44,13 +59,14 @@ export function Login() {
         <button className="knop breed" disabled={bezig}>Inloggen</button>
       </form>
       <p style={{ marginTop: 12 }} className="midden">
-        <Link to="/registreer">Account aanmaken</Link> · <Link to="/wachtwoord-vergeten">Wachtwoord vergeten</Link>
+        <Link to={pad("/registreer")}>Account aanmaken</Link> · <Link to={pad("/wachtwoord-vergeten")}>Wachtwoord vergeten</Link>
       </p>
     </Kader>
   );
 }
 
 export function Registreer({ supporterAccount=false }: { supporterAccount?: boolean }) {
+  const { vrouwen, pad } = useAuthPloeg();
   const navigate = useNavigate();
   const [voornaam, setVoornaam] = useState("");
   const [achternaam, setAchternaam] = useState("");
@@ -71,7 +87,7 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: wachtwoord,
-      options: { data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie: supporterAccount ? "supporter" : functie, account_type: supporterAccount ? "supporter" : "club" } },
+      options: { ...(vrouwen ? { emailRedirectTo: window.location.origin + import.meta.env.BASE_URL + "vrouwen.html" } : {}), data: { voornaam: voornaam.trim(), achternaam: achternaam.trim(), naam: `${voornaam.trim()} ${achternaam.trim()}`.trim(), functie: supporterAccount ? "supporter" : functie, account_type: vrouwen || supporterAccount ? "supporter" : "club", ...(vrouwen ? { club: "vrouwen", club_functie: supporterAccount ? "supporter" : functie } : {}) } },
     });
     setBezig(false);
     if (error) return setFout(error.message);
@@ -82,7 +98,7 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
     return (
       <Kader titel="Bijna klaar">
         <p>Je account is aangemaakt. Controleer je mailbox en klik op de bevestigingslink, log daarna in.</p>
-        <Link className="knop breed" to="/login">Naar inloggen</Link>
+        <Link className="knop breed" to={pad("/login")}>Naar inloggen</Link>
       </Kader>
     );
   }
@@ -90,8 +106,8 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
   return (
     <Kader titel={supporterAccount ? "Supporteraccount aanmaken" : "Account aanmaken"}>
       <div className="tabs" role="group" aria-label="Soort account">
-        <button type="button" disabled={bezig} className={!supporterAccount ? "actief" : ""} aria-pressed={!supporterAccount} onClick={() => navigate("/registreer")}>Speler / clublid</button>
-        <button type="button" disabled={bezig} className={supporterAccount ? "actief" : ""} aria-pressed={supporterAccount} onClick={() => navigate("/supporter-account")}>Supporter</button>
+        <button type="button" disabled={bezig} className={!supporterAccount ? "actief" : ""} aria-pressed={!supporterAccount} onClick={() => navigate(pad("/registreer"))}>{vrouwen ? "Speelster / clublid" : "Speler / clublid"}</button>
+        <button type="button" disabled={bezig} className={supporterAccount ? "actief" : ""} aria-pressed={supporterAccount} onClick={() => navigate(pad("/supporter-account"))}>Supporter</button>
       </div>
       <form onSubmit={submit}>
         {fout && <div className="melding fout">{fout}</div>}
@@ -101,7 +117,7 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
         {!supporterAccount && <div className="veld">
           <label htmlFor="registratie-functie">Ik ben</label>
           <select id="registratie-functie" value={functie} onChange={(e) => setFunctie(e.target.value as Functie)}>
-            {FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{FUNCTIE_LABEL[f]}</option>)}
+            {FUNCTIES.filter((f) => f !== "supporter").map((f) => <option key={f} value={f}>{vrouwen && f === "speler" ? "Speelster" : vrouwen && f === "spelercoach" ? "Speelster-coach" : FUNCTIE_LABEL[f]}</option>)}
           </select>
         </div>}
         <div className="veld"><label>Wachtwoord (minstens 8 tekens)</label><input type="password" value={wachtwoord} onChange={(e) => setWachtwoord(e.target.value)} required autoComplete="new-password" /></div>
@@ -109,19 +125,20 @@ export function Registreer({ supporterAccount=false }: { supporterAccount?: bool
         <button className="knop breed" disabled={bezig}>Account aanmaken</button>
       </form>
       <p className="zacht" style={{ marginTop: 10 }}>{supporterAccount ? "Je naam verschijnt in het prono-klassement. Je account geeft geen toegang tot interne clubgegevens." : "Na het aanmaken moet een beheerder je account goedkeuren voor je alles kunt zien."}</p>
-      <p className="midden" style={{ marginTop: 8 }}><Link to="/login">Ik heb al een account</Link></p>
+      <p className="midden" style={{ marginTop: 8 }}><Link to={pad("/login")}>Ik heb al een account</Link></p>
     </Kader>
   );
 }
 
 export function WachtwoordVergeten() {
+  const { vrouwen, pad } = useAuthPloeg();
   const [email, setEmail] = useState("");
   const [verstuurd, setVerstuurd] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}${vrouwen ? "vrouwen.html" : ""}`;
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
     if (error) setFout(error.message);
     else setVerstuurd(true);
@@ -138,12 +155,13 @@ export function WachtwoordVergeten() {
           <button className="knop breed">Verstuur link</button>
         </form>
       )}
-      <p className="midden" style={{ marginTop: 8 }}><Link to="/login">Terug naar inloggen</Link></p>
+      <p className="midden" style={{ marginTop: 8 }}><Link to={pad("/login")}>Terug naar inloggen</Link></p>
     </Kader>
   );
 }
 
 export function NieuwWachtwoord() {
+  const { vrouwen } = useAuthPloeg();
   const [wachtwoord, setWachtwoord] = useState("");
   const [bevestiging, setBevestiging] = useState("");
   const [fout, setFout] = useState<string | null>(null);
@@ -156,7 +174,7 @@ export function NieuwWachtwoord() {
     if (wachtwoord.length < 8) return setFout("Minstens 8 tekens.");
     const { error } = await supabase.auth.updateUser({ password: wachtwoord });
     if (error) return setFout(error.message);
-    navigate("/");
+    navigate(vrouwen ? "/vrouwen" : "/");
   }
 
   return (

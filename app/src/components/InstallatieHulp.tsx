@@ -8,8 +8,8 @@ type InstallatieEvent = Event & { prompt: () => Promise<void>; userChoice: Promi
 const VERBORGEN_SLEUTEL = "steca-installatie-verborgen";
 
 /** open: meteen opengeklapt tonen. wegklikbaar: met een knop om de hulp op dit scherm niet meer te tonen. */
-export function InstallatieHulp({ open = false, wegklikbaar = false }: { open?: boolean; wegklikbaar?: boolean } = {}) {
-  const vrouwen = document.documentElement.dataset.installatie === "vrouwen";
+export function InstallatieHulp({ open = false, wegklikbaar = false, vrouwenPloeg = false }: { open?: boolean; wegklikbaar?: boolean; vrouwenPloeg?: boolean } = {}) {
+  const vrouwen = vrouwenPloeg || document.documentElement.dataset.installatie === "vrouwen";
   const appNaam = vrouwen ? "Steca Vrouwen Clubapp" : "Steca Juniors Clubapp";
   const appIcoon = vrouwen ? "icon-vrouwen-gelijk-180.png" : "icon-retro-180.png";
   const [toestel, setToestel] = useState<"iphone" | "android">(() => /Android/i.test(navigator.userAgent) ? "android" : "iphone");
