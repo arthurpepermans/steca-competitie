@@ -2082,7 +2082,7 @@ declare r vrouwen_sync; lokaal timestamp:=now() at time zone 'Europe/Brussels'; 
  if r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes' then return null;end if;
  due:=r.laatste_succes is null or coalesce(r.aangevraagd>coalesce(r.afgerond,'epoch'),false);
  -- Laatste dinsdag/woensdag/donderdag om 22u, inclusief gemiste scheduler-runs.
- due:=due or exists(select 1 from generate_series(lokaal::date-6,lokaal::date,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
+ due:=due or exists(select 1 from generate_series((lokaal::date-6)::timestamp,lokaal::date::timestamp,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
  due:=due or exists(select 1 from club_matches where club_id='vrouwen' and not is_test and aftrap+interval '2 hours'<=now() and aftrap+interval '2 hours'>coalesce(r.laatste_succes,'epoch'));
  if not due or (r.fout is not null and r.afgerond>now()-interval '10 minutes') then return null;end if;
  update vrouwen_sync set gestart=now(),run_id=gen_random_uuid(),fout=null where id returning * into r;
@@ -2134,7 +2134,7 @@ begin
  if r.gestart>coalesce(r.afgerond,'epoch') and r.gestart>now()-interval '10 minutes' then return false;end if;
  if r.dispatch_at>coalesce(r.afgerond,'epoch') and r.dispatch_at>now()-interval '10 minutes' then return false;end if;
  due:=p_force or r.laatste_succes is null or coalesce(r.aangevraagd>coalesce(r.afgerond,'epoch'),false);
- due:=due or exists(select 1 from generate_series(lokaal::date-6,lokaal::date,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
+ due:=due or exists(select 1 from generate_series((lokaal::date-6)::timestamp,lokaal::date::timestamp,interval '1 day') d where extract(isodow from d) in(2,3,4) and d+interval '22 hours'<=lokaal and (d+interval '22 hours') at time zone 'Europe/Brussels'>coalesce(r.laatste_succes,'epoch'));
  due:=due or exists(select 1 from club_matches where club_id='vrouwen' and not is_test and aftrap+interval '2 hours'<=now() and aftrap+interval '2 hours'>coalesce(r.laatste_succes,'epoch'));
  if not due or (r.fout is not null and r.afgerond>now()-interval '10 minutes' and not p_force) then return false;end if;
  select cron_secret into sleutel from public.push_config where id=1;
