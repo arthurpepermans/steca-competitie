@@ -196,3 +196,10 @@ def test_kalender_uitgesteld_blijft_een_onbesliste_wedstrijd():
 def test_kalender_onbekende_markering_blijft_een_fout():
     with pytest.raises(ParseError, match="onverwachte rij"):
         parse_kalender(lees("kalender_uitgesteld.html").replace("UITGESTELD", "ONBEKEND"))
+
+
+@pytest.mark.parametrize("markering", ["FORFAIT", "forfait"])
+def test_kalender_forfait_bewaart_ploegen_en_opmerking(markering):
+    f, = parse_kalender(lees("kalender_uitgesteld.html").replace("UITGESTELD", markering))
+    assert (f.thuis, f.thuis_id, f.uit, f.uit_id) == ("Nickyspurters", 44, "FC Ons Huis", 27)
+    assert (f.datum, f.uur, f.opmerking) == (date(2026, 9, 12), "15:00", "Forfait")

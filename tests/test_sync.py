@@ -1,5 +1,6 @@
 """Sync-orkestratie op fixtures met een in-memory database."""
 import shutil
+import pytest
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -126,16 +127,17 @@ def test_eerder_gespeelde_wedstrijd_blijft_meetellen_en_uur_blijft_bewaard():
     assert any("eerder gespeelde" in w for w in plan.waarschuwingen)
 
 
-def test_uitgestelde_kalenderrij_wordt_bewaard_zonder_score(tmp_path):
+@pytest.mark.parametrize("markering,opmerking", [("UITGESTELD", "Uitgesteld"), ("FORFAIT", "Forfait")])
+def test_gemarkeerde_kalenderrij_wordt_bewaard_zonder_score(tmp_path, markering, opmerking):
     shutil.copytree(FIX, tmp_path / "fixtures")
     html = (FIX / "kalender.html").read_text(encoding="utf-8")
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, "lxml")
     rij = soup.select_one("div.pageContent table tr")
-    rij.find_all("td")[3].string = "(UITGESTELD)"
+    rij.find_all("td")[3].string = f"({markering})"
     (tmp_path / "fixtures" / "kalender.html").write_text(str(soup), encoding="utf-8")
     plan = bouw_plan(FixtureSource(tmp_path / "fixtures"), now=NU)
-    uitgesteld = [m for m in plan.matches if m["opmerking"] == "Uitgesteld"]
+    uitgesteld = [m for m in plan.matches if m["opmerking"] == opmerking]
     assert len(uitgesteld) == 1
     assert uitgesteld[0]["status"] == "gepland"
     assert uitgesteld[0]["thuis_score"] is None and uitgesteld[0]["uit_score"] is None
