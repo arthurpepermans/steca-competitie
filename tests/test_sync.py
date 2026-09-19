@@ -7,7 +7,7 @@ from pathlib import Path
 from competition.config import Settings
 from competition.fetch import FixtureSource
 from competition.supabase_client import MemoryDatabase
-from competition.sync import bereken_diff, bouw_plan, pas_toe, run
+from competition.sync import SyncError, bereken_diff, bouw_plan, pas_toe, run
 
 FIX = Path(__file__).parent / "fixtures"
 NU = datetime(2026, 9, 8, 18, 0, tzinfo=timezone.utc)
@@ -142,3 +142,48 @@ def test_gemarkeerde_kalenderrij_wordt_bewaard_zonder_score(tmp_path, markering,
     assert uitgesteld[0]["status"] == "gepland"
     assert uitgesteld[0]["thuis_score"] is None and uitgesteld[0]["uit_score"] is None
     assert len(plan.matches) == 968
+
+
+def test_uitslag_en_kalender_worden_een_wedstrijd_met_score_en_uur(tmp_path):
+    from bs4 import BeautifulSoup
+    shutil.copytree(FIX, tmp_path / "fixtures")
+    soup = BeautifulSoup((FIX / "kalender.html").read_text(encoding="utf-8"), "lxml")
+    extra = BeautifulSoup("""<center>zaterdag 5 september 2026</center>
+      <center>EERSTE AFDELING</center><table><tr><td>15:30</td><td></td>
+      <td><a href='?ploegid=21'>FC Depot</a></td><td>-</td>
+      <td><a href='?ploegid=11'>Dynamo Wijndaal</a></td></tr></table>""", "html.parser")
+    soup.select_one("div.pageContent").extend(list(extra.contents))
+    (tmp_path / "fixtures" / "kalender.html").write_text(str(soup), encoding="utf-8")
+    plan = bouw_plan(FixtureSource(tmp_path / "fixtures"), now=NU, met_clubs=False)
+    assert len(plan.matches) == len({m["match_key"] for m in plan.matches}) == 968
+    depot = next(m for m in plan.matches if m["match_key"] == "2026-2027|21|11")
+    assert (depot["thuis_score"], depot["uit_score"], depot["status"], depot["uur"]) == (1, 3, "gespeeld", "15:30")
+    assert plan.standings == bouw_plan(FixtureSource(FIX), now=NU, met_clubs=False).standings
+    db = MemoryDatabase()
+    pas_toe(plan, db, dry_run=False)
+    assert ("matches", 968) in db.upserts
+    db.tabellen["matches"][(depot["match_key"],)].update(manual_override=True, thuis_score=9)
+    pas_toe(plan, db, dry_run=False)
+    assert db.tabellen["matches"][(depot["match_key"],)]["thuis_score"] == 9
+
+
+@pytest.mark.parametrize("tegenstrijdig", [False, True])
+def test_dubbele_uitslag_telt_eenmaal_of_stopt_bij_tegenstrijdige_score(tmp_path, tegenstrijdig):
+    from bs4 import BeautifulSoup
+    import copy
+    shutil.copytree(FIX, tmp_path / "fixtures")
+    soup = BeautifulSoup((FIX / "uitslagen.html").read_text(encoding="utf-8"), "lxml")
+    rij = next(tr for tr in soup.find_all("tr") if tr.find("td") and tr.find("td").get_text(strip=True) == "FC Depot")
+    dubbel = copy.copy(rij)
+    if tegenstrijdig:
+        dubbel.find_all("td")[4].string = "9"
+    rij.insert_after(dubbel)
+    (tmp_path / "fixtures" / "uitslagen.html").write_text(str(soup), encoding="utf-8")
+    source = FixtureSource(tmp_path / "fixtures")
+    if tegenstrijdig:
+        with pytest.raises(SyncError, match="tegenstrijdige uitslagen"):
+            bouw_plan(source, now=NU, met_clubs=False)
+    else:
+        plan = bouw_plan(source, now=NU, met_clubs=False)
+        assert len(plan.matches) == 968
+        assert plan.standings == bouw_plan(FixtureSource(FIX), now=NU, met_clubs=False).standings
