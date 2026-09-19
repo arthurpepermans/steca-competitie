@@ -30,6 +30,7 @@ function Kader({ titel, children }: { titel: string; children: React.ReactNode }
       <InstallatieHulp vrouwenPloeg={vrouwen} />
       <Link className="knop licht breed" to={pad("/supporters")}>Doorgaan zonder account</Link>
       <p className="zacht klein">Bekijk de kalender en volg de ploeg.</p>
+      {!vrouwen && <p className="zacht klein"><a href={`${import.meta.env.BASE_URL}over.html`}>Over de clubapp</a> · <a href={`${import.meta.env.BASE_URL}privacy.html`}>Privacy sfeerbeelden</a> · <a href={`${import.meta.env.BASE_URL}voorwaarden.html`}>Gebruiksregels</a></p>}
     </div>
   );
 }
