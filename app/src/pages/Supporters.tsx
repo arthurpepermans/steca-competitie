@@ -1,3 +1,4 @@
+import { MaandNavigatie, useKalenderMaand } from '../components/MaandNavigatie';
 import { useState } from "react";
 import { Ploegkeuze } from "../components/Ploegkeuze";
 import { Link, useSearchParams } from "react-router-dom";
@@ -29,8 +30,8 @@ export function Supporters() {
   const reeksen = [...new Set(data?.klassement.map((r) => r.reeks) ?? [])].sort();
   const gekozen = reeks ?? data?.ploegen.find((p) => p.ploegid === EIGEN_PLOEGID)?.reeks ?? reeksen[0];
   const matches = sorteerOpDatum((data?.matches ?? []).filter(isEigen));
-  const komende = matches.filter((m) => m.status === "gepland");
-  const gespeeld = matches.filter((m) => m.status === "gespeeld").reverse();
+  const maand = useKalenderMaand((data?.matches ?? []).filter(m => m.reeks === gekozen).map(m => m.datum));
+  const maandMatches = sorteerOpDatum((data?.matches ?? []).filter(m => kalenderTab === "Hele reeks" ? m.reeks === gekozen : isEigen(m))).filter(m => maand.bevat(m.datum));
   return <>
     <header className="kop">
       <Ploegkeuze ploeg="mannen" />
@@ -49,14 +50,10 @@ export function Supporters() {
       {data && tab === "Opstelling" && <OpenbareOpstelling matches={matches} />}
       {data && tab === "Kantine" && <Kantine openbaar />}
       {data && tab === "Kalender" && <div className="tabs">{["Steca Juniors","Hele reeks","Ploegen"].map(n=><button key={n} className={kalenderTab===n?'actief':''} onClick={()=>setKalenderTab(n)}>{n}</button>)}</div>}
-      {data && tab === "Kalender" && kalenderTab === "Hele reeks" && sorteerOpDatum(data.matches.filter(m=>m.reeks===gekozen)).map(m=><MatchKaart key={m.match_key} match={m}/>)}
-      {data && tab === "Kalender" && kalenderTab === "Steca Juniors" && <>
-        <h2>Volgende wedstrijden</h2>
-        {!komende.length && <p>Er zijn nog geen wedstrijden gepland.</p>}
-        {komende.map((m) => <MatchKaart key={m.match_key} match={m} />)}
-        <h2>Uitslagen</h2>
-        {!gespeeld.length && <p>Er zijn nog geen uitslagen.</p>}
-        {gespeeld.map((m) => <MatchKaart key={m.match_key} match={m} />)}
+      {data && tab === "Kalender" && kalenderTab !== "Ploegen" && <>
+        <MaandNavigatie {...maand} />
+        {maandMatches.map(m => <MatchKaart key={m.match_key} match={m} />)}
+        {!maandMatches.length && <p>Geen matchen in deze maand.</p>}
       </>}
       {data && tab === "Klassement" && <>
         <h2>Klassement</h2>

@@ -1,3 +1,4 @@
+import { MaandNavigatie, useKalenderMaand } from '../components/MaandNavigatie';
 import {VrouwenProfielBadges} from '../components/VrouwenProfielBadges';
 import {VrouwenLidgegevens} from '../components/VrouwenLidgegevens';
 import {seizoenRanglijst} from '../lib/stemmen';
@@ -34,15 +35,17 @@ export function VrouwenKalender({data,bron,inhoud,verslag}:{data:ClubData;bron?:
  const reeks=(bron?.reekswedstrijden??[]).map(m=>data.matches.find(c=>c.thuis===m.thuis&&c.uit===m.uit&&Date.parse(c.aftrap)===Date.parse(m.aftrap))??({match_key:'twizzit-'+m.id,seizoen:bron!.seizoen,aftrap:m.aftrap,thuis:m.thuis,uit:m.uit,thuis_score:m.score?.[0]??null,uit_score:m.score?.[1]??null,is_test:false,reeks:m.reeks,locaties:m.locaties}));
  const eigenMatches=[...data.matches];
  for(const m of bron?.wedstrijden??[]){const index=eigenMatches.findIndex(c=>c.thuis===m.thuis&&c.uit===m.uit&&Date.parse(c.aftrap)===Date.parse(m.aftrap));if(index<0)eigenMatches.push({match_key:'twizzit-'+m.id,seizoen:bron!.seizoen,aftrap:m.aftrap,thuis:m.thuis,uit:m.uit,thuis_score:m.score?.[0]??null,uit_score:m.score?.[1]??null,is_test:false,reeks:m.reeks,locaties:m.locaties});else if(m.score&&eigenMatches[index].thuis_score===null)eigenMatches[index]={...eigenMatches[index],thuis_score:m.score[0],uit_score:m.score[1]};}
- const wedstrijden=(tab==='eigen'?eigenMatches:reeks).filter(m=>(!ploeg||m.thuis===ploeg||m.uit===ploeg)&&(toonGespeeld||m.thuis_score===null)).sort((a,b)=>a.aftrap.localeCompare(b.aftrap));
+ const maand=useKalenderMaand([...eigenMatches,...reeks].map(m=>m.aftrap));
+ const wedstrijden=(tab==='eigen'?eigenMatches:reeks).filter(m=>(!ploeg||m.thuis===ploeg||m.uit===ploeg)&&(toonGespeeld||m.thuis_score===null)&&maand.bevat(m.aftrap)).sort((a,b)=>a.aftrap.localeCompare(b.aftrap));
  const perDatum=new Map<string,ClubMatch[]>();for(const m of wedstrijden){const d=new Date(m.aftrap).toLocaleDateString('sv-SE',{timeZone:'Europe/Brussels'});perDatum.set(d,[...(perDatum.get(d)??[]),m]);}
  const ploegen=bron?.klassementen[0]?.rijen.map(r=>r.naam).sort((a,b)=>a.localeCompare(b))??[...new Set(data.matches.flatMap(m=>[m.thuis,m.uit]))].sort();
  return <><div className="tabs">{[['eigen','Steca Vrouwen'],['reeks','Hele reeks'],['ploegen','Ploegen']].map(([k,l])=><button key={k} className={tab===k?'actief':''} onClick={()=>{setTab(k);setPloeg(null);}}>{l}</button>)}</div>
  {tab==='ploegen'&&!ploeg?<><div className="veld"><select aria-label="Reeks"><option>{bron?.klassementen[0]?.naam??'Dames Zele'}</option></select></div><ul className="lijst omrand">{ploegen.map(naam=>{const thuis=reeks.find(m=>m.thuis===naam&&m.locaties?.length);return <li key={naam}><button className="rij v-ploegenrij" onClick={()=>setPloeg(naam)}><span><strong>{naam}</strong><br/><span className="zacht klein">{thuis?.locaties?.[0]?.zaal??'Terrein onbekend'}</span></span><span>›</span></button></li>;})}</ul></>:<>
  {ploeg&&<><button className="knop licht klein" onClick={()=>setPloeg(null)}>‹ Alle ploegen</button><h2>{ploeg}</h2></>}
+ <MaandNavigatie {...maand}/>
  <label className="klein zacht" style={{display:'block',marginBottom:10}}><input type="checkbox" checked={toonGespeeld} onChange={e=>setToonGespeeld(e.target.checked)}/> gespeelde matchen tonen</label>
  {[...perDatum.entries()].map(([datum,ms])=><section key={datum}>{tab!=='eigen'&&<h3 style={{marginTop:12}}>{vrouwenDatum(ms[0].aftrap)}</h3>}{ms.map(m=><VrouwenKalenderKaart key={m.match_key} match={m} toonDatum={tab==='eigen'} verslagKnop={data.matches.some(x=>x.match_key===m.match_key)?verslag?.(m):null}>{eigen(m)&&data.matches.some(x=>x.match_key===m.match_key)?inhoud?.(m):null}</VrouwenKalenderKaart>)}</section>)}
- {!wedstrijden.length&&<div className="kaart zacht">Geen matchen gevonden.</div>}</>}</>;
+ {!wedstrijden.length&&<div className="kaart zacht">Geen matchen gevonden voor deze maand en filters.</div>}</>}</>;
 }
 function VrouwenKalenderKaart({match:m,toonDatum,children,verslagKnop}:{match:ClubMatch;toonDatum:boolean;children?:ReactNode;verslagKnop?:ReactNode}){
  const thuis=m.thuis==='STECA VROUWEN',uit=m.uit==='STECA VROUWEN',gespeeld=m.thuis_score!==null&&m.uit_score!==null;
