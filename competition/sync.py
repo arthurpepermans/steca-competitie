@@ -232,10 +232,28 @@ def bouw_plan(
             m = dataclasses.replace(m, terrein=oud.get("terrein"))
         matches.append(m)
 
-    keys = {m.key for m in matches}
-    dubbel = len(matches) - len(keys)
+    # De kalender kan een wedstrijd nog tonen die ook al bij de uitslagen staat.
+    # Schrijf elke sleutel eenmaal en tel een gespeelde wedstrijd maar eenmaal mee.
+    uniek: dict[str, Match] = {}
+    for m in matches:
+        vorig = uniek.get(m.key)
+        if vorig is not None:
+            if vorig.gespeeld and m.gespeeld and (
+                vorig.thuis_score, vorig.uit_score
+            ) != (m.thuis_score, m.uit_score):
+                raise SyncError(ParseError(f"tegenstrijdige uitslagen voor {m.key}"), paginas["uitslagen"])
+            leidend, aanvullend = (vorig, m) if vorig.gespeeld else (m, vorig)
+            m = dataclasses.replace(
+                leidend, uur=leidend.uur or aanvullend.uur,
+                terrein=leidend.terrein or aanvullend.terrein,
+                opmerking=leidend.opmerking or aanvullend.opmerking,
+            )
+        uniek[m.key] = m
+    dubbel = len(matches) - len(uniek)
+    matches = list(uniek.values())
+    keys = set(uniek)
     if dubbel:
-        waarschuwingen.append(f"{dubbel} wedstrijd(en) komen dubbel voor (uitslagen én kalender?)")
+        waarschuwingen.append(f"{dubbel} dubbele wedstrijdvermelding(en) samengevoegd; uitslagen hebben voorrang")
     eerder_gespeeld = [
         _rij_naar_match(r) for r in (bestaande_matches or [])
         if r.get("seizoen") == seizoen and r.get("status") == "gespeeld" and r["match_key"] not in keys
