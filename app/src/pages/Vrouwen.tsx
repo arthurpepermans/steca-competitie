@@ -1,3 +1,4 @@
+import { MaandNavigatie, useKalenderMaand } from '../components/MaandNavigatie';
 import {Ploegkeuze} from '../components/Ploegkeuze';
 import {Moon} from '@phosphor-icons/react/dist/csr/Moon';
 import {Sun} from '@phosphor-icons/react/dist/csr/Sun';
@@ -47,7 +48,8 @@ export function Vrouwen() {
   const [data,setData]=useState<Data|null>(null);
   const [fout,setFout]=useState(false);
   const [poging,setPoging]=useState(0);
-  const [filter,setFilter]=useState('komend');
+  const [filter,setFilter]=useState('alles');
+  const maand=useKalenderMaand((data?.wedstrijden??[]).map(m=>m.aftrap));
   const [reeks,setReeks]=useState(0);
   const [donker,setDonker]=useState(()=>{try{return localStorage.getItem('steca-retro-thema')==='dark';}catch{return false;}});
   useEffect(()=>{
@@ -82,7 +84,7 @@ export function Vrouwen() {
         {komend[0]?<Wedstrijd match={komend[0]} groot/>:<p>Er staat nog geen volgende match ingepland.</p>}
         {gespeeld[0]&&<><div className="v-sectie-kop"><h2>Laatste uitslag</h2><Link to="/vrouwen/klassement">Klassement ↗</Link></div><Wedstrijd match={gespeeld[0]}/></>}
       </>}
-      {tab==='kalender'&&(!clubActief||!session)&&<><h1>Kalender</h1><p className="v-zacht">Alle matchen van de Steca Vrouwen · {data.seizoen}</p><div className="v-tabs">{[['komend','Komend'],['gespeeld','Uitslagen'],['alles','Alles']].map(([id,label])=><button aria-pressed={filter===id} key={id} onClick={()=>setFilter(id)}>{label}</button>)}</div>{(filter==='komend'?komend:filter==='gespeeld'?gespeeld:data.wedstrijden).map(m=><Wedstrijd key={m.id} match={m}/>)}{filter==='gespeeld'&&!gespeeld.length&&<p>Nog geen uitslagen beschikbaar.</p>}</>}
+      {tab==='kalender'&&(!clubActief||!session)&&<><h1>Kalender</h1><p className="v-zacht">Alle matchen van de Steca Vrouwen · {data.seizoen}</p><MaandNavigatie {...maand}/><div className="v-tabs">{[['komend','Komend'],['gespeeld','Uitslagen'],['alles','Alles']].map(([id,label])=><button aria-pressed={filter===id} key={id} onClick={()=>setFilter(id)}>{label}</button>)}</div>{(filter==='komend'?komend:filter==='gespeeld'?gespeeld:data.wedstrijden).filter(m=>maand.bevat(m.aftrap)).map(m=><Wedstrijd key={m.id} match={m}/>)}{!(filter==='komend'?komend:filter==='gespeeld'?gespeeld:data.wedstrijden).some(m=>maand.bevat(m.aftrap))&&<p>Geen matchen gevonden voor deze maand en filters.</p>}</>}
       {tab==='klassement'&&<><h1>Klassement</h1><p className="v-zacht">Hamse Liga · {data.seizoen}</p><label className="v-reeks">Reeks<select value={reeks} onChange={e=>setReeks(Number(e.target.value))}>{data.klassementen.map((r,i)=><option value={i} key={r.id}>{r.naam}</option>)}</select></label><div className="v-tabel-scroll"><table className="v-tabel"><thead><tr><th>#</th><th>Ploeg</th><th title="Gespeeld">G</th><th>W</th><th>V</th><th title="Gelijk">GL</th><th>+/-</th><th>PT</th></tr></thead><tbody>{data.klassementen[reeks]?.rijen.map(r=><tr key={r.naam} className={r.naam==='STECA VROUWEN'?'v-eigen':''}><td>{r.positie}</td><th scope="row">{r.naam}</th><td>{r.gespeeld}</td><td>{r.winst}</td><td>{r.verlies}</td><td>{r.gelijk}</td><td>{r.voor}-{r.tegen}</td><td><b>{r.punten}</b></td></tr>)}</tbody></table></div></>}
       <p className="v-update">Bijgewerkt op {datum(data.bijgewerkt)} om {uur(data.bijgewerkt)} · <a href="https://hamseliga.be/kalender" target="_blank" rel="noreferrer">Hamse Liga / Twizzit</a></p>
       </>}

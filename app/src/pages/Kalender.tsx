@@ -1,3 +1,4 @@
+import { MaandNavigatie, useKalenderMaand } from '../components/MaandNavigatie';
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { haalVerslagen, metVerslag } from "../lib/matchverslag";
@@ -34,11 +35,13 @@ export function Kalender() {
   const mijnStemmen = useAsync(haalMijnStemmen);
   const herlaadStemmen = async () => { await Promise.all([stemPunten.herlaad(), stemmers.herlaad(), mijnStemmen.herlaad()]); };
 
+  const maand = useKalenderMaand((matches.data ?? []).map(m => m.datum));
+
   if (matches.laden || teams.laden || leden.laden) return <Laden />;
   const reeks = teams.data?.find((t) => t.ploegid === EIGEN_PLOEGID)?.reeks ?? "";
   const spelers = (leden.data ?? []).filter(isSpelerLid).map((m) => ({ id: m.id, naam: m.naam }));
   const alle = sorteerOpDatum((matches.data ?? []).map(m => metVerslag(m, verslagen.data?.find(v => v.match_key === m.match_key))));
-  const lijst = alle.filter((m) => (tab === "eigen" ? isEigen(m) : m.reeks === reeks)).filter((m) => gekozenMatch ? m.match_key === gekozenMatch : toonGespeeld || m.status === "gepland");
+  const lijst = alle.filter((m) => (tab === "eigen" ? isEigen(m) : m.reeks === reeks)).filter((m) => gekozenMatch ? m.match_key === gekozenMatch : (toonGespeeld || m.status === "gepland") && maand.bevat(m.datum));
 
   const perDatum = new Map<string, typeof lijst>();
   for (const m of lijst) {
@@ -56,6 +59,7 @@ export function Kalender() {
       <button className={tab === "ploegen" ? "actief" : ""} onClick={() => setTab("ploegen")}>Ploegen</button>
       </div>
       {tab === "ploegen" ? <Ploegen /> : <>
+      {!gekozenMatch && <MaandNavigatie {...maand} />}
       <label className="klein zacht" style={{ display: "block", marginBottom: 10 }}>
         <input type="checkbox" checked={toonGespeeld} onChange={(e) => setToonGespeeld(e.target.checked)} /> gespeelde matchen tonen
       </label>
@@ -95,7 +99,7 @@ export function Kalender() {
           ))}
         </section>
       ))}
-      {lijst.length === 0 && <div className="kaart zacht">Geen matchen gevonden.</div>}
+      {lijst.length === 0 && <div className="kaart zacht">Geen matchen gevonden voor deze maand en filters.</div>}
       <LaatstBijgewerkt /></>}
     </>
   );
