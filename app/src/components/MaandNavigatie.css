@@ -1,5 +1,20 @@
-.maand-navigatie { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: end; gap: 10px; margin: 16px 0; }
-.maand-navigatie label { display: grid; gap: 4px; min-width: 0; }
-.maand-navigatie select { width: 100%; min-height: 44px; margin: 0; }
-.maand-navigatie .knop { min-height: 44px; padding: 0; font-size: 24px; }
-.maand-navigatie button:disabled { opacity: .35; cursor: default; }
+.maand-navigatie { margin: 22px 0 18px; border-top: 3px solid var(--tekst); border-bottom: 1px solid var(--tekst); }
+.maand-navigatie-kop { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 16px; }
+.maand-titel { min-width: 0; border: 0; padding: 0; background: none; color: var(--tekst); text-align: left; cursor: pointer; }
+.maand-editie { display: block; font: 10px/1.5 monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--tekst-zacht); }
+.maand-editie > span { margin: 0 5px; color: var(--kleur); }
+.maand-naam { display: flex; align-items: center; gap: 10px; margin-top: 4px; font: 700 clamp(30px, 5vw, 42px)/1.1 "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: -.015em; }
+.maand-chevron { flex-shrink: 0; color: var(--kleur); transition: transform .15s; }
+.maand-chevron.open { transform: rotate(180deg); }
+.maand-pijlen { display: flex; gap: 7px; flex-shrink: 0; }
+.maand-pijlen button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--tekst); border-radius: 0; background: var(--kaart); color: var(--tekst); cursor: pointer; }
+.maand-pijlen button:not(:disabled):hover { background: var(--accent); color: var(--op-accent); }
+.maand-pijlen button:disabled { opacity: .25; cursor: default; }
+.maand-keuzes:not([hidden]) { display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 7px; padding: 14px 0 16px; border-top: 1px dashed var(--rand); }
+.maand-keuzes button { min-height: 64px; padding: 9px 6px; border: 1px solid var(--rand); border-radius: 0; background: var(--kaart); color: var(--tekst); cursor: pointer; }
+.maand-keuzes strong { display: block; font: 700 22px/1.1 "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.maand-keuzes span { display: block; margin-top: 5px; font: 10px/1.2 monospace; }
+.maand-keuzes button[aria-pressed="true"] { background: var(--accent); color: var(--op-accent); border-color: var(--tekst); box-shadow: inset 0 -3px 0 var(--tekst); }
+.maand-keuzes button:hover { border-color: var(--tekst); }
+@media (max-width: 380px) { .maand-editie { font-size: 9px; letter-spacing: .025em; } .maand-naam { font-size: 29px; gap: 5px; } .maand-pijlen { gap: 4px; } }
+@media (prefers-reduced-motion: reduce) { .maand-chevron { transition: none; } }
