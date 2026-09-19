@@ -283,13 +283,14 @@ def parse_kalender(html: str) -> list[Fixture]:
             if not tds:
                 continue
             t = [_text(td) for td in tds]
-            if len(t) < 5 or t[3].upper() not in ("-", "(UITGESTELD)"):
+            opmerkingen = {"-": "", "(UITGESTELD)": "Uitgesteld", "(FORFAIT)": "Forfait"}
+            if len(t) < 5 or t[3].upper() not in opmerkingen:
                 raise ParseError(f"kalender {datum} {reeks}: onverwachte rij {t}")
             out.append(Fixture(
                 datum=datum, uur=_uur_or_none(t[0]), reeks=reeks,
                 thuis=t[2], uit=t[4],
                 thuis_id=_ploegid(tds[2]), uit_id=_ploegid(tds[4]),
-                opmerking="Uitgesteld" if t[3] != "-" else "",
+                opmerking=opmerkingen[t[3].upper()],
             ))
     if not out:
         raise ParseError("kalender: geen wedstrijden gevonden")
