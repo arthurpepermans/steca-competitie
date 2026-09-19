@@ -32,6 +32,7 @@ export function DriveBeheer() {
   return <>
     <h2>Google Drive</h2>
     <p>Opslag voor de foto's en video's van onze wedstrijden.</p>
+    <p className="klein"><a href={`${import.meta.env.BASE_URL}privacy.html`}>Privacy en gegevensgebruik bij de Drive-koppeling</a> · <a href={`${import.meta.env.BASE_URL}voorwaarden.html`}>Gebruiksregels</a></p>
     {fout && <p className="melding fout" role="alert">{fout}</p>}
     {!status && !fout && <p>Status laden…</p>}
     {status && <div className="kaart">
