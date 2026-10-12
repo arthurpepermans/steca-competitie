@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
@@ -9,12 +9,6 @@ export function AppgebruikMeting() {
   const { pathname } = useLocation();
   const user = session?.user.id;
   const pagina = paginaCategorie(pathname);
-  const [gelezen, setGelezen] = useState(false);
-  useEffect(() => {
-    try { setGelezen(localStorage.getItem(`steca-gebruik-info-v1:${user}`) === 'gelezen'); }
-    catch { setGelezen(false); }
-  }, [user]);
-
   useEffect(() => {
     if (!user || !pagina) return;
     let sessie = crypto.randomUUID();
@@ -91,13 +85,5 @@ export function AppgebruikMeting() {
     };
   }, [user, pagina, pathname]);
 
-  if (gelezen || !user) return null;
-  return <aside className="melding info" aria-label="Informatie over appgebruik">
-    <strong>Zo verbeteren we de clubapp</strong>
-    <p>We houden bij welke pagina’s je bezoekt, hoe vaak en hoelang je actief bent, en of je aanwezigheid, stemmen of opstellingen opslaat. Alleen de hoofdadmin kan gebruik aan je naam koppelen. Metingen verdwijnen na 90 dagen uit het overzicht en worden dagelijks verwijderd. We slaan geen ingevulde teksten of schermopnames op.</p>
-    <button className="knop licht" type="button" onClick={() => {
-      setGelezen(true);
-      try { localStorage.setItem(`steca-gebruik-info-v1:${user}`, 'gelezen'); } catch { /* Optioneel. */ }
-    }}>Begrepen</button>
-  </aside>;
+  return null;
 }
