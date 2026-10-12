@@ -87,7 +87,7 @@ export function AppgebruikMeting() {
       window.removeEventListener('focus', zichtbaarheid);
       window.removeEventListener('blur', zichtbaarheid);
       window.removeEventListener('pagehide', afsluiten);
-      afsluiten();
+      if (gestart) afsluiten();
     };
   }, [user, pagina, pathname]);
 
