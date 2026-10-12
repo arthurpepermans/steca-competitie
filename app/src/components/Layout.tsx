@@ -16,6 +16,7 @@ import { Lichtkrant } from "./Lichtkrant";
 import { useNavViewport } from "../lib/useNavViewport";
 
 import { MeldingenPopup } from './MeldingenPopup';
+import { AppgebruikMeting } from './AppgebruikMeting';
 
 const TABS = [
   { to: "/", label: "Home", Icon: House },
@@ -60,7 +61,7 @@ export function Layout() {
         </div>
       </header>
       <Lichtkrant />
-      <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><SupporterAanwezigheidProvider><Outlet /></SupporterAanwezigheidProvider></main>
+      <main id="inhoud" className="inhoud" tabIndex={-1}><NieuweVersie /><AppgebruikMeting /><SupporterAanwezigheidProvider><Outlet /></SupporterAanwezigheidProvider></main>
       <MeldingenPopup />
       <nav ref={navRef} className="nav" aria-label="Hoofdnavigatie">
         {TABS.map(({ to, label, Icon }) => (

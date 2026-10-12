@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { Registreer } from "../pages/Auth";
@@ -12,7 +12,8 @@ const { rpc, toestand } = vi.hoisted(() => ({ rpc: vi.fn(), toestand: { laden: f
 vi.mock("./supabase", () => ({ supabase: { rpc }, configOk: true }));
 const loader = vi.hoisted(() => vi.fn());
 vi.mock("./useAsync", () => ({ useAsync: loader }));
-beforeEach(() => { loader.mockReset(); loader.mockReturnValue(toestand); });
+beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-09-10T12:00:00Z')); loader.mockReset(); loader.mockReturnValue(toestand); });
+afterEach(() => { vi.useRealTimers(); });
 vi.mock("../components/InstallatieHulp", () => ({ InstallatieHulp: () => null }));
 
 describe("openbare supporterstoegang", () => {

@@ -14,6 +14,7 @@ import { Leden, LidDetail } from "./pages/Leden";
 import { Profiel } from "./pages/Profiel";
 import { Supporters } from "./pages/Supporters";
 import { DriveBeheer } from "./pages/DriveBeheer";
+import { Appgebruik } from "./pages/Appgebruik";
 
 import { MatchVerslag } from './pages/MatchVerslag';
 import { Meldingen } from './pages/Meldingen';
@@ -86,6 +87,7 @@ function Poort() {
         <Route path="/leden/:id" element={<LidDetail />} />
         <Route path="/profiel" element={<Profiel />} />
         <Route path="/drive" element={<DriveBeheer />} />
+        <Route path="/appgebruik" element={<Appgebruik />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
