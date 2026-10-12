@@ -1,0 +1,58 @@
+/// <reference types="node" />
+import { PGlite } from '@electric-sql/pglite';
+import { readFileSync } from 'node:fs';
+import { expect, it } from 'vitest';
+it('beschermt persoonsgebruik, telt idempotent en ruimt alleen verlopen metingen op', async () => {
+  const db = new PGlite();
+  const hoofd = '00000000-0000-0000-0000-000000000001';
+  const speler = '00000000-0000-0000-0000-000000000002';
+  const supporter = '00000000-0000-0000-0000-000000000003';
+  const inactief = '00000000-0000-0000-0000-000000000004';
+  const bezoek = '10000000-0000-0000-0000-000000000001';
+  const sessie = '20000000-0000-0000-0000-000000000001';
+  try {
+    await db.exec(`create role anon; create role authenticated; create role service_role;
+      create schema auth; create table auth.users(id uuid primary key);
+      create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+      grant usage on schema auth to authenticated,anon; grant execute on function auth.uid() to authenticated,anon;
+      create table public.members(user_id uuid,naam text,functie text,status text,is_hoofdadmin boolean);
+      create table public.supporter_profiles(user_id uuid,naam text,actief boolean);
+      create table public.attendance(id int, status text); create table public.match_votes(id int); create table public.lineups(id int);
+      insert into auth.users values('${hoofd}'),('${speler}'),('${supporter}'),('${inactief}');
+      insert into public.members values('${hoofd}','Arthur','speler','actief',true),('${speler}','Speler','speler','actief',false),('${inactief}','Inactief','speler','inactief',false);
+      insert into public.supporter_profiles values('${supporter}','Supporter',true);`);
+    const sql=readFileSync(new URL('../../../supabase/migraties/2026-10-12_appgebruik.sql',import.meta.url),'utf8');
+    await db.exec(sql); await db.exec(sql);
+    await db.exec(`set role anon`);
+    await expect(db.query(`select public.appgebruik_rapport(current_date,current_date,true)`)).rejects.toThrow(/permission denied/);
+    await expect(db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',0)`)).rejects.toThrow(/permission denied/);
+    await db.exec(`reset role; set role authenticated; set request.jwt.claim.sub='${speler}'`);
+    await expect(db.query(`select * from public.app_usage_visits`)).rejects.toThrow(/permission denied/);
+    await expect(db.query(`select * from public.app_usage_actions`)).rejects.toThrow(/permission denied/);
+    await expect(db.query(`select public.appgebruik_rapport(current_date,current_date,true)`)).rejects.toThrow(/hoofdadmin/);
+    await expect(db.query(`select public.appgebruik_opschonen()`)).rejects.toThrow(/permission denied/);
+    await expect(db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/leden/geheim',0)`)).rejects.toThrow(/Ongeldige/);
+    await db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',10)`);
+    await db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',10)`);
+    await db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',5)`);
+    await expect(db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/profiel',10)`)).rejects.toThrow(/al geregistreerd/);
+    await db.exec(`set request.jwt.claim.sub='${inactief}'`);
+    await expect(db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',0)`)).rejects.toThrow(/actief clubaccount/);
+    await db.exec(`set request.jwt.claim.sub='${supporter}'`);
+    await db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/kalender',0)`);
+    await db.exec(`reset role; set request.jwt.claim.sub='${speler}'; insert into public.attendance values(1,'aanwezig'); update public.attendance set status='afwezig'; update public.attendance set status='afwezig'; set role authenticated;`);
+    await db.exec(`set request.jwt.claim.sub='${hoofd}'`);
+    await db.query(`select public.registreer_appgebruik('${bezoek}','${sessie}','/',0)`);
+    const {rows} = await db.query<{r:{overzicht:{gebruikers:number; bezoeken:number; seconden:number; paginaweergaven:number};dagen:{gebruikers:number}[]}}>(`select public.appgebruik_rapport((now() at time zone 'Europe/Brussels')::date,(now() at time zone 'Europe/Brussels')::date,false) r`);
+    expect(rows[0].r.overzicht).toEqual({gebruikers:2,bezoeken:2,paginaweergaven:2,seconden:10});
+    expect(rows[0].r.dagen[0].gebruikers).toBe(2);
+    const all=await db.query<{r:{overzicht:{gebruikers:number}}}>(`select public.appgebruik_rapport(current_date-1,current_date+1,true) r`);
+    expect(all.rows[0].r.overzicht.gebruikers).toBe(3);
+    const acties = await db.query<{r:{acties:{actie:string;aantal:number;gebruikers:number}[]}}>(`select public.appgebruik_rapport(current_date-1,current_date+1,true) r`);
+    expect(acties.rows[0].r.acties).toEqual([{actie:'aanwezigheid',aantal:2,gebruikers:1}]);
+    await db.exec(`reset role; update public.app_usage_visits set gestart=now()-interval '91 days' where user_id='${speler}'; set role service_role;`);
+    expect((await db.query<{n:number}>(`select public.appgebruik_opschonen() n`)).rows[0].n).toBe(1);
+    await db.exec('reset role');
+    expect((await db.query<{n:number}>('select count(*)::int n from public.app_usage_visits')).rows[0].n).toBe(2);
+  } finally { await db.close(); }
+}, 30_000);
