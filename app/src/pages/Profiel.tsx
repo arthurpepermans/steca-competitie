@@ -63,6 +63,8 @@ export function Profiel() {
       <InstallatieHulp />
       {!onboarding && lid && <p><Link className="knop licht" to="/meldingen">Meldingen beheren</Link></p>}
       {r.isAdmin && <p><Link className="knop licht" to="/drive">Google Drive beheren</Link></p>}
+      {r.isHoofdadmin && <p><Link className="knop licht" to="/appgebruik">Appgebruik bekijken</Link></p>}
+      <details className="kaart"><summary>Hoe we appgebruik meten</summary><p>Om de clubapp te verbeteren bewaren we bezoeken, paginacategorieën en een schatting van actieve tijd, gekoppeld aan je account. Alleen de hoofdadmin ziet gebruik per naam. We bewaren geen formulierinhoud, locatie of schermopnames. Metingen verdwijnen na 90 dagen uit het overzicht en worden dagelijks verwijderd. Vragen? Neem contact op met de hoofdadmin.</p></details>
       {lid ? <div className="kaart">
         <p className="zacht">{FUNCTIE_LABEL[lid.functie]}{lid.is_hoofdadmin ? " · hoofdadmin" : lid.is_admin ? " · admin" : ""} · {session?.user.email}</p>
         <LidFormulier lid={lid} eigen onOpslaan={opslaan} />
