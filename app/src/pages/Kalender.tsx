@@ -32,7 +32,7 @@ export function Kalender() {
   const stats = useAsync(haalStats);
   const stemPunten = useAsync(haalStemPunten);
   const stemmers = useAsync(haalStemmers);
-  const mijnStemmen = useAsync(haalMijnStemmen);
+  const mijnStemmen = useAsync(() => haalMijnStemmen(lid?.id), [lid?.id]);
   const herlaadStemmen = async () => { await Promise.all([stemPunten.herlaad(), stemmers.herlaad(), mijnStemmen.herlaad()]); };
 
   const maand = useKalenderMaand((matches.data ?? []).map(m => m.datum));
@@ -83,13 +83,13 @@ export function Kalender() {
                 />
               )}
               {isEigen(m) && m.status === "gespeeld" && (
-                <JuniorStemming
+                <JuniorStemming key={JSON.stringify([m.match_key, lid?.id])}
                   match={m}
                   spelers={spelers}
                   aanwezigheden={aanw.data ?? []}
                   punten={stemPunten.data ?? []}
                   stemmers={stemmers.data ?? []}
-                  mijnStem={(mijnStemmen.data ?? []).find((v) => v.match_key === m.match_key) ?? null}
+                  mijnStem={(mijnStemmen.data ?? []).find((v) => v.match_key === m.match_key && v.voter_id === lid?.id) ?? null}
                   eigenLidId={lid?.id ?? null}
                   onGewijzigd={herlaadStemmen}
                 />

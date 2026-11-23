@@ -152,9 +152,10 @@ export async function haalStemmers(): Promise<VoteCount[]> {
   return check(await supabase.from("match_vote_counts").select("*"));
 }
 
-/** Alleen de eigen stembrieven (RLS). */
-export async function haalMijnStemmen(): Promise<MatchVote[]> {
-  return check(await supabase.from("match_votes").select("*"));
+/** Beheerders mogen ook andere stemmen lezen. Vraag hier alleen de eigen stem op. */
+export async function haalMijnStemmen(lidId: string | undefined): Promise<MatchVote[]> {
+  if (!lidId) return [];
+  return check(await supabase.from("match_votes").select("*").eq("voter_id", lidId));
 }
 
 export async function stem(matchKey: string, eerste: string, tweede: string, derde: string): Promise<void> {

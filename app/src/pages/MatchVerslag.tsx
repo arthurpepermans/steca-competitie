@@ -18,9 +18,9 @@ export function MatchVerslag() {
   const { key = '' } = useParams();
   const { lid } = useAuth();
   const info = useAsync(async () => {
-    const [matches, verslagen, leden, stats, aanw, punten, stemmers, stemmen] = await Promise.all([haalMatches(), haalVerslagen(), haalLedenBasis(), haalStats(), haalAanwezigheden(), haalStemPunten(), haalStemmers(), haalMijnStemmen()]);
+    const [matches, verslagen, leden, stats, aanw, punten, stemmers, stemmen] = await Promise.all([haalMatches(), haalVerslagen(), haalLedenBasis(), haalStats(), haalAanwezigheden(), haalStemPunten(), haalStemmers(), haalMijnStemmen(lid?.id)]);
     return { matches, verslagen, leden, stats, aanw, punten, stemmers, stemmen };
-  }, [key]);
+  }, [key, lid?.id]);
   const [bewerk, setBewerk] = useState(params.get('invullen')==='1');
   if (info.laden) return <Laden />;
   if (info.fout || !info.data) return <><Fout tekst={info.fout} /><button className="knop" onClick={info.herlaad}>Opnieuw laden</button></>;
@@ -45,7 +45,7 @@ export function MatchVerslag() {
       <Sfeerbeelden matchKey={key} />
     </article>
     {rechten(lid).isStaf && <div className="kaart"><button className="knop licht" aria-expanded={bewerk} onClick={() => setBewerk(!bewerk)}>{bewerk ? 'Invoer sluiten' : 'Uitslag en matchverslag invullen'}</button>{bewerk && <VerslagInvoer key={verslag?.updated_at ?? key} match={origineel} verslag={verslag} spelers={spelers} klaar={async () => { await info.herlaad(); setBewerk(false); }} />}</div>}
-    {match.status === 'gespeeld' && <JuniorStemming match={match} spelers={spelers} aanwezigheden={d.aanw} punten={d.punten} stemmers={d.stemmers} mijnStem={d.stemmen.find(s => s.match_key === key) ?? null} eigenLidId={lid?.id ?? null} onGewijzigd={info.herlaad} />}
+    {match.status === 'gespeeld' && <JuniorStemming key={JSON.stringify([key, lid?.id])} match={match} spelers={spelers} aanwezigheden={d.aanw} punten={d.punten} stemmers={d.stemmers} mijnStem={d.stemmen.find(s => s.match_key === key && s.voter_id === lid?.id) ?? null} eigenLidId={lid?.id ?? null} onGewijzigd={info.herlaad} />}
   </>;
 }
 

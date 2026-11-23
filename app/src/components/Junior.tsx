@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { aftrapTijd } from '../lib/aftrap';
 import { stem, trekStemIn } from "../lib/api";
 import { fmtDatum, tegenstander } from "../lib/datum";
@@ -45,6 +45,9 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
     setFout(null);
     try {
       await actie();
+      setEerste("");
+      setTweede("");
+      setDerde("");
       await onGewijzigd();
       setBewerk(false);
     } catch (e) {
@@ -54,14 +57,16 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
     }
   }
 
-  async function opslaan(e: FormEvent) {
-    e.preventDefault();
+  async function opslaan() {
+    if (bezig || !mag) return;
     if (!eerste || !tweede || !derde) return setFout("Kies drie spelers.");
     if (new Set([eerste, tweede, derde]).size < 3) return setFout("Kies drie verschillende spelers.");
     if (stemtOpZichzelf(eigenLidId, [eerste, tweede, derde])) {
       alert("Egotripper! Op jezelf stemmen telt niet. Kies drie andere spelers.");
       return setFout("Stem ongeldig: je stemde op jezelf.");
     }
+    const keuzes = [eerste, tweede, derde].map((id, i) => `${i + 1}. ${namen.get(id)}`);
+    if (!window.confirm([`Jouw stem tegen ${tegenstander(match)} bevestigen?`, ...keuzes].join("\n"))) return;
     await doe(() => stem(match.match_key, eerste, tweede, derde));
   }
 
@@ -93,13 +98,18 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
             Jouw stem: {namen.get(mijnStem.eerste) ?? "?"}, {namen.get(mijnStem.tweede) ?? "?"}, {namen.get(mijnStem.derde) ?? "?"}
           </span>
           <span className="knoppen">
-            <button type="button" className="knop licht klein" onClick={() => setBewerk(true)}>Wijzigen</button>
+            <button type="button" className="knop licht klein" onClick={() => {
+              setEerste(mijnStem.eerste);
+              setTweede(mijnStem.tweede);
+              setDerde(mijnStem.derde);
+              setBewerk(true);
+            }}>Wijzigen</button>
             <button type="button" className="knop licht klein" disabled={bezig} onClick={() => { if (confirm("Je stem intrekken?")) void doe(() => trekStemIn(match.match_key)); }}>Intrekken</button>
           </span>
         </div>
       )}
       {toonFormulier && (
-        <form onSubmit={opslaan} style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 8 }}>
           <p className="klein zacht" style={{ margin: "0 0 6px" }}>Kies de beste drie spelers van deze match: 3, 2 en 1 punt.</p>
           {[
             { label: `1e (${PUNTEN[0]} punten)`, waarde: eerste, zet: setEerste },
@@ -115,10 +125,10 @@ export function JuniorStemming({ match, spelers, aanwezigheden, punten, stemmers
             </div>
           ))}
           <div className="knoppen">
-            <button className="knop" disabled={bezig}>{mijnStem ? "Stem bijwerken" : "Stem uitbrengen"}</button>
+            <button type="button" className="knop" disabled={bezig || !eerste || !tweede || !derde} onClick={opslaan}>{mijnStem ? "Stem bijwerken" : "Stem uitbrengen"}</button>
             {mijnStem && <button type="button" className="knop licht" onClick={() => setBewerk(false)}>Annuleren</button>}
           </div>
-        </form>
+        </div>
       )}
       {!mag && open && eigenLidId && (
         <p className="klein zacht" style={{ margin: "6px 0 0" }}>Alleen wie op deze match als aanwezig stond, kan stemmen.</p>
